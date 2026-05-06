@@ -16,3 +16,36 @@
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #2a2a3a; border-radius: 2px; }
 }
+
+@layer components {
+  .tab-btn {
+    @apply relative px-3 py-1.5 text-[11px] tracking-widest font-medium rounded-lg
+           border border-transparent text-[#555] transition-all duration-150 outline-none
+           cursor-pointer select-none;
+  }
+  .tab-btn:hover {
+    @apply text-[#999] border-white/10 bg-white/[0.03];
+  }
+  .tab-btn.active {
+    color: #ffc864;
+    border-color: rgba(255, 200, 100, 0.25);
+    background: rgba(255, 200, 100, 0.07);
+  }
+  .tab-btn.active:hover {
+    background: rgba(255, 200, 100, 0.11);
+  }
+
+  .day-pill {
+    @apply px-2.5 py-1 text-[10px] tracking-wide rounded-lg border border-transparent
+           text-[#444] whitespace-nowrap transition-all duration-150 outline-none
+           cursor-pointer select-none shrink-0;
+  }
+  .day-pill:hover {
+    @apply text-[#888] border-white/10 bg-white/[0.03];
+  }
+  .day-pill.active {
+    color: #e8e6e0;
+    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.06);
+  }
+}

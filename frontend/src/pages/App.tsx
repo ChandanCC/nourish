@@ -11,7 +11,8 @@ const MICRO_KEYS = Object.keys(MICRO_GROUPS).flatMap(g => MICRO_GROUPS[g]) as (k
 
 export default function App() {
   const [activeDay, setActiveDay] = useState(getTodayKey());
-  const [tab, setTab]             = useState<'macros' | 'micros' | 'week'>('macros');
+  const [view, setView]           = useState<'day' | 'week'>('day');
+  const [tab, setTab]             = useState<'macros' | 'micros'>('macros');
   const [input, setInput]         = useState('');
   const [analysing, setAnalysing] = useState(false);
   const [error, setError]         = useState<string | null>(null);
@@ -82,11 +83,15 @@ export default function App() {
           <span className="text-[9px] opacity-30 tracking-widest">NUTRITION LOG</span>
         </div>
         <div className="flex gap-1.5 overflow-x-auto pb-0.5">
+          <button className={`day-pill ${view==='week'?'active':''}`} onClick={() => setView('week')}>
+            week
+          </button>
+          <div className="w-px shrink-0 self-stretch my-0.5" style={{ background:'rgba(255,255,255,0.08)' }} />
           {allDays.map(day => {
             const dh = history.find(d => d.dateKey === day);
             return (
-              <button key={day} onClick={() => setActiveDay(day)}
-                className={`day-pill ${activeDay===day?'active':''}`}
+              <button key={day} onClick={() => { setActiveDay(day); setView('day'); }}
+                className={`day-pill ${view==='day'&&activeDay===day?'active':''}`}
                 style={{ opacity: dh||day===getTodayKey()?1:0.3 }}>
                 {day===getTodayKey()?'today':formatDate(day)}
                 {dh && <span className="ml-1 text-[9px] opacity-40">{Math.round(dh.dailyTotals.calories)}</span>}
@@ -96,24 +101,25 @@ export default function App() {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-1.5 px-5 pt-2.5">
-        <button className={`tab-btn ${tab==='macros'?'active':''}`} onClick={() => setTab('macros')}>MACROS</button>
-        <button className={`tab-btn ${tab==='micros'?'active':''}`} onClick={() => setTab('micros')}>
-          MICROS
-          {hasAnyMicro && (
-            <span className="ml-2 text-[9px] inline-flex items-center gap-1">
-              <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background:'#34d399' }}/>{greenMicros}
-              <span className="inline-block w-1.5 h-1.5 rounded-full ml-0.5" style={{ background:'#fbbf24' }}/>{yellowMicros}
-              <span className="inline-block w-1.5 h-1.5 rounded-full ml-0.5" style={{ background:'#f87171' }}/>{redMicros}
-            </span>
-          )}
-        </button>
-        <button className={`tab-btn ${tab==='week'?'active':''}`} onClick={() => setTab('week')}>WEEK</button>
-      </div>
+      {/* Tabs — only in day view */}
+      {view === 'day' && (
+        <div className="flex gap-1.5 px-5 pt-2.5">
+          <button className={`tab-btn ${tab==='macros'?'active':''}`} onClick={() => setTab('macros')}>MACROS</button>
+          <button className={`tab-btn ${tab==='micros'?'active':''}`} onClick={() => setTab('micros')}>
+            MICROS
+            {hasAnyMicro && (
+              <span className="ml-2 text-[9px] inline-flex items-center gap-1">
+                <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background:'#34d399' }}/>{greenMicros}
+                <span className="inline-block w-1.5 h-1.5 rounded-full ml-0.5" style={{ background:'#fbbf24' }}/>{yellowMicros}
+                <span className="inline-block w-1.5 h-1.5 rounded-full ml-0.5" style={{ background:'#f87171' }}/>{redMicros}
+              </span>
+            )}
+          </button>
+        </div>
+      )}
 
       {/* Macro panel */}
-      {tab==='macros' && (
+      {view==='day' && tab==='macros' && (
         <div className="px-5 py-3" style={{ borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
           <div className="rounded-xl p-3 mb-2" style={{ background:calCol.bg, border:`1px solid ${calCol.border}` }}>
             <div className="flex justify-between items-center mb-2">
@@ -145,7 +151,7 @@ export default function App() {
       )}
 
       {/* Micro panel */}
-      {tab==='micros' && (
+      {view==='day' && tab==='micros' && (
         <div className="px-5 py-3 overflow-y-auto max-h-72" style={{ borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
           {!hasAnyMicro ? (
             <div className="text-center opacity-20 py-6 text-[11px] tracking-widest">LOG FOOD TO SEE MICRONUTRIENTS</div>
@@ -182,7 +188,7 @@ export default function App() {
 
       {/* Content — week summary or day entries */}
       <div className="flex-1 overflow-y-auto">
-        {tab === 'week' ? (
+        {view === 'week' ? (
           <WeeklySummary history={history} />
         ) : (
           <div className="px-5 py-3">
