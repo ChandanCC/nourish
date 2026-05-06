@@ -1,0 +1,77 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Nourish API — Lambda + API Gateway
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 256
+    Runtime: nodejs20.x
+    Environment:
+      Variables:
+        NODE_ENV: production
+
+Parameters:
+  MongoDBUri:
+    Type: String
+    NoEcho: true
+    Description: MongoDB Atlas connection string
+  CorsOrigin:
+    Type: String
+    Default: '*'
+    Description: Allowed CORS origin (set to your CloudFront URL in prod)
+
+Resources:
+
+  # ── Lambda function ─────────────────────────────────────────────────────────
+  NourishApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: nourish-api
+      Handler: dist/lambda.lambdaHandler
+      CodeUri: ../backend/
+      Description: Nourish nutrition logger API
+      Environment:
+        Variables:
+          MONGODB_URI: !Ref MongoDBUri
+          CORS_ORIGIN: !Ref CorsOrigin
+      Events:
+        ApiProxy:
+          Type: Api
+          Properties:
+            RestApiId: !Ref NourishApi
+            Path: /{proxy+}
+            Method: ANY
+        ApiRoot:
+          Type: Api
+          Properties:
+            RestApiId: !Ref NourishApi
+            Path: /
+            Method: ANY
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2020
+        Sourcemap: false
+        EntryPoints:
+          - src/lambda.ts
+
+  # ── API Gateway ─────────────────────────────────────────────────────────────
+  NourishApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: nourish-api
+      StageName: prod
+      Cors:
+        AllowMethods: "'GET,POST,DELETE,OPTIONS'"
+        AllowHeaders: "'Content-Type,x-user-id'"
+        AllowOrigin: !Sub "'${CorsOrigin}'"
+
+Outputs:
+  ApiUrl:
+    Description: API Gateway endpoint
+    Value: !Sub 'https://${NourishApi}.execute-api.${AWS::Region}.amazonaws.com/prod'
+  FunctionArn:
+    Description: Lambda function ARN
+    Value: !GetAtt NourishApiFunction.Arn

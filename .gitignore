@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.env
+*.js.map
+.aws-sam/
+cdk.out/
+.DS_Store
