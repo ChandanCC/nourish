@@ -1,26 +1,19 @@
 import axios from 'axios';
+import { getToken } from '../lib/auth';
 import type { NutritionDay } from '../types';
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
 
-// Stable anonymous user ID stored in localStorage
-export function getUserId(): string {
-  let id = localStorage.getItem('nourish_user_id');
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem('nourish_user_id', id);
-  }
-  return id;
-}
+export const AUTH_URL = BASE_URL.replace(/\/api$/, '') + '/auth';
 
 const client = axios.create({
   baseURL: BASE_URL,
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Inject user ID on every request
 client.interceptors.request.use(config => {
-  config.headers['x-user-id'] = getUserId();
+  const token = getToken();
+  if (token) config.headers['Authorization'] = `Bearer ${token}`;
   return config;
 });
 

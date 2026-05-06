@@ -1,0 +1,88 @@
+import { useState } from 'react';
+import { GoogleLogin } from '@react-oauth/google';
+import { AUTH_URL } from '../api/client';
+import type { AuthUser } from '../lib/auth';
+
+interface Props {
+  onLogin: (token: string, user: AuthUser) => void;
+}
+
+export default function LoginPage({ onLogin }: Props) {
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  async function handleCredential(credential: string) {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`${AUTH_URL}/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential }),
+      });
+      if (!res.ok) throw new Error('Authentication failed');
+      const { token, user } = await res.json();
+      onLogin(token, user);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Sign-in failed');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center max-w-lg mx-auto px-6"
+      style={{ background: '#0a0a0f', color: '#e8e6e0', fontFamily: "'DM Mono','Fira Mono',monospace" }}>
+
+      {/* Logo */}
+      <div className="mb-12 text-center">
+        <h1 className="font-display font-extrabold text-4xl tracking-tight mb-1.5" style={{ color: '#ffc864' }}>
+          NOURISH
+        </h1>
+        <p className="text-[10px] opacity-25 tracking-[0.3em]">NUTRITION LOG</p>
+      </div>
+
+      {/* Card */}
+      <div className="w-full rounded-2xl p-8"
+        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+
+        <div className="mb-7 text-center">
+          <p className="text-[13px] opacity-60 leading-relaxed">
+            Track what you eat.<br />
+            <span className="opacity-60">Understand your nutrition.</span>
+          </p>
+        </div>
+
+        <div className="flex justify-center">
+          {loading ? (
+            <div className="flex items-center gap-2 text-[11px] opacity-40 tracking-widest py-2">
+              <span className="inline-block w-3.5 h-3.5 rounded-full border border-white/20 border-t-white/60 animate-spin" />
+              SIGNING IN...
+            </div>
+          ) : (
+            <GoogleLogin
+              theme="filled_black"
+              size="large"
+              shape="rectangular"
+              text="signin_with"
+              onSuccess={res => {
+                if (res.credential) handleCredential(res.credential);
+              }}
+              onError={() => setError('Google sign-in failed')}
+            />
+          )}
+        </div>
+
+        {error && (
+          <p className="mt-4 text-center text-[10px] tracking-wide" style={{ color: '#f87171' }}>
+            {error}
+          </p>
+        )}
+      </div>
+
+      <p className="mt-8 text-[9px] opacity-15 tracking-[0.2em] text-center">
+        YOUR DATA IS PRIVATE AND TIED TO YOUR GOOGLE ACCOUNT
+      </p>
+    </div>
+  );
+}

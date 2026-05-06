@@ -31,8 +31,7 @@ function sumMicros(entries: IEntry[]): IMicros {
 // ── GET /logs?days=15  — fetch history ───────────────────────────────────────
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const userId = req.headers['x-user-id'] as string;
-    if (!userId) return res.status(400).json({ error: 'x-user-id header required' });
+    const userId = req.user!.userId;
 
     const days = Math.min(parseInt(req.query.days as string) || 15, 30);
     const since = new Date();
@@ -54,8 +53,7 @@ router.get('/', async (req: Request, res: Response) => {
 // ── GET /logs/:dateKey  — single day ─────────────────────────────────────────
 router.get('/:dateKey', async (req: Request, res: Response) => {
   try {
-    const userId = req.headers['x-user-id'] as string;
-    if (!userId) return res.status(400).json({ error: 'x-user-id header required' });
+    const userId = req.user!.userId;
 
     const { dateKey } = req.params;
     const doc = await NutritionDay.findOne({ userId, dateKey }).lean();
@@ -71,8 +69,7 @@ router.get('/:dateKey', async (req: Request, res: Response) => {
 // ── POST /logs/:dateKey/entries  — add an entry ───────────────────────────────
 router.post('/:dateKey/entries', async (req: Request, res: Response) => {
   try {
-    const userId = req.headers['x-user-id'] as string;
-    if (!userId) return res.status(400).json({ error: 'x-user-id header required' });
+    const userId = req.user!.userId;
 
     const { dateKey } = req.params;
     const { rawText, summary, items, totals, micros } = req.body;
@@ -115,8 +112,7 @@ router.post('/:dateKey/entries', async (req: Request, res: Response) => {
 // ── DELETE /logs/:dateKey/entries/:entryId ────────────────────────────────────
 router.delete('/:dateKey/entries/:entryId', async (req: Request, res: Response) => {
   try {
-    const userId = req.headers['x-user-id'] as string;
-    if (!userId) return res.status(400).json({ error: 'x-user-id header required' });
+    const userId = req.user!.userId;
 
     const { dateKey, entryId } = req.params;
 
@@ -143,8 +139,7 @@ router.delete('/:dateKey/entries/:entryId', async (req: Request, res: Response) 
 // ── DELETE /logs/:dateKey  — wipe a whole day ─────────────────────────────────
 router.delete('/:dateKey', async (req: Request, res: Response) => {
   try {
-    const userId = req.headers['x-user-id'] as string;
-    if (!userId) return res.status(400).json({ error: 'x-user-id header required' });
+    const userId = req.user!.userId;
 
     const { dateKey } = req.params;
     await NutritionDay.deleteOne({ userId, dateKey });

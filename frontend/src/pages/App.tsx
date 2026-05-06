@@ -1,15 +1,19 @@
 import { useState, useRef } from 'react';
 import { useHistory, useDay, useAddEntry, useDeleteEntry } from '../hooks/useLogs';
+import { useAuth } from '../hooks/useAuth';
 import { MACRO_GOALS, MICRO_GROUPS, STATUS_STYLES, getMacroStatus, getMicroStatus, getTodayKey, formatDate, detectDateFromText, analyseFood } from '../lib/nutrition';
 import MacroCard from '../components/MacroCard';
 import MicroChip from '../components/MicroChip';
 import EntryCard from '../components/EntryCard';
 import WeeklySummary from '../components/WeeklySummary';
+import LoginPage from './LoginPage';
 import type { Micros } from '../types';
 
 const MICRO_KEYS = Object.keys(MICRO_GROUPS).flatMap(g => MICRO_GROUPS[g]) as (keyof Micros)[];
 
 export default function App() {
+  const { user, login, logout, isAuthenticated } = useAuth();
+
   const [activeDay, setActiveDay] = useState(getTodayKey());
   const [view, setView]           = useState<'day' | 'week'>('day');
   const [tab, setTab]             = useState<'macros' | 'micros'>('macros');
@@ -73,14 +77,29 @@ export default function App() {
   const calPct    = Math.min((totals.calories / MACRO_GOALS.calories) * 100, 130);
   const calRem    = MACRO_GOALS.calories - totals.calories;
 
+  if (!isAuthenticated) return <LoginPage onLogin={login} />;
+
   return (
     <div className="min-h-screen flex flex-col max-w-lg mx-auto" style={{ background:'#0a0a0f', color:'#e8e6e0', fontFamily:"'DM Mono','Fira Mono',monospace" }}>
 
       {/* Header */}
       <div className="px-5 pt-4 pb-3" style={{ borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
-        <div className="flex items-baseline gap-2.5 mb-3">
-          <h1 className="font-display font-extrabold text-xl tracking-tight" style={{ color:'#ffc864' }}>NOURISH</h1>
-          <span className="text-[9px] opacity-30 tracking-widest">NUTRITION LOG</span>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-baseline gap-2.5">
+            <h1 className="font-display font-extrabold text-xl tracking-tight" style={{ color:'#ffc864' }}>NOURISH</h1>
+            <span className="text-[9px] opacity-30 tracking-widest">NUTRITION LOG</span>
+          </div>
+          <button onClick={logout} title={`Sign out (${user?.email})`}
+            className="flex items-center gap-1.5 group">
+            {user?.picture
+              ? <img src={user.picture} alt={user.name} className="w-6 h-6 rounded-full opacity-70 group-hover:opacity-100 transition-opacity" />
+              : <div className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold"
+                  style={{ background:'rgba(255,200,100,0.15)', color:'#ffc864' }}>
+                  {user?.name?.[0]?.toUpperCase() ?? '?'}
+                </div>
+            }
+            <span className="text-[9px] opacity-0 group-hover:opacity-30 transition-opacity tracking-widest">OUT</span>
+          </button>
         </div>
         <div className="flex gap-1.5 overflow-x-auto pb-0.5">
           <button className={`day-pill ${view==='week'?'active':''}`} onClick={() => setView('week')}>
