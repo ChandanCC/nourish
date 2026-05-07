@@ -6,6 +6,9 @@ import MacroCard from '../components/MacroCard';
 import MicroChip from '../components/MicroChip';
 import EntryCard from '../components/EntryCard';
 import WeeklySummary from '../components/WeeklySummary';
+import HomeScreen from '../components/HomeScreen';
+import TodayZone from '../components/TodayZone';
+import LogZone from '../components/LogZone';
 import LoginPage from './LoginPage';
 import type { Micros } from '../types';
 
@@ -30,21 +33,22 @@ export default function App() {
   const addEntry    = useAddEntry(activeDay);
   const deleteEntry = useDeleteEntry(activeDay);
 
-  const totals  = dayData?.dailyTotals || { calories:0, protein:0, carbs:0, fat:0, fiber:0 };
+  const totals  = dayData?.dailyTotals || { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 };
   const micros  = (dayData?.dailyMicros || {}) as Micros;
   const entries = dayData?.entries || [];
 
   const hasAnyMicro  = MICRO_KEYS.some(k => (micros[k] || 0) > 0);
-  const greenMicros  = hasAnyMicro ? MICRO_KEYS.filter(k => getMicroStatus(k, micros[k]||0)==='green').length  : 0;
-  const yellowMicros = hasAnyMicro ? MICRO_KEYS.filter(k => getMicroStatus(k, micros[k]||0)==='yellow').length : 0;
-  const redMicros    = hasAnyMicro ? MICRO_KEYS.filter(k => getMicroStatus(k, micros[k]||0)==='red').length    : 0;
+  const greenMicros  = hasAnyMicro ? MICRO_KEYS.filter(k => getMicroStatus(k, micros[k] || 0) === 'green').length  : 0;
+  const yellowMicros = hasAnyMicro ? MICRO_KEYS.filter(k => getMicroStatus(k, micros[k] || 0) === 'yellow').length : 0;
+  const redMicros    = hasAnyMicro ? MICRO_KEYS.filter(k => getMicroStatus(k, micros[k] || 0) === 'red').length    : 0;
 
   const historyKeys = history.map(d => d.dateKey);
   const allDays = [getTodayKey(), ...historyKeys.filter(k => k !== getTodayKey())].slice(0, 15);
 
   async function handleLog() {
     if (!input.trim() || analysing) return;
-    setAnalysing(true); setError(null);
+    setAnalysing(true);
+    setError(null);
     try {
       const parsed    = await analyseFood(input);
       const targetDay = detectDateFromText(input);
@@ -52,7 +56,7 @@ export default function App() {
         rawText: input,
         summary: parsed.summary || '',
         items:   parsed.items   || [],
-        totals:  parsed.totals  || { calories:0, protein:0, carbs:0, fat:0, fiber:0 },
+        totals:  parsed.totals  || { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 },
         micros:  parsed.micros  || {},
       });
       setActiveDay(targetDay);
@@ -80,177 +84,138 @@ export default function App() {
   if (!isAuthenticated) return <LoginPage onLogin={login} />;
 
   return (
-    <div className="min-h-screen flex flex-col max-w-lg mx-auto" style={{ background:'var(--bg-0)', color:'var(--ink-0)' }}>
-
-      {/* Header */}
-      <div className="px-5 pt-4 pb-3" style={{ borderBottom:'1px solid var(--ink-4)' }}>
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-baseline gap-2.5">
-            <h1 className="font-display font-extrabold text-xl tracking-tight" style={{ color:'var(--gold)' }}>NOURIQ</h1>
-            <span className="text-[9px] opacity-30 tracking-widest">NUTRITION LOG</span>
+    <HomeScreen
+      user={user}
+      onLogout={logout}
+      input={input}
+      setInput={setInput}
+      analysing={analysing}
+      onLog={handleLog}
+      error={error}
+      onClearError={() => setError(null)}
+      textareaRef={textareaRef}
+    >
+      {/* TODAY zone — tab nav + macro/micro panels (restructured in P01-002 and P01-003) */}
+      <TodayZone>
+        {/* Day selector tabs */}
+        <div className="px-5 pt-4 pb-3" style={{ borderBottom: '1px solid var(--ink-4)' }}>
+          <div className="flex gap-1.5 overflow-x-auto pb-0.5">
+            <button className={`day-pill ${view === 'week' ? 'active' : ''}`} onClick={() => setView('week')}>
+              week
+            </button>
+            <div className="w-px shrink-0 self-stretch my-0.5" style={{ background: 'var(--ink-4)' }} />
+            {allDays.map(day => {
+              const dh = history.find(d => d.dateKey === day);
+              return (
+                <button
+                  key={day}
+                  onClick={() => { setActiveDay(day); setView('day'); }}
+                  className={`day-pill ${view === 'day' && activeDay === day ? 'active' : ''}`}
+                  style={{ opacity: dh || day === getTodayKey() ? 1 : 0.3 }}
+                >
+                  {day === getTodayKey() ? 'today' : formatDate(day)}
+                  {dh && <span className="ml-1 text-[9px] opacity-40">{Math.round(dh.dailyTotals.calories)}</span>}
+                </button>
+              );
+            })}
           </div>
-          <button onClick={logout} title={`Sign out (${user?.email})`}
-            className="flex items-center gap-1.5 group">
-            {user?.picture
-              ? <img src={user.picture} alt={user.name} className="w-6 h-6 rounded-full opacity-70 group-hover:opacity-100 transition-opacity" />
-              : <div className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold"
-                  style={{ background:'var(--gold-3)', color:'var(--gold)' }}>
-                  {user?.name?.[0]?.toUpperCase() ?? '?'}
-                </div>
-            }
-            <span className="text-[9px] opacity-0 group-hover:opacity-30 transition-opacity tracking-widest">OUT</span>
-          </button>
         </div>
-        <div className="flex gap-1.5 overflow-x-auto pb-0.5">
-          <button className={`day-pill ${view==='week'?'active':''}`} onClick={() => setView('week')}>
-            week
-          </button>
-          <div className="w-px shrink-0 self-stretch my-0.5" style={{ background:'var(--ink-4)' }} />
-          {allDays.map(day => {
-            const dh = history.find(d => d.dateKey === day);
-            return (
-              <button key={day} onClick={() => { setActiveDay(day); setView('day'); }}
-                className={`day-pill ${view==='day'&&activeDay===day?'active':''}`}
-                style={{ opacity: dh||day===getTodayKey()?1:0.3 }}>
-                {day===getTodayKey()?'today':formatDate(day)}
-                {dh && <span className="ml-1 text-[9px] opacity-40">{Math.round(dh.dailyTotals.calories)}</span>}
-              </button>
-            );
-          })}
-        </div>
-      </div>
 
-      {/* Tabs — only in day view */}
-      {view === 'day' && (
-        <div className="flex gap-1.5 px-5 pt-2.5">
-          <button className={`tab-btn ${tab==='macros'?'active':''}`} onClick={() => setTab('macros')}>MACROS</button>
-          <button className={`tab-btn ${tab==='micros'?'active':''}`} onClick={() => setTab('micros')}>
-            MICROS
-            {hasAnyMicro && (
-              <span className="ml-2 text-[9px] inline-flex items-center gap-1">
-                <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background:'var(--status-up)' }}/>{greenMicros}
-                <span className="inline-block w-1.5 h-1.5 rounded-full ml-0.5" style={{ background:'var(--status-mid)' }}/>{yellowMicros}
-                <span className="inline-block w-1.5 h-1.5 rounded-full ml-0.5" style={{ background:'var(--status-down)' }}/>{redMicros}
-              </span>
-            )}
-          </button>
-        </div>
-      )}
-
-      {/* Macro panel */}
-      {view==='day' && tab==='macros' && (
-        <div className="px-5 py-3" style={{ borderBottom:'1px solid var(--ink-4)' }}>
-          <div className="rounded-xl p-3 mb-2" style={{ background:calCol.bg, border:`1px solid ${calCol.border}` }}>
-            <div className="flex justify-between items-center mb-2">
-              <div>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="font-display font-extrabold text-3xl leading-none" style={{ color:calCol.text }}>{Math.round(totals.calories)}</span>
-                  <span className="text-[11px] opacity-40">/ {MACRO_GOALS.calories} kcal</span>
-                </div>
-                <div className="text-[9px] opacity-30 tracking-widest mt-0.5">
-                  {isToday?'CALORIES TODAY':formatDate(activeDay).toUpperCase()}
-                </div>
-              </div>
-              <div className="text-[11px] opacity-75" style={{ color:calCol.text }}>
-                {calRem>0?`${Math.round(calRem)} left`:`${Math.round(Math.abs(calRem))} over`}
-              </div>
-            </div>
-            <div className="h-1 rounded-full overflow-hidden" style={{ background:'var(--bar-track)' }}>
-              <div className="h-full rounded-full transition-all duration-700"
-                style={{ width:`${Math.min(calPct,100)}%`, background:calCol.bar }} />
-            </div>
+        {/* Tab buttons (macros / micros) */}
+        {view === 'day' && (
+          <div className="flex gap-1.5 px-5 pt-2.5">
+            <button className={`tab-btn ${tab === 'macros' ? 'active' : ''}`} onClick={() => setTab('macros')}>MACROS</button>
+            <button className={`tab-btn ${tab === 'micros' ? 'active' : ''}`} onClick={() => setTab('micros')}>
+              MICROS
+              {hasAnyMicro && (
+                <span className="ml-2 text-[9px] inline-flex items-center gap-1">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: 'var(--status-up)' }} />{greenMicros}
+                  <span className="inline-block w-1.5 h-1.5 rounded-full ml-0.5" style={{ background: 'var(--status-mid)' }} />{yellowMicros}
+                  <span className="inline-block w-1.5 h-1.5 rounded-full ml-0.5" style={{ background: 'var(--status-down)' }} />{redMicros}
+                </span>
+              )}
+            </button>
           </div>
-          <div className="flex gap-2 mb-2">
-            <MacroCard label="Protein" value={totals.protein} colorKey="protein" />
-            <MacroCard label="Carbs"   value={totals.carbs}   colorKey="carbs" />
-            <MacroCard label="Fat"     value={totals.fat}      colorKey="fat" />
-          </div>
-          <MacroCard label="Fiber" value={totals.fiber||0} colorKey="fiber" fullWidth />
-        </div>
-      )}
+        )}
 
-      {/* Micro panel */}
-      {view==='day' && tab==='micros' && (
-        <div className="px-5 py-3 overflow-y-auto max-h-72" style={{ borderBottom:'1px solid var(--ink-4)' }}>
-          {!hasAnyMicro ? (
-            <div className="text-center opacity-20 py-6 text-[11px] tracking-widest">LOG FOOD TO SEE MICRONUTRIENTS</div>
-          ) : (
-            <>
-              <div className="flex gap-3 mb-2 text-[10px] opacity-40 flex-wrap">
-                <span><span className="inline-block w-1.5 h-1.5 rounded-full mr-1 align-middle" style={{ background:'var(--status-up)' }}/>≥80% RDI</span>
-                <span><span className="inline-block w-1.5 h-1.5 rounded-full mr-1 align-middle" style={{ background:'var(--status-mid)' }}/>40–80%</span>
-                <span><span className="inline-block w-1.5 h-1.5 rounded-full mr-1 align-middle" style={{ background:'var(--status-down)' }}/>&lt;40% · sodium &gt;100%</span>
-              </div>
-              {Object.entries(MICRO_GROUPS).map(([group, keys]) => (
-                <div key={group}>
-                  <div className="text-[9px] tracking-widest opacity-30 uppercase my-2">{group}</div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {(keys as (keyof Micros)[]).map(k => (
-                      <MicroChip key={k} microKey={k} value={micros[k]||0} />
-                    ))}
+        {/* Macro panel */}
+        {view === 'day' && tab === 'macros' && (
+          <div className="px-5 py-3" style={{ borderBottom: '1px solid var(--ink-4)' }}>
+            <div className="rounded-xl p-3 mb-2" style={{ background: calCol.bg, border: `1px solid ${calCol.border}` }}>
+              <div className="flex justify-between items-center mb-2">
+                <div>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="font-display font-extrabold text-3xl leading-none" style={{ color: calCol.text }}>{Math.round(totals.calories)}</span>
+                    <span className="text-[11px] opacity-40">/ {MACRO_GOALS.calories} kcal</span>
+                  </div>
+                  <div className="text-[9px] opacity-30 tracking-widest mt-0.5">
+                    {isToday ? 'CALORIES TODAY' : formatDate(activeDay).toUpperCase()}
                   </div>
                 </div>
-              ))}
-            </>
-          )}
-        </div>
-      )}
-
-      {/* Error */}
-      {error && (
-        <div className="mx-5 my-2 px-3 py-2 rounded-lg text-[10px] leading-relaxed break-words"
-          style={{ background:'rgba(232,84,84,0.07)', border:'1px solid rgba(232,84,84,0.20)', color:'var(--status-down)' }}>
-          <strong>Error:</strong> {error}
-          <span className="ml-2 cursor-pointer opacity-50" onClick={() => setError(null)}>✕</span>
-        </div>
-      )}
-
-      {/* Content — week summary or day entries */}
-      <div className="flex-1 overflow-y-auto">
-        {view === 'week' ? (
-          <WeeklySummary history={history} />
-        ) : (
-          <div className="px-5 py-3">
-            {dayLoading ? (
-              <div className="text-center opacity-20 py-8 text-[11px] tracking-widest">LOADING...</div>
-            ) : entries.length > 0 ? (
-              [...entries].reverse().map(entry => (
-                <EntryCard key={entry.entryId} entry={entry} onDelete={handleDelete} deleting={deletingId===entry.entryId} />
-              ))
-            ) : (
-              <div className="text-center opacity-15 py-10 text-[11px] tracking-widest">
-                {isToday?'NOTHING LOGGED TODAY YET':`NO DATA FOR ${formatDate(activeDay).toUpperCase()}`}
+                <div className="text-[11px] opacity-75" style={{ color: calCol.text }}>
+                  {calRem > 0 ? `${Math.round(calRem)} left` : `${Math.round(Math.abs(calRem))} over`}
+                </div>
               </div>
+              <div className="h-1 rounded-full overflow-hidden" style={{ background: 'var(--bar-track)' }}>
+                <div className="h-full rounded-full transition-all duration-700"
+                  style={{ width: `${Math.min(calPct, 100)}%`, background: calCol.bar }} />
+              </div>
+            </div>
+            <div className="flex gap-2 mb-2">
+              <MacroCard label="Protein" value={totals.protein} colorKey="protein" />
+              <MacroCard label="Carbs"   value={totals.carbs}   colorKey="carbs" />
+              <MacroCard label="Fat"     value={totals.fat}     colorKey="fat" />
+            </div>
+            <MacroCard label="Fiber" value={totals.fiber || 0} colorKey="fiber" fullWidth />
+          </div>
+        )}
+
+        {/* Micro panel */}
+        {view === 'day' && tab === 'micros' && (
+          <div className="px-5 py-3 overflow-y-auto max-h-72" style={{ borderBottom: '1px solid var(--ink-4)' }}>
+            {!hasAnyMicro ? (
+              <div className="text-center opacity-20 py-6 text-[11px] tracking-widest">LOG FOOD TO SEE MICRONUTRIENTS</div>
+            ) : (
+              <>
+                <div className="flex gap-3 mb-2 text-[10px] opacity-40 flex-wrap">
+                  <span><span className="inline-block w-1.5 h-1.5 rounded-full mr-1 align-middle" style={{ background: 'var(--status-up)' }} />≥80% RDI</span>
+                  <span><span className="inline-block w-1.5 h-1.5 rounded-full mr-1 align-middle" style={{ background: 'var(--status-mid)' }} />40–80%</span>
+                  <span><span className="inline-block w-1.5 h-1.5 rounded-full mr-1 align-middle" style={{ background: 'var(--status-down)' }} />&lt;40% · sodium &gt;100%</span>
+                </div>
+                {Object.entries(MICRO_GROUPS).map(([group, keys]) => (
+                  <div key={group}>
+                    <div className="text-[9px] tracking-widest opacity-30 uppercase my-2">{group}</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {(keys as (keyof Micros)[]).map(k => (
+                        <MicroChip key={k} microKey={k} value={micros[k] || 0} />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </>
             )}
           </div>
         )}
-      </div>
+      </TodayZone>
 
-      {/* Input */}
-      <div className="px-5 pb-6 pt-3" style={{ borderTop:'1px solid var(--ink-4)', background:'var(--bg-0)' }}>
-        <textarea ref={textareaRef} value={input} onChange={e => setInput(e.target.value)}
-          onKeyDown={e => { if (e.key==='Enter'&&(e.metaKey||e.ctrlKey)) handleLog(); }}
-          placeholder={'What did you eat?\n\n"2 eggs, banana, oats for breakfast"\n"yesterday dinner: dal rice sabzi roti"'}
-          rows={3}
-          className="w-full rounded-xl px-3.5 py-3 text-[12px] leading-relaxed outline-none transition-colors duration-200"
-          style={{ background:'var(--bg-2)', border:'1px solid var(--ink-4)', color:'var(--ink-0)', resize:'none' }}
-          onFocus={e => (e.target.style.borderColor='var(--gold-1)')}
-          onBlur={e  => (e.target.style.borderColor='var(--ink-4)')}
-        />
-        <div className="flex justify-between items-center mt-2.5">
-          <span className="text-[9px] opacity-20 tracking-wide">⌘↩ to log</span>
-          <button onClick={handleLog} disabled={analysing||!input.trim()}
-            className="font-display font-extrabold text-[13px] tracking-widest rounded-xl px-6 py-3 transition-all duration-200 hover:-translate-y-px disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{ background: 'var(--gold)', color: 'var(--bg-0)' }}>
-            {analysing ? (
-              <span className="flex items-center gap-2">
-                <span className="inline-block w-4 h-4 rounded-full border-2 border-black/20 border-t-bg-0 animate-spin" />
-                Analysing...
-              </span>
-            ) : 'LOG IT'}
-          </button>
+      {/* LOG zone — entry list */}
+      <LogZone>
+        <div className="px-5 py-3">
+          {view === 'week' ? (
+            <WeeklySummary history={history} />
+          ) : dayLoading ? (
+            <div className="text-center opacity-20 py-8 text-[11px] tracking-widest">LOADING...</div>
+          ) : entries.length > 0 ? (
+            [...entries].reverse().map(entry => (
+              <EntryCard key={entry.entryId} entry={entry} onDelete={handleDelete} deleting={deletingId === entry.entryId} />
+            ))
+          ) : (
+            <div className="text-center opacity-15 py-10 text-[11px] tracking-widest">
+              {isToday ? 'NOTHING LOGGED TODAY YET' : `NO DATA FOR ${formatDate(activeDay).toUpperCase()}`}
+            </div>
+          )}
         </div>
-      </div>
-    </div>
+      </LogZone>
+    </HomeScreen>
   );
 }

@@ -8,8 +8,8 @@
 ## Current State
 
 ```
-Active task:      None — ready to begin Phase 01
-Last completed:   Governance system (not an implementation task)
+Active task:      P01-002 — Remove Tab Navigation
+Last completed:   P01-001 — Home Screen Zone Scaffold
 Blocked tasks:    None
 Current phase:    Phase 01 — Frontend Layout Foundation
 ```
@@ -26,7 +26,7 @@ Current phase:    Phase 01 — Frontend Layout Foundation
 | M4: Polished | Motion system complete | 0 / 6 tasks | P08-001→P08-006 |
 | M5: Ship-Ready | Onboarding + hardening | 0 / 11 tasks | P09-001→P10-004 |
 
-**Overall: 0 / 48 tasks complete**
+**Overall: 1 / 48 tasks complete**
 
 ---
 
@@ -34,7 +34,7 @@ Current phase:    Phase 01 — Frontend Layout Foundation
 
 | Phase | Tasks | Complete | Status |
 |---|---|---|---|
-| Phase 01: Frontend Layout | 4 | 0 | NOT_STARTED |
+| Phase 01: Frontend Layout | 4 | 1 | IN_PROGRESS |
 | Phase 02: Frontend Display | 5 | 0 | NOT_STARTED |
 | Phase 03: Command Bar | 1 | 0 | NOT_STARTED |
 | Phase 04: Backend Data | 6 | 0 | NOT_STARTED |
@@ -49,7 +49,9 @@ Current phase:    Phase 01 — Frontend Layout Foundation
 
 ## Completed Tasks
 
-*None yet.*
+| Task | Description | Commit |
+|---|---|---|
+| P01-001 | Home Screen Zone Scaffold | P01-001 |
 
 ---
 
@@ -67,11 +69,9 @@ Current phase:    Phase 01 — Frontend Layout Foundation
 
 ## Architecture Debt Introduced During Implementation
 
-*None yet. Log here when implementation shortcuts are taken.*
-
 | Task | Debt Description | Remediation | Priority |
 |---|---|---|---|
-| — | — | — | — |
+| P01-001 | Error display uses raw rgba(232,84,84,...) instead of --status-down token (pre-existing) | Replace with CSS var | Low |
 
 ---
 
