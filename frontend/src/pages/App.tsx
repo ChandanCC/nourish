@@ -1,8 +1,7 @@
 import { useState, useRef } from 'react';
 import { useDay, useAddEntry, useDeleteEntry } from '../hooks/useLogs';
 import { useAuth } from '../hooks/useAuth';
-import { getTodayKey, formatDate, detectDateFromText, analyseFood } from '../lib/nutrition';
-import EntryCard from '../components/EntryCard';
+import { getTodayKey, detectDateFromText, analyseFood } from '../lib/nutrition';
 import HomeScreen from '../components/HomeScreen';
 import TodayZone from '../components/TodayZone';
 import LogZone from '../components/LogZone';
@@ -17,8 +16,6 @@ export default function App() {
   const [error, setError]         = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  const isToday = activeDay === getTodayKey();
 
   const { data: dayData, isLoading: dayLoading } = useDay(activeDay);
   const addEntry    = useAddEntry(activeDay);
@@ -73,21 +70,13 @@ export default function App() {
     >
       <TodayZone />
 
-      <LogZone>
-        <div className="px-5 py-3">
-          {dayLoading ? (
-            <div className="text-center opacity-20 py-8 text-[11px] tracking-widest">LOADING...</div>
-          ) : entries.length > 0 ? (
-            [...entries].reverse().map(entry => (
-              <EntryCard key={entry.entryId} entry={entry} onDelete={handleDelete} deleting={deletingId === entry.entryId} />
-            ))
-          ) : (
-            <div className="text-center opacity-15 py-10 text-[11px] tracking-widest">
-              {isToday ? 'NOTHING LOGGED TODAY YET' : `NO DATA FOR ${formatDate(activeDay).toUpperCase()}`}
-            </div>
-          )}
-        </div>
-      </LogZone>
+      <LogZone
+        entries={entries}
+        isLoading={dayLoading}
+        activeDay={activeDay}
+        deletingId={deletingId}
+        onDelete={handleDelete}
+      />
     </HomeScreen>
   );
 }
