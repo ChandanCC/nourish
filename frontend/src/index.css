@@ -1,10 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
+  /* Typography */
+  --font-display: 'Syne', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+
   /* Background family */
   --bg-0: #08080D;
   --bg-1: #0F0F18;
@@ -46,8 +48,9 @@
   body {
     background-color: var(--bg-0);
     color: var(--ink-0);
-    font-family: 'DM Mono', monospace;
+    font-family: var(--font-mono);
     -webkit-font-smoothing: antialiased;
+    font-variant-numeric: tabular-nums;
   }
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -58,7 +61,7 @@
   /* Type scale — six sizes only */
   .text-display {
     font-size: 32px;
-    font-family: 'Syne', sans-serif;
+    font-family: var(--font-display);
     font-weight: 800;
     line-height: 36px;
     letter-spacing: -0.02em;
@@ -67,14 +70,14 @@
   }
   .text-title {
     font-size: 18px;
-    font-family: 'Syne', sans-serif;
+    font-family: var(--font-display);
     font-weight: 700;
     line-height: 24px;
     color: var(--ink-0);
   }
   .text-data {
     font-size: 16px;
-    font-family: 'DM Mono', monospace;
+    font-family: var(--font-mono);
     font-weight: 500;
     line-height: 22px;
     letter-spacing: -0.01em;
@@ -83,14 +86,14 @@
   }
   .text-body {
     font-size: 13px;
-    font-family: 'DM Mono', monospace;
+    font-family: var(--font-mono);
     font-weight: 400;
     line-height: 19px;
     color: var(--ink-0);
   }
   .text-label {
     font-size: 9px;
-    font-family: 'DM Mono', monospace;
+    font-family: var(--font-mono);
     font-weight: 400;
     line-height: 12px;
     letter-spacing: 0.08em;
@@ -99,7 +102,7 @@
   }
   .text-micro {
     font-size: 8px;
-    font-family: 'DM Mono', monospace;
+    font-family: var(--font-mono);
     font-weight: 400;
     line-height: 11px;
     letter-spacing: 0.04em;
