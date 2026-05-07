@@ -1,25 +1,17 @@
 import { useState, useRef } from 'react';
-import { useHistory, useDay, useAddEntry, useDeleteEntry } from '../hooks/useLogs';
+import { useDay, useAddEntry, useDeleteEntry } from '../hooks/useLogs';
 import { useAuth } from '../hooks/useAuth';
-import { MACRO_GOALS, MICRO_GROUPS, STATUS_STYLES, getMacroStatus, getMicroStatus, getTodayKey, formatDate, detectDateFromText, analyseFood } from '../lib/nutrition';
-import MacroCard from '../components/MacroCard';
-import MicroChip from '../components/MicroChip';
+import { getTodayKey, formatDate, detectDateFromText, analyseFood } from '../lib/nutrition';
 import EntryCard from '../components/EntryCard';
-import WeeklySummary from '../components/WeeklySummary';
 import HomeScreen from '../components/HomeScreen';
 import TodayZone from '../components/TodayZone';
 import LogZone from '../components/LogZone';
 import LoginPage from './LoginPage';
-import type { Micros } from '../types';
-
-const MICRO_KEYS = Object.keys(MICRO_GROUPS).flatMap(g => MICRO_GROUPS[g]) as (keyof Micros)[];
 
 export default function App() {
   const { user, login, logout, isAuthenticated } = useAuth();
 
   const [activeDay, setActiveDay] = useState(getTodayKey());
-  const [view, setView]           = useState<'day' | 'week'>('day');
-  const [tab, setTab]             = useState<'macros' | 'micros'>('macros');
   const [input, setInput]         = useState('');
   const [analysing, setAnalysing] = useState(false);
   const [error, setError]         = useState<string | null>(null);
@@ -28,22 +20,11 @@ export default function App() {
 
   const isToday = activeDay === getTodayKey();
 
-  const { data: history = [] }                       = useHistory(15);
-  const { data: dayData, isLoading: dayLoading }     = useDay(activeDay);
+  const { data: dayData, isLoading: dayLoading } = useDay(activeDay);
   const addEntry    = useAddEntry(activeDay);
   const deleteEntry = useDeleteEntry(activeDay);
 
-  const totals  = dayData?.dailyTotals || { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 };
-  const micros  = (dayData?.dailyMicros || {}) as Micros;
   const entries = dayData?.entries || [];
-
-  const hasAnyMicro  = MICRO_KEYS.some(k => (micros[k] || 0) > 0);
-  const greenMicros  = hasAnyMicro ? MICRO_KEYS.filter(k => getMicroStatus(k, micros[k] || 0) === 'green').length  : 0;
-  const yellowMicros = hasAnyMicro ? MICRO_KEYS.filter(k => getMicroStatus(k, micros[k] || 0) === 'yellow').length : 0;
-  const redMicros    = hasAnyMicro ? MICRO_KEYS.filter(k => getMicroStatus(k, micros[k] || 0) === 'red').length    : 0;
-
-  const historyKeys = history.map(d => d.dateKey);
-  const allDays = [getTodayKey(), ...historyKeys.filter(k => k !== getTodayKey())].slice(0, 15);
 
   async function handleLog() {
     if (!input.trim() || analysing) return;
@@ -76,11 +57,6 @@ export default function App() {
     finally { setDeletingId(null); }
   }
 
-  const calStatus = totals.calories > 0 ? getMacroStatus('calories', totals.calories) : 'dim';
-  const calCol    = STATUS_STYLES[calStatus];
-  const calPct    = Math.min((totals.calories / MACRO_GOALS.calories) * 100, 130);
-  const calRem    = MACRO_GOALS.calories - totals.calories;
-
   if (!isAuthenticated) return <LoginPage onLogin={login} />;
 
   return (
@@ -95,115 +71,11 @@ export default function App() {
       onClearError={() => setError(null)}
       textareaRef={textareaRef}
     >
-      {/* TODAY zone — tab nav + macro/micro panels (restructured in P01-002 and P01-003) */}
-      <TodayZone>
-        {/* Day selector tabs */}
-        <div className="px-5 pt-4 pb-3" style={{ borderBottom: '1px solid var(--ink-4)' }}>
-          <div className="flex gap-1.5 overflow-x-auto pb-0.5">
-            <button className={`day-pill ${view === 'week' ? 'active' : ''}`} onClick={() => setView('week')}>
-              week
-            </button>
-            <div className="w-px shrink-0 self-stretch my-0.5" style={{ background: 'var(--ink-4)' }} />
-            {allDays.map(day => {
-              const dh = history.find(d => d.dateKey === day);
-              return (
-                <button
-                  key={day}
-                  onClick={() => { setActiveDay(day); setView('day'); }}
-                  className={`day-pill ${view === 'day' && activeDay === day ? 'active' : ''}`}
-                  style={{ opacity: dh || day === getTodayKey() ? 1 : 0.3 }}
-                >
-                  {day === getTodayKey() ? 'today' : formatDate(day)}
-                  {dh && <span className="ml-1 text-[9px] opacity-40">{Math.round(dh.dailyTotals.calories)}</span>}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+      <TodayZone />
 
-        {/* Tab buttons (macros / micros) */}
-        {view === 'day' && (
-          <div className="flex gap-1.5 px-5 pt-2.5">
-            <button className={`tab-btn ${tab === 'macros' ? 'active' : ''}`} onClick={() => setTab('macros')}>MACROS</button>
-            <button className={`tab-btn ${tab === 'micros' ? 'active' : ''}`} onClick={() => setTab('micros')}>
-              MICROS
-              {hasAnyMicro && (
-                <span className="ml-2 text-[9px] inline-flex items-center gap-1">
-                  <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: 'var(--status-up)' }} />{greenMicros}
-                  <span className="inline-block w-1.5 h-1.5 rounded-full ml-0.5" style={{ background: 'var(--status-mid)' }} />{yellowMicros}
-                  <span className="inline-block w-1.5 h-1.5 rounded-full ml-0.5" style={{ background: 'var(--status-down)' }} />{redMicros}
-                </span>
-              )}
-            </button>
-          </div>
-        )}
-
-        {/* Macro panel */}
-        {view === 'day' && tab === 'macros' && (
-          <div className="px-5 py-3" style={{ borderBottom: '1px solid var(--ink-4)' }}>
-            <div className="rounded-xl p-3 mb-2" style={{ background: calCol.bg, border: `1px solid ${calCol.border}` }}>
-              <div className="flex justify-between items-center mb-2">
-                <div>
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="font-display font-extrabold text-3xl leading-none" style={{ color: calCol.text }}>{Math.round(totals.calories)}</span>
-                    <span className="text-[11px] opacity-40">/ {MACRO_GOALS.calories} kcal</span>
-                  </div>
-                  <div className="text-[9px] opacity-30 tracking-widest mt-0.5">
-                    {isToday ? 'CALORIES TODAY' : formatDate(activeDay).toUpperCase()}
-                  </div>
-                </div>
-                <div className="text-[11px] opacity-75" style={{ color: calCol.text }}>
-                  {calRem > 0 ? `${Math.round(calRem)} left` : `${Math.round(Math.abs(calRem))} over`}
-                </div>
-              </div>
-              <div className="h-1 rounded-full overflow-hidden" style={{ background: 'var(--bar-track)' }}>
-                <div className="h-full rounded-full transition-all duration-700"
-                  style={{ width: `${Math.min(calPct, 100)}%`, background: calCol.bar }} />
-              </div>
-            </div>
-            <div className="flex gap-2 mb-2">
-              <MacroCard label="Protein" value={totals.protein} colorKey="protein" />
-              <MacroCard label="Carbs"   value={totals.carbs}   colorKey="carbs" />
-              <MacroCard label="Fat"     value={totals.fat}     colorKey="fat" />
-            </div>
-            <MacroCard label="Fiber" value={totals.fiber || 0} colorKey="fiber" fullWidth />
-          </div>
-        )}
-
-        {/* Micro panel */}
-        {view === 'day' && tab === 'micros' && (
-          <div className="px-5 py-3 overflow-y-auto max-h-72" style={{ borderBottom: '1px solid var(--ink-4)' }}>
-            {!hasAnyMicro ? (
-              <div className="text-center opacity-20 py-6 text-[11px] tracking-widest">LOG FOOD TO SEE MICRONUTRIENTS</div>
-            ) : (
-              <>
-                <div className="flex gap-3 mb-2 text-[10px] opacity-40 flex-wrap">
-                  <span><span className="inline-block w-1.5 h-1.5 rounded-full mr-1 align-middle" style={{ background: 'var(--status-up)' }} />≥80% RDI</span>
-                  <span><span className="inline-block w-1.5 h-1.5 rounded-full mr-1 align-middle" style={{ background: 'var(--status-mid)' }} />40–80%</span>
-                  <span><span className="inline-block w-1.5 h-1.5 rounded-full mr-1 align-middle" style={{ background: 'var(--status-down)' }} />&lt;40% · sodium &gt;100%</span>
-                </div>
-                {Object.entries(MICRO_GROUPS).map(([group, keys]) => (
-                  <div key={group}>
-                    <div className="text-[9px] tracking-widest opacity-30 uppercase my-2">{group}</div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {(keys as (keyof Micros)[]).map(k => (
-                        <MicroChip key={k} microKey={k} value={micros[k] || 0} />
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </>
-            )}
-          </div>
-        )}
-      </TodayZone>
-
-      {/* LOG zone — entry list */}
       <LogZone>
         <div className="px-5 py-3">
-          {view === 'week' ? (
-            <WeeklySummary history={history} />
-          ) : dayLoading ? (
+          {dayLoading ? (
             <div className="text-center opacity-20 py-8 text-[11px] tracking-widest">LOADING...</div>
           ) : entries.length > 0 ? (
             [...entries].reverse().map(entry => (

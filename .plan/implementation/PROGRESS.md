@@ -8,8 +8,8 @@
 ## Current State
 
 ```
-Active task:      P01-002 — Remove Tab Navigation
-Last completed:   P01-001 — Home Screen Zone Scaffold
+Active task:      P01-003 — TODAY Zone Structure
+Last completed:   P01-002 — Remove Tab Navigation
 Blocked tasks:    None
 Current phase:    Phase 01 — Frontend Layout Foundation
 ```
@@ -26,7 +26,7 @@ Current phase:    Phase 01 — Frontend Layout Foundation
 | M4: Polished | Motion system complete | 0 / 6 tasks | P08-001→P08-006 |
 | M5: Ship-Ready | Onboarding + hardening | 0 / 11 tasks | P09-001→P10-004 |
 
-**Overall: 1 / 48 tasks complete**
+**Overall: 2 / 48 tasks complete**
 
 ---
 
@@ -34,7 +34,7 @@ Current phase:    Phase 01 — Frontend Layout Foundation
 
 | Phase | Tasks | Complete | Status |
 |---|---|---|---|
-| Phase 01: Frontend Layout | 4 | 1 | IN_PROGRESS |
+| Phase 01: Frontend Layout | 4 | 2 | IN_PROGRESS |
 | Phase 02: Frontend Display | 5 | 0 | NOT_STARTED |
 | Phase 03: Command Bar | 1 | 0 | NOT_STARTED |
 | Phase 04: Backend Data | 6 | 0 | NOT_STARTED |
@@ -52,6 +52,7 @@ Current phase:    Phase 01 — Frontend Layout Foundation
 | Task | Description | Commit |
 |---|---|---|
 | P01-001 | Home Screen Zone Scaffold | P01-001 |
+| P01-002 | Remove Tab Navigation | P01-002 |
 
 ---
 
