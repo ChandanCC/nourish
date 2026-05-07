@@ -19,13 +19,13 @@ Not: MyFitnessPal. Not: a fitness motivation app. Not: a wellness brand.
 When starting any session in this repository, load in this order:
 
 ```
-1. CLAUDE.md                          ← This file (always loaded first)
-2. .plan/PROJECT_STATE.md             ← Where we are right now
-3. .plan/SESSION_PROTOCOL.md          ← How to operate in this session
-4. .plan/product/core-principles.md           ← Product constitution (immutable)
-5. .plan/design-system/visual-language.md           ← Design system overview
-6. .plan/product/signal-system.md             ← The product's core concept
-7. .plan/design-system/home-screen.md               ← Primary surface architecture
+1. CLAUDE.md                               ← This file (always loaded first)
+2. .plan/PROJECT_STATE.md                  ← Where we are right now
+3. .plan/SESSION_PROTOCOL.md               ← How to operate in this session
+4. .plan/product/core-principles.md        ← Product constitution (immutable)
+5. .plan/design-system/visual-language.md  ← Design system overview
+6. .plan/product/signal-system.md          ← The product's core concept
+7. .plan/design-system/home-screen.md      ← Primary surface architecture
 ```
 
 Then load only what the task requires:
@@ -34,6 +34,9 @@ Then load only what the task requires:
 - Engineering task → read `.plan/engineering/stack.md` + `.plan/engineering/constraints.md`
 - Animation work → read `.plan/design-system/motion-system.md`
 - Design token work → read all of `.plan/design-system/tokens/`
+- Checking invariants / governance → read `.plan/architecture/ARCHITECTURE_INVARIANTS.md`
+- Checking visual prohibitions → read `.plan/design-system/VISUAL_GUARDRAILS.md`
+- Checking scope → read `.plan/governance/SCOPE_DISCIPLINE.md`
 
 ---
 
@@ -87,6 +90,8 @@ After completing work in a session, update these files if they are affected:
 | Design token added/changed | Update `design-system/tokens/` + CSS custom properties |
 | Technical debt introduced | Add to `.plan/PROJECT_STATE.md#technical-debt` |
 | Roadmap item completed | Update `.plan/product/roadmap.md` |
+| Invariant violated (with justification) | Update `.plan/architecture/ARCHITECTURE_INVARIANTS.md` + DECISION_LOG.md |
+| New governance concern identified | Add to `.plan/governance/DRIFT_PREVENTION.md` |
 
 ---
 
@@ -98,6 +103,9 @@ After completing work in a session, update these files if they are affected:
 - **Do not create documentation** unless explicitly asked. Work from conversation context and existing `.plan/` files.
 - **Do not introduce shortcuts** that violate design system rules for "just this once." Debt compounds.
 - **Reference spec files** when implementing components. The source of truth is `.plan/`, not assumptions from training data.
+- **Run the implementation review checklist** before marking any task complete. See `.plan/governance/IMPLEMENTATION_REVIEW_CHECKLIST.md`.
+- **Check scope discipline** before expanding beyond the current task. See `.plan/governance/SCOPE_DISCIPLINE.md`.
+- **Stop and ask** before making any requires-human-confirmation change. See `.plan/governance/AI_SESSION_RULES.md`.
 
 ---
 
@@ -107,5 +115,23 @@ Nouriq tells you what pattern your body is operating in — right now, based on 
 
 ---
 
-*Initialized: 2026-05-07 | Version: 1.0*
+## Governance System
+
+This repository has an active governance system. Key documents:
+
+| Document | Purpose |
+|---|---|
+| `.plan/CONSTITUTION.md` | Highest-level product and engineering philosophy |
+| `.plan/architecture/ARCHITECTURE_INVARIANTS.md` | Immutable technical and product truths |
+| `.plan/governance/DRIFT_PREVENTION.md` | Known drift patterns and recovery protocols |
+| `.plan/governance/IMPLEMENTATION_REVIEW_CHECKLIST.md` | Mandatory pre-completion checklist |
+| `.plan/governance/SCOPE_DISCIPLINE.md` | How tasks stay atomic |
+| `.plan/governance/AI_SESSION_RULES.md` | Claude session discipline |
+| `.plan/design-system/VISUAL_GUARDRAILS.md` | Prohibited visual patterns |
+
+The governance system exists to protect coherence across time. It is not bureaucracy — it is the accumulated discipline that makes the product stable.
+
+---
+
+*Initialized: 2026-05-07 | Version: 1.1 (governance added)*
 *Authoritative. Supersedes assumptions. Update requires explicit decision.*

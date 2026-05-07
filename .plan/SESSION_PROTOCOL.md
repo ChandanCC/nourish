@@ -83,6 +83,22 @@ Total: ~10 minutes. After this, proceed with full context.
 
 ---
 
+## Governance References
+
+Before beginning any implementation, be aware these governance documents exist and when to consult them:
+
+| Document | When to read |
+|---|---|
+| `.plan/CONSTITUTION.md` | When uncertain whether a direction is right for the product |
+| `.plan/architecture/ARCHITECTURE_INVARIANTS.md` | Before any architectural change; when invariants might be affected |
+| `.plan/governance/DRIFT_PREVENTION.md` | When a pattern starts to feel "off"; before doing anything unusual |
+| `.plan/governance/IMPLEMENTATION_REVIEW_CHECKLIST.md` | Before marking any task complete (mandatory) |
+| `.plan/governance/SCOPE_DISCIPLINE.md` | When scope pressure arises; before expanding beyond current task |
+| `.plan/governance/AI_SESSION_RULES.md` | When uncertain how to proceed in a session |
+| `.plan/design-system/VISUAL_GUARDRAILS.md` | Before adding any new visual element or UI pattern |
+
+---
+
 ## Design Drift Prevention
 
 These patterns are how design systems decay. Flag them immediately:

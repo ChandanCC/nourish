@@ -12,6 +12,8 @@ Next milestone: v1.1 — home screen redesign + SIGNAL + onboarding
 
 **Start P1 — Home Screen Architecture.** P0 and P4 are done. The design token system is live. The next implementation task is the four-zone layout per `design-system/home-screen.md`. Resolve U-001 (training section scope) before building the TODAY zone.
 
+Before beginning: read `governance/IMPLEMENTATION_REVIEW_CHECKLIST.md` and `governance/SCOPE_DISCIPLINE.md`.
+
 ---
 
 ## Quick Status
@@ -22,7 +24,8 @@ Google OAuth + JWT auth                              ✅ DONE
 Backend on AWS Lambda                                ✅ DONE
 Frontend on S3 + CloudFront                          ✅ DONE
 Backend architecture fully specified                ✅ DONE  ← D-020/D-023
-.plan/ documentation system + refactor              ✅ DONE  ← this session
+.plan/ documentation system + refactor              ✅ DONE
+Governance system (invariants + guardrails)         ✅ DONE
 Design token CSS variables in codebase              ✅ DONE  ← P0
 EntryCard redesign (no banned colors, INK system)   ✅ DONE  ← P4
 

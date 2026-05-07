@@ -15,10 +15,22 @@ Single source of truth for all product, design, and engineering decisions.
 ```
 .plan/
 ├── README.md                    ← This file. Navigation index.
+├── CONSTITUTION.md              ← Highest-level product and engineering philosophy
 ├── PROJECT_STATE.md             ← Current status, next action, pending items
 ├── SESSION_PROTOCOL.md          ← How every Claude session must operate
+├── IMPLEMENTATION_RULES.md      ← Practical implementation habits and rules
 ├── CONVENTIONS.md               ← Writing rules, canonical source table, update protocol
 ├── DECISION_LOG.md              ← Append-only log of all major decisions
+│
+├── architecture/                ← Immutable architectural truths
+│   └── ARCHITECTURE_INVARIANTS.md  ← Product, intelligence, data, UX, engineering invariants
+│
+├── governance/                  ← Implementation discipline and drift prevention
+│   ├── DRIFT_PREVENTION.md          ← Known drift patterns + recovery protocols
+│   ├── IMPLEMENTATION_REVIEW_CHECKLIST.md  ← Mandatory pre-completion checklist
+│   ├── SCOPE_DISCIPLINE.md          ← How tasks stay atomic
+│   ├── AI_SESSION_RULES.md          ← Claude session rules
+│   └── GOVERNANCE_SYSTEM_SUMMARY.md ← How all governance docs interact
 │
 ├── product/                     ← What the product is and why it works that way
 │   ├── core-principles.md       ← IMMUTABLE. Product constitution.
@@ -39,6 +51,7 @@ Single source of truth for all product, design, and engineering decisions.
 │   │   ├── spacing.md           ← 4px base system, named tokens
 │   │   ├── surfaces.md          ← Backgrounds, borders, elevation, radius
 │   │   └── opacity.md           ← Opacity hierarchy and semantic roles
+│   ├── VISUAL_GUARDRAILS.md     ← Prohibited patterns, emotional tone validation
 │   └── components/              ← Per-component implementation specs
 │       ├── signal-hero.md       ← Full hero zone: states, collapse, animation
 │       ├── waveform.md          ← 7-day waveform: visual, interaction, data
