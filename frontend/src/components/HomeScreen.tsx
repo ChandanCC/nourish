@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { ReactNode, RefObject } from 'react';
 import type { AuthUser } from '../lib/auth';
 import SignalZone from './SignalZone';
@@ -27,8 +28,38 @@ export default function HomeScreen({
   textareaRef,
   children,
 }: HomeScreenProps) {
+  const [isFocused, setIsFocused] = useState(false);
+
   return (
     <>
+      {/* Scrim — dims content when command bar is focused */}
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          bottom: 56,
+          background: 'rgba(8,8,13,0.60)',
+          pointerEvents: 'none',
+          zIndex: 9,
+          opacity: isFocused ? 1 : 0,
+          transition: 'opacity 150ms linear',
+        }}
+      />
+
+      {/* Gradient fade — always visible above command bar */}
+      <div
+        style={{
+          position: 'fixed',
+          bottom: 56,
+          left: 0,
+          right: 0,
+          height: 40,
+          background: 'linear-gradient(to bottom, transparent, var(--bg-0))',
+          pointerEvents: 'none',
+          zIndex: 10,
+        }}
+      />
+
       <div
         className="max-w-lg mx-auto"
         style={{ minHeight: '100vh', paddingBottom: '88px', color: 'var(--ink-0)' }}
@@ -44,7 +75,10 @@ export default function HomeScreen({
           left: '50%',
           transform: 'translateX(-50%)',
           background: 'var(--bg-0)',
-          borderTop: '1px solid var(--ink-4)',
+          borderTop: isFocused
+            ? '1px solid rgba(237,184,74,0.25)'
+            : '1px solid var(--ink-4)',
+          transition: 'border-top-color 150ms linear',
           zIndex: 10,
         }}
       >
@@ -67,6 +101,8 @@ export default function HomeScreen({
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) onLog(); }}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
             placeholder={'What did you eat?\n\n"2 eggs, banana, oats for breakfast"\n"yesterday dinner: dal rice sabzi roti"'}
             rows={3}
             className="w-full rounded-xl px-3.5 py-3 text-[12px] leading-relaxed outline-none transition-colors duration-200"
@@ -76,8 +112,6 @@ export default function HomeScreen({
               color: 'var(--ink-0)',
               resize: 'none',
             }}
-            onFocus={e => (e.target.style.borderColor = 'var(--gold-1)')}
-            onBlur={e => (e.target.style.borderColor = 'var(--ink-4)')}
           />
           <div className="flex justify-between items-center mt-2.5">
             <span className="text-[9px] opacity-20 tracking-wide">⌘↩ to log</span>
