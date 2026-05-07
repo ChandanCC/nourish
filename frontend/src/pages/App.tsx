@@ -80,13 +80,13 @@ export default function App() {
   if (!isAuthenticated) return <LoginPage onLogin={login} />;
 
   return (
-    <div className="min-h-screen flex flex-col max-w-lg mx-auto" style={{ background:'#0a0a0f', color:'#e8e6e0', fontFamily:"'DM Mono','Fira Mono',monospace" }}>
+    <div className="min-h-screen flex flex-col max-w-lg mx-auto" style={{ background:'var(--bg-0)', color:'var(--ink-0)' }}>
 
       {/* Header */}
-      <div className="px-5 pt-4 pb-3" style={{ borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
+      <div className="px-5 pt-4 pb-3" style={{ borderBottom:'1px solid var(--ink-4)' }}>
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-baseline gap-2.5">
-            <h1 className="font-display font-extrabold text-xl tracking-tight" style={{ color:'#ffc864' }}>NOURISH</h1>
+            <h1 className="font-display font-extrabold text-xl tracking-tight" style={{ color:'var(--gold)' }}>NOURIQ</h1>
             <span className="text-[9px] opacity-30 tracking-widest">NUTRITION LOG</span>
           </div>
           <button onClick={logout} title={`Sign out (${user?.email})`}
@@ -94,7 +94,7 @@ export default function App() {
             {user?.picture
               ? <img src={user.picture} alt={user.name} className="w-6 h-6 rounded-full opacity-70 group-hover:opacity-100 transition-opacity" />
               : <div className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold"
-                  style={{ background:'rgba(255,200,100,0.15)', color:'#ffc864' }}>
+                  style={{ background:'var(--gold-3)', color:'var(--gold)' }}>
                   {user?.name?.[0]?.toUpperCase() ?? '?'}
                 </div>
             }
@@ -105,7 +105,7 @@ export default function App() {
           <button className={`day-pill ${view==='week'?'active':''}`} onClick={() => setView('week')}>
             week
           </button>
-          <div className="w-px shrink-0 self-stretch my-0.5" style={{ background:'rgba(255,255,255,0.08)' }} />
+          <div className="w-px shrink-0 self-stretch my-0.5" style={{ background:'var(--ink-4)' }} />
           {allDays.map(day => {
             const dh = history.find(d => d.dateKey === day);
             return (
@@ -128,9 +128,9 @@ export default function App() {
             MICROS
             {hasAnyMicro && (
               <span className="ml-2 text-[9px] inline-flex items-center gap-1">
-                <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background:'#34d399' }}/>{greenMicros}
-                <span className="inline-block w-1.5 h-1.5 rounded-full ml-0.5" style={{ background:'#fbbf24' }}/>{yellowMicros}
-                <span className="inline-block w-1.5 h-1.5 rounded-full ml-0.5" style={{ background:'#f87171' }}/>{redMicros}
+                <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background:'var(--status-up)' }}/>{greenMicros}
+                <span className="inline-block w-1.5 h-1.5 rounded-full ml-0.5" style={{ background:'var(--status-mid)' }}/>{yellowMicros}
+                <span className="inline-block w-1.5 h-1.5 rounded-full ml-0.5" style={{ background:'var(--status-down)' }}/>{redMicros}
               </span>
             )}
           </button>
@@ -139,7 +139,7 @@ export default function App() {
 
       {/* Macro panel */}
       {view==='day' && tab==='macros' && (
-        <div className="px-5 py-3" style={{ borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
+        <div className="px-5 py-3" style={{ borderBottom:'1px solid var(--ink-4)' }}>
           <div className="rounded-xl p-3 mb-2" style={{ background:calCol.bg, border:`1px solid ${calCol.border}` }}>
             <div className="flex justify-between items-center mb-2">
               <div>
@@ -155,7 +155,7 @@ export default function App() {
                 {calRem>0?`${Math.round(calRem)} left`:`${Math.round(Math.abs(calRem))} over`}
               </div>
             </div>
-            <div className="h-1 rounded-full overflow-hidden" style={{ background:'rgba(255,255,255,0.07)' }}>
+            <div className="h-1 rounded-full overflow-hidden" style={{ background:'var(--bar-track)' }}>
               <div className="h-full rounded-full transition-all duration-700"
                 style={{ width:`${Math.min(calPct,100)}%`, background:calCol.bar }} />
             </div>
@@ -171,15 +171,15 @@ export default function App() {
 
       {/* Micro panel */}
       {view==='day' && tab==='micros' && (
-        <div className="px-5 py-3 overflow-y-auto max-h-72" style={{ borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
+        <div className="px-5 py-3 overflow-y-auto max-h-72" style={{ borderBottom:'1px solid var(--ink-4)' }}>
           {!hasAnyMicro ? (
             <div className="text-center opacity-20 py-6 text-[11px] tracking-widest">LOG FOOD TO SEE MICRONUTRIENTS</div>
           ) : (
             <>
               <div className="flex gap-3 mb-2 text-[10px] opacity-40 flex-wrap">
-                <span><span className="inline-block w-1.5 h-1.5 rounded-full mr-1 align-middle" style={{ background:'#34d399' }}/>≥80% RDI</span>
-                <span><span className="inline-block w-1.5 h-1.5 rounded-full mr-1 align-middle" style={{ background:'#fbbf24' }}/>40–80%</span>
-                <span><span className="inline-block w-1.5 h-1.5 rounded-full mr-1 align-middle" style={{ background:'#f87171' }}/>&lt;40% · sodium &gt;100%</span>
+                <span><span className="inline-block w-1.5 h-1.5 rounded-full mr-1 align-middle" style={{ background:'var(--status-up)' }}/>≥80% RDI</span>
+                <span><span className="inline-block w-1.5 h-1.5 rounded-full mr-1 align-middle" style={{ background:'var(--status-mid)' }}/>40–80%</span>
+                <span><span className="inline-block w-1.5 h-1.5 rounded-full mr-1 align-middle" style={{ background:'var(--status-down)' }}/>&lt;40% · sodium &gt;100%</span>
               </div>
               {Object.entries(MICRO_GROUPS).map(([group, keys]) => (
                 <div key={group}>
@@ -199,7 +199,7 @@ export default function App() {
       {/* Error */}
       {error && (
         <div className="mx-5 my-2 px-3 py-2 rounded-lg text-[10px] leading-relaxed break-words"
-          style={{ background:'rgba(248,113,113,0.07)', border:'1px solid rgba(248,113,113,0.2)', color:'#f87171' }}>
+          style={{ background:'rgba(232,84,84,0.07)', border:'1px solid rgba(232,84,84,0.20)', color:'var(--status-down)' }}>
           <strong>Error:</strong> {error}
           <span className="ml-2 cursor-pointer opacity-50" onClick={() => setError(null)}>✕</span>
         </div>
@@ -227,23 +227,24 @@ export default function App() {
       </div>
 
       {/* Input */}
-      <div className="px-5 pb-6 pt-3" style={{ borderTop:'1px solid rgba(255,255,255,0.06)', background:'#0a0a0f' }}>
+      <div className="px-5 pb-6 pt-3" style={{ borderTop:'1px solid var(--ink-4)', background:'var(--bg-0)' }}>
         <textarea ref={textareaRef} value={input} onChange={e => setInput(e.target.value)}
           onKeyDown={e => { if (e.key==='Enter'&&(e.metaKey||e.ctrlKey)) handleLog(); }}
           placeholder={'What did you eat?\n\n"2 eggs, banana, oats for breakfast"\n"yesterday dinner: dal rice sabzi roti"'}
           rows={3}
           className="w-full rounded-xl px-3.5 py-3 text-[12px] leading-relaxed outline-none transition-colors duration-200"
-          style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.1)', color:'#e8e6e0', resize:'none' }}
-          onFocus={e => (e.target.style.borderColor='rgba(255,200,100,0.3)')}
-          onBlur={e  => (e.target.style.borderColor='rgba(255,255,255,0.1)')}
+          style={{ background:'var(--bg-2)', border:'1px solid var(--ink-4)', color:'var(--ink-0)', resize:'none' }}
+          onFocus={e => (e.target.style.borderColor='var(--gold-1)')}
+          onBlur={e  => (e.target.style.borderColor='var(--ink-4)')}
         />
         <div className="flex justify-between items-center mt-2.5">
           <span className="text-[9px] opacity-20 tracking-wide">⌘↩ to log</span>
           <button onClick={handleLog} disabled={analysing||!input.trim()}
-            className="bg-[#ffc864] text-[#0a0a0f] font-display font-extrabold text-[13px] tracking-widest rounded-xl px-6 py-3 transition-all duration-200 hover:bg-[#ffd98a] hover:-translate-y-px disabled:opacity-40 disabled:cursor-not-allowed">
+            className="font-display font-extrabold text-[13px] tracking-widest rounded-xl px-6 py-3 transition-all duration-200 hover:-translate-y-px disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{ background: 'var(--gold)', color: 'var(--bg-0)' }}>
             {analysing ? (
               <span className="flex items-center gap-2">
-                <span className="inline-block w-4 h-4 rounded-full border-2 border-black/20 border-t-[#0a0a0f] animate-spin" />
+                <span className="inline-block w-4 h-4 rounded-full border-2 border-black/20 border-t-bg-0 animate-spin" />
                 Analysing...
               </span>
             ) : 'LOG IT'}

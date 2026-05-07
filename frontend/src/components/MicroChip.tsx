@@ -17,7 +17,7 @@ export default function MicroChip({ microKey, value }: Props) {
         <span style={{ color: col.text }} className="text-sm font-medium leading-none">{display}</span>
         <span className="text-[9px] opacity-40">{cfg.unit}</span>
       </div>
-      <div className="h-[3px] rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.07)' }}>
+      <div className="h-[3px] rounded-full overflow-hidden" style={{ background: 'var(--bar-track)' }}>
         <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: col.bar }} />
       </div>
       <div className="text-[9px] opacity-32">{Math.round(pct)}%{cfg.invert ? ' ↓' : ''}</div>

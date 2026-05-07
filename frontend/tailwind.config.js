@@ -4,13 +4,30 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        mono: ['"DM Mono"', 'Fira Mono', 'monospace'],
+        mono: ['"DM Mono"', 'monospace'],
         display: ['Syne', 'sans-serif'],
       },
       colors: {
-        brand: { yellow: '#ffc864', 'yellow-light': '#ffd98a' },
-        surface: { base: '#0a0a0f', card: 'rgba(255,255,255,0.03)', border: 'rgba(255,255,255,0.07)' },
-        status: { green: '#34d399', yellow: '#fbbf24', red: '#f87171', purple: '#a78bfa', teal: '#4ecdc4', orange: '#ffa552', pink: '#ff6b9d' },
+        /* Background family */
+        'bg-0': 'var(--bg-0)',
+        'bg-1': 'var(--bg-1)',
+        'bg-2': 'var(--bg-2)',
+        'bg-3': 'var(--bg-3)',
+        /* Ink family */
+        'ink-0': 'var(--ink-0)',
+        'ink-1': 'var(--ink-1)',
+        'ink-2': 'var(--ink-2)',
+        'ink-3': 'var(--ink-3)',
+        'ink-4': 'var(--ink-4)',
+        /* Brand accent */
+        gold: 'var(--gold)',
+        'gold-1': 'var(--gold-1)',
+        'gold-2': 'var(--gold-2)',
+        'gold-3': 'var(--gold-3)',
+        /* Status signals */
+        'status-up': 'var(--status-up)',
+        'status-mid': 'var(--status-mid)',
+        'status-down': 'var(--status-down)',
       },
     },
   },

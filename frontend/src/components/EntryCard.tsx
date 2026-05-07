@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import type { Entry, Micros } from '../types';
-import { MICRO_RDI, STATUS_STYLES, getMicroStatus, getMacroStatus } from '../lib/nutrition';
+import type { Entry } from '../types';
+import { MACRO_GOALS } from '../lib/nutrition';
 
 interface Props {
   entry: Entry;
@@ -8,92 +8,120 @@ interface Props {
   deleting?: boolean;
 }
 
+const MACROS: { key: 'protein' | 'carbs' | 'fat'; label: string }[] = [
+  { key: 'protein', label: 'PROTEIN' },
+  { key: 'carbs',   label: 'CARBS'   },
+  { key: 'fat',     label: 'FAT'     },
+];
+
 export default function EntryCard({ entry, onDelete, deleting }: Props) {
   const [expanded, setExpanded] = useState(false);
-  const calStatus = getMacroStatus('calories', entry.totals.calories);
-  const calCol    = STATUS_STYLES[calStatus];
 
-  const microKeys = Object.keys(MICRO_RDI) as (keyof Micros)[];
-  const hasMicros = microKeys.some(k => (entry.micros?.[k] || 0) > 0);
+  const name = entry.summary || entry.rawText.slice(0, 60);
+  const { calories, protein, carbs, fat } = entry.totals;
 
   return (
     <div
-      className="group rounded-xl p-3 mb-2 cursor-pointer transition-colors duration-200"
-      style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
-      onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(255,200,100,0.2)')}
-      onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)')}
+      className="mb-2 cursor-pointer"
+      style={{
+        background: 'var(--bg-1)',
+        border: '1px solid var(--ink-4)',
+        borderRadius: 12,
+        transition: 'border-color 150ms',
+      }}
+      onMouseEnter={e => ((e.currentTarget as HTMLDivElement).style.borderColor = 'var(--gold-1)')}
+      onMouseLeave={e => ((e.currentTarget as HTMLDivElement).style.borderColor = 'var(--ink-4)')}
       onClick={() => setExpanded(x => !x)}
     >
-      <div className="flex justify-between items-start gap-2 mb-1.5">
-        <div className="flex-1 min-w-0">
-          <div className="text-[11px] opacity-40 mb-1 italic truncate">
-            {entry.summary || entry.rawText.slice(0, 55)}
-          </div>
-          <div className="flex gap-2 text-[11px] flex-wrap items-center">
-            <span style={{ color: calCol.text }}>🔥 {Math.round(entry.totals.calories)}</span>
-            <span style={{ color: '#4ecdc4' }}>P {Math.round(entry.totals.protein)}g</span>
-            <span style={{ color: '#ffa552' }}>C {Math.round(entry.totals.carbs)}g</span>
-            <span style={{ color: '#ff6b9d' }}>F {Math.round(entry.totals.fat)}g</span>
-            {entry.totals.fiber > 0 && (
-              <span style={{ color: '#a78bfa' }}>Fi {Math.round(entry.totals.fiber)}g</span>
-            )}
-          </div>
+      {/* Collapsed header — always visible */}
+      <div className="px-3 pt-3 pb-2.5">
+        <div className="flex justify-between items-start gap-3 mb-1.5">
+          <span className="text-body flex-1 min-w-0">{name}</span>
+          <span className="text-data" style={{ flexShrink: 0 }}>{Math.round(calories)}</span>
         </div>
-        <button
-          className="opacity-0 group-hover:opacity-100 transition-opacity text-[10px] px-2 py-1 rounded-md cursor-pointer"
-          style={{ background: 'rgba(255,80,80,0.08)', border: '1px solid rgba(255,80,80,0.2)', color: '#f87171' }}
-          onClick={e => { e.stopPropagation(); onDelete(entry.entryId); }}
-          disabled={deleting}
-        >
-          {deleting ? '…' : '✕'}
-        </button>
+        <div className="flex items-center justify-between">
+          <span className="text-label">
+            P {Math.round(protein)}g · C {Math.round(carbs)}g · F {Math.round(fat)}g
+          </span>
+          <span className="text-micro">{expanded ? '▲' : '▼'}</span>
+        </div>
       </div>
 
+      {/* Expanded panel */}
       {expanded && (
-        <div className="mt-2 pt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }} onClick={e => e.stopPropagation()}>
-          {entry.items.map((item, i) => (
-            <div key={i} className="flex justify-between items-start py-1.5 gap-2 text-[11px]"
-              style={{ borderBottom: i < entry.items.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
-              <div className="flex-1 min-w-0">
-                {item.mealLabel && (
-                  <span className="text-[9px] px-1.5 py-0.5 rounded mr-1 uppercase tracking-wide"
-                    style={{ background: 'rgba(255,200,100,0.08)', color: 'rgba(255,200,100,0.65)', border: '1px solid rgba(255,200,100,0.15)' }}>
-                    {item.mealLabel}
-                  </span>
-                )}
-                <span className="opacity-85">{item.name}</span>
-                <span className="opacity-30 ml-1.5 text-[10px]">{item.quantity}</span>
+        <div
+          onClick={e => e.stopPropagation()}
+          style={{ borderTop: '1px solid var(--ink-4)' }}
+          className="px-3 pb-3 pt-2.5"
+        >
+          {/* Macro progress rows — INK fill only, no color coding */}
+          {MACROS.map(({ key, label }) => {
+            const value = entry.totals[key];
+            const pct   = Math.min((value / MACRO_GOALS[key]) * 100, 100);
+            return (
+              <div key={key} className="flex items-center gap-2 mb-2">
+                <span className="text-label" style={{ width: 52, flexShrink: 0 }}>{label}</span>
+                <div style={{ flex: 1, height: 3, borderRadius: 2, background: 'var(--bar-track)', overflow: 'hidden' }}>
+                  <div style={{ width: `${pct}%`, height: '100%', borderRadius: 2, background: 'var(--bar-fill)' }} />
+                </div>
+                <span className="text-micro" style={{ flexShrink: 0, fontVariantNumeric: 'tabular-nums', width: 28, textAlign: 'right' }}>
+                  {Math.round(value)}g
+                </span>
               </div>
-              <div className="flex gap-1.5 opacity-50 flex-shrink-0">
-                <span>{item.calories}cal</span>
-                <span style={{ color: '#4ecdc4' }}>{item.protein}p</span>
-                <span style={{ color: '#ffa552' }}>{item.carbs}c</span>
-                <span style={{ color: '#ff6b9d' }}>{item.fat}f</span>
-                {item.fiber > 0 && <span style={{ color: '#a78bfa' }}>{item.fiber}fi</span>}
-              </div>
-            </div>
-          ))}
-          {hasMicros && (
-            <div className="mt-2 pt-2 flex flex-wrap gap-1" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-              {microKeys.filter(k => (entry.micros?.[k] || 0) > 0).map(k => {
-                const col = STATUS_STYLES[getMicroStatus(k, entry.micros[k])];
-                const v = entry.micros[k];
-                return (
-                  <span key={k} className="text-[9px] px-1.5 py-0.5 rounded"
-                    style={{ background: col.bg, color: col.text, border: `1px solid ${col.border}` }}>
-                    {MICRO_RDI[k].label}: {v < 10 ? v.toFixed(1) : Math.round(v)}{MICRO_RDI[k].unit}
+            );
+          })}
+
+          {/* Per-item breakdown */}
+          {entry.items?.length > 0 && (
+            <div style={{ borderTop: '1px solid var(--ink-4)', marginTop: 8, paddingTop: 8 }}>
+              {entry.items.map((item, i) => (
+                <div key={i} className="flex justify-between items-baseline gap-2 mb-1">
+                  <span style={{ fontSize: 11, fontFamily: '"DM Mono", monospace', color: 'var(--ink-2)', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {item.mealLabel && (
+                      <span style={{ marginRight: 6, color: 'var(--ink-3)' }}>[{item.mealLabel}]</span>
+                    )}
+                    {item.name}
+                    {item.quantity && (
+                      <span style={{ color: 'var(--ink-3)', marginLeft: 4 }}>{item.quantity}</span>
+                    )}
                   </span>
-                );
-              })}
+                  <span className="text-micro" style={{ flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
+                    {item.calories}kcal
+                  </span>
+                </div>
+              ))}
             </div>
           )}
+
+          {/* Footer — timestamp + delete */}
+          <div
+            style={{ borderTop: '1px solid var(--ink-4)', marginTop: 8, paddingTop: 8 }}
+            className="flex justify-between items-center"
+          >
+            <span className="text-micro">
+              {new Date(entry.loggedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+            </span>
+            <button
+              onClick={() => onDelete(entry.entryId)}
+              disabled={deleting}
+              className="text-label"
+              style={{
+                color: 'var(--ink-3)',
+                background: 'none',
+                border: 'none',
+                cursor: deleting ? 'not-allowed' : 'pointer',
+                padding: 0,
+                opacity: deleting ? 0.4 : 1,
+                transition: 'color 150ms',
+              }}
+              onMouseEnter={e => !deleting && ((e.currentTarget as HTMLButtonElement).style.color = 'var(--status-down)')}
+              onMouseLeave={e => ((e.currentTarget as HTMLButtonElement).style.color = 'var(--ink-3)')}
+            >
+              {deleting ? '…' : 'DELETE'}
+            </button>
+          </div>
         </div>
       )}
-
-      <div className="text-[9px] opacity-20 mt-1.5 text-right">
-        {new Date(entry.loggedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
-        {entry.items.length > 0 && <span className="ml-1">{expanded ? '▲' : '▼'}</span>}
-      </div>
     </div>
   );
 }

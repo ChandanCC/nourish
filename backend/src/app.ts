@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import logsRouter from './routes/logs';
 import authRouter from './routes/auth';
+import analyseRouter from './routes/analyse';
 import { requireAuth } from './middleware/auth';
 
 const app = express();
@@ -21,6 +22,7 @@ app.use(express.json({ limit: '2mb' }));
 app.get('/health', (_req, res) => res.json({ status: 'ok', ts: new Date().toISOString() }));
 app.use('/auth', authRouter);
 app.use('/api/logs', requireAuth, logsRouter);
+app.use('/api/analyse', requireAuth, analyseRouter);
 
 // ── 404 ──────────────────────────────────────────────────────────────────────
 app.use((_req, res) => res.status(404).json({ error: 'Not found' }));

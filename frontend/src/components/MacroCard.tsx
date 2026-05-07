@@ -23,7 +23,7 @@ export default function MacroCard({ label, value, colorKey, unit = 'g', fullWidt
         <span style={{ color: col.text }} className="text-lg font-bold font-display leading-none">{Math.round(value)}</span>
         <span className="text-[9px] opacity-40">/{goal}{unit}</span>
       </div>
-      <div className="h-[3px] rounded-full overflow-hidden mb-1" style={{ background: 'rgba(255,255,255,0.07)' }}>
+      <div className="h-[3px] rounded-full overflow-hidden mb-1" style={{ background: 'var(--bar-track)' }}>
         <div className="h-full rounded-full transition-all duration-500"
           style={{ width: `${Math.min(pct, 100)}%`, background: col.bar }} />
       </div>

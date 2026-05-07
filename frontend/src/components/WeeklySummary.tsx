@@ -54,11 +54,11 @@ export default function WeeklySummary({ history }: Props) {
             <span className="text-[11px] opacity-40">/ {MACRO_GOALS.calories} kcal</span>
           </div>
           <div className="text-right">
-            <div className="font-display font-bold text-[15px]" style={{ color: '#ffc864' }}>{onTarget}/{logged}</div>
+            <div className="font-display font-bold text-[15px]" style={{ color: 'var(--gold)' }}>{onTarget}/{logged}</div>
             <div className="text-[8px] opacity-30 tracking-widest">ON TARGET</div>
           </div>
         </div>
-        <div className="h-1 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.07)' }}>
+        <div className="h-1 rounded-full overflow-hidden" style={{ background: 'var(--bar-track)' }}>
           <div className="h-full rounded-full transition-all duration-700"
             style={{ width: `${calPct}%`, background: calCol.bar }} />
         </div>
@@ -71,12 +71,12 @@ export default function WeeklySummary({ history }: Props) {
           const col = STATUS_STYLES[value > 0 ? getMacroStatus(key, value) : 'dim'];
           return (
             <div key={key} className="flex-1 rounded-lg p-2.5"
-              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              style={{ background: 'var(--bg-1)', border: '1px solid var(--ink-4)' }}>
               <div className="text-[9px] opacity-30 tracking-widest mb-1">{label}</div>
               <div className="font-display font-bold text-lg leading-none" style={{ color: col.text }}>
                 {Math.round(value)}g
               </div>
-              <div className="h-0.5 rounded-full mt-1.5 overflow-hidden" style={{ background: 'rgba(255,255,255,0.07)' }}>
+              <div className="h-0.5 rounded-full mt-1.5 overflow-hidden" style={{ background: 'var(--bar-track)' }}>
                 <div className="h-full rounded-full" style={{ width: `${pct}%`, background: col.bar }} />
               </div>
             </div>
@@ -92,8 +92,8 @@ export default function WeeklySummary({ history }: Props) {
           { label: 'AVG FIBER',   value: `${Math.round(avgFib)}g` },
         ] as const).map(({ label, value }) => (
           <div key={label} className="flex-1 rounded-lg p-2.5 text-center"
-            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-            <div className="font-display font-bold text-xl leading-none" style={{ color: '#e8e6e0' }}>{value}</div>
+            style={{ background: 'var(--bg-1)', border: '1px solid var(--ink-4)' }}>
+            <div className="font-display font-bold text-xl leading-none" style={{ color: 'var(--ink-0)' }}>{value}</div>
             <div className="text-[8px] opacity-30 tracking-widest mt-1">{label}</div>
           </div>
         ))}

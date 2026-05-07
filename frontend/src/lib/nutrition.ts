@@ -41,10 +41,10 @@ export const MICRO_GROUPS: Record<string, (keyof Micros)[]> = {
 };
 
 export const STATUS_STYLES: Record<StatusColor, { bg: string; border: string; text: string; bar: string }> = {
-  green:  { bg: 'rgba(52,211,153,0.1)',   border: 'rgba(52,211,153,0.3)',   text: '#34d399', bar: '#34d399' },
-  yellow: { bg: 'rgba(251,191,36,0.09)',  border: 'rgba(251,191,36,0.3)',   text: '#fbbf24', bar: '#fbbf24' },
-  red:    { bg: 'rgba(248,113,113,0.09)', border: 'rgba(248,113,113,0.3)',  text: '#f87171', bar: '#f87171' },
-  dim:    { bg: 'rgba(255,255,255,0.03)', border: 'rgba(255,255,255,0.08)', text: '#555555', bar: '#2a2a3a' },
+  green:  { bg: 'rgba(62,207,162,0.10)',  border: 'rgba(62,207,162,0.28)',  text: '#3ECFA2', bar: '#3ECFA2' },
+  yellow: { bg: 'rgba(232,166,64,0.09)',  border: 'rgba(232,166,64,0.28)',  text: '#E8A640', bar: '#E8A640' },
+  red:    { bg: 'rgba(232,84,84,0.09)',   border: 'rgba(232,84,84,0.28)',   text: '#E85454', bar: '#E85454' },
+  dim:    { bg: '#0F0F18',                border: 'rgba(232,227,216,0.09)', text: 'rgba(232,227,216,0.22)', bar: 'rgba(232,227,216,0.09)' },
 };
 
 export function getMacroStatus(key: MacroKey, value: number): StatusColor {
@@ -104,12 +104,6 @@ export function detectDateFromText(text: string): string {
   return todayKey;
 }
 
-const SYSTEM_PROMPT = `You are a nutrition analysis expert. Analyze all food items and return ONLY raw JSON. Start with { end with }.
-
-Return this exact structure (use 0 for unknowns, never omit fields):
-{"items":[{"name":"","quantity":"","calories":0,"protein":0,"carbs":0,"fat":0,"fiber":0,"mealLabel":""}],"totals":{"calories":0,"protein":0,"carbs":0,"fat":0,"fiber":0},"micros":{"vitaminC":0,"vitaminD":0,"vitaminB12":0,"vitaminA":0,"vitaminE":0,"vitaminK":0,"calcium":0,"iron":0,"magnesium":0,"zinc":0,"potassium":0,"sodium":0,"omega3":0,"folate":0},"summary":""}
-
-Rules: macros/fiber in grams, calories in kcal. Indian food = IFCT data. Low-fat milk=1.5% fat ~60kcal/100ml. mealLabel: Breakfast/Lunch/Dinner/Snack/Other. Output ONLY JSON.`;
 
 function extractJSON(raw: string) {
   try { return JSON.parse(raw.trim()); } catch {}
@@ -125,21 +119,17 @@ function extractJSON(raw: string) {
 }
 
 export async function analyseFood(text: string) {
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const { getToken } = await import('./auth');
+  const base = (import.meta.env.VITE_API_URL || 'http://localhost:4000/api');
+  const res = await fetch(`${base}/analyse`, {
     method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model:      'claude-sonnet-4-20250514',
-      max_tokens: 5000,
-      system:     SYSTEM_PROMPT,
-      messages:   [{ role: 'user', content: text }],
-    }),
+    headers: {
+      'Content-Type':  'application/json',
+      'Authorization': `Bearer ${getToken()}`,
+    },
+    body: JSON.stringify({ text }),
   });
-  if (!res.ok) throw new Error(`Claude API ${res.status}`);
   const data = await res.json();
-  if (data.type === 'error') throw new Error(data.error?.message || 'API error');
-  if (data.stop_reason === 'max_tokens') throw new Error('Response cut off — try a smaller meal');
-  const textBlock = data.content?.find((b: { type: string }) => b.type === 'text');
-  if (!textBlock?.text) throw new Error('No text in response');
-  return extractJSON(textBlock.text);
+  if (!res.ok) throw new Error(data.error || `API ${res.status}`);
+  return extractJSON(data.result);
 }

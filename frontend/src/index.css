@@ -1,51 +1,168 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Background family */
+  --bg-0: #08080D;
+  --bg-1: #0F0F18;
+  --bg-2: #151520;
+  --bg-3: #1B1B27;
+
+  /* Ink family — warm off-white at opacity steps */
+  --ink-0: #E8E3D8;
+  --ink-1: rgba(232, 227, 216, 0.72);
+  --ink-2: rgba(232, 227, 216, 0.42);
+  --ink-3: rgba(232, 227, 216, 0.22);
+  --ink-4: rgba(232, 227, 216, 0.09);
+
+  /* Brand accent — gold. Max 3 placements in the entire UI. */
+  --gold: #EDB84A;
+  --gold-1: rgba(237, 184, 74, 0.30);
+  --gold-2: rgba(237, 184, 74, 0.12);
+  --gold-3: rgba(237, 184, 74, 0.06);
+
+  /* Status signals — only for metrics with genuine health/nutritional targets */
+  --status-up: #3ECFA2;
+  --status-mid: #E8A640;
+  --status-down: #E85454;
+  --status-null: rgba(232, 227, 216, 0.22);
+
+  /* Waveform */
+  --wave-surplus: rgba(237, 184, 74, 0.60);
+  --wave-deficit: rgba(232, 227, 216, 0.22);
+  --wave-today: rgba(232, 227, 216, 0.88);
+  --wave-baseline: rgba(232, 227, 216, 0.12);
+
+  /* Progress bar */
+  --bar-fill: rgba(232, 227, 216, 0.60);
+  --bar-track: rgba(232, 227, 216, 0.09);
+}
+
 @layer base {
   * { box-sizing: border-box; }
   body {
-    background-color: #0a0a0f;
-    color: #e8e6e0;
-    font-family: 'DM Mono', 'Fira Mono', monospace;
+    background-color: var(--bg-0);
+    color: var(--ink-0);
+    font-family: 'DM Mono', monospace;
     -webkit-font-smoothing: antialiased;
   }
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #2a2a3a; border-radius: 2px; }
+  ::-webkit-scrollbar-thumb { background: var(--bg-3); border-radius: 2px; }
 }
 
 @layer components {
-  .tab-btn {
-    @apply relative px-3 py-1.5 text-[11px] tracking-widest font-medium rounded-lg
-           border border-transparent text-[#555] transition-all duration-150 outline-none
-           cursor-pointer select-none;
+  /* Type scale — six sizes only */
+  .text-display {
+    font-size: 32px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    line-height: 36px;
+    letter-spacing: -0.02em;
+    color: var(--ink-0);
+    text-transform: uppercase;
   }
-  .tab-btn:hover {
-    @apply text-[#999] border-white/10 bg-white/[0.03];
+  .text-title {
+    font-size: 18px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    line-height: 24px;
+    color: var(--ink-0);
   }
-  .tab-btn.active {
-    color: #ffc864;
-    border-color: rgba(255, 200, 100, 0.25);
-    background: rgba(255, 200, 100, 0.07);
+  .text-data {
+    font-size: 16px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    line-height: 22px;
+    letter-spacing: -0.01em;
+    color: var(--ink-0);
+    font-variant-numeric: tabular-nums;
   }
-  .tab-btn.active:hover {
-    background: rgba(255, 200, 100, 0.11);
+  .text-body {
+    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 400;
+    line-height: 19px;
+    color: var(--ink-0);
+  }
+  .text-label {
+    font-size: 9px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 400;
+    line-height: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  .text-micro {
+    font-size: 8px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 400;
+    line-height: 11px;
+    letter-spacing: 0.04em;
+    color: var(--ink-3);
   }
 
+  /* Card surfaces */
+  .surface-card {
+    background: var(--bg-1);
+    border: 1px solid var(--ink-4);
+    border-radius: 12px;
+  }
+  .surface-sheet {
+    background: var(--bg-2);
+    border: 1px solid var(--ink-3);
+    border-radius: 12px;
+  }
+
+  /* Day pill — horizontal day selector, pending home screen redesign */
   .day-pill {
-    @apply px-2.5 py-1 text-[10px] tracking-wide rounded-lg border border-transparent
-           text-[#444] whitespace-nowrap transition-all duration-150 outline-none
+    @apply px-2.5 py-1 rounded-lg border border-transparent
+           whitespace-nowrap transition-all duration-150 outline-none
            cursor-pointer select-none shrink-0;
+    font-size: 9px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
   }
   .day-pill:hover {
-    @apply text-[#888] border-white/10 bg-white/[0.03];
+    color: var(--ink-2);
+    border-color: var(--ink-4);
+    background: rgba(232, 227, 216, 0.03);
   }
   .day-pill.active {
-    color: #e8e6e0;
-    border-color: rgba(255, 255, 255, 0.12);
-    background: rgba(255, 255, 255, 0.06);
+    color: var(--ink-0);
+    border-color: var(--ink-3);
+    background: rgba(232, 227, 216, 0.06);
+  }
+
+  /* Tab button — pending home screen redesign */
+  .tab-btn {
+    @apply relative px-3 py-1.5 rounded-lg border border-transparent
+           transition-all duration-150 outline-none
+           cursor-pointer select-none;
+    font-size: 9px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .tab-btn:hover {
+    color: var(--ink-2);
+    border-color: var(--ink-4);
+    background: rgba(232, 227, 216, 0.02);
+  }
+  .tab-btn.active {
+    color: var(--gold);
+    border-color: var(--gold-1);
+    background: var(--gold-3);
+  }
+  .tab-btn.active:hover {
+    background: var(--gold-2);
   }
 }
