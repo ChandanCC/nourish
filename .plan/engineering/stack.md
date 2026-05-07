@@ -32,9 +32,9 @@ Dev         npm workspaces + concurrently + nodemon
 - No Zustand, Redux, or Jotai — unnecessary for current complexity
 
 **Styling**
-- Tailwind CSS v3
-- Custom CSS variables for design tokens (BG, INK, GOLD, STATUS) — not yet fully wired in v1.0; used as plain hex values currently
-- `index.css` for custom component classes (`.tab-btn`, `.day-pill`)
+- Tailwind CSS v3 — extended colors config maps to CSS custom properties
+- 23 CSS custom properties for design tokens (BG, INK, GOLD, STATUS, WAVE, BAR) — live in `frontend/src/index.css` as of v1.1
+- `index.css` also contains type scale utility classes (`.text-display` through `.text-micro`) and surface classes (`.surface-card`, `.surface-sheet`)
 
 **Key Dependencies**
 ```json

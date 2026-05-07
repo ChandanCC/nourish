@@ -13,27 +13,31 @@ Read these files in order before doing any work. This takes under 2 minutes.
 ```
 Step 1   CLAUDE.md                     — Rules and non-negotiables
 Step 2   .plan/PROJECT_STATE.md        — Current progress and open decisions
-Step 3   .plan/core-principles.md      — The product constitution
+Step 3   .plan/product/core-principles.md      — The product constitution
 ```
 
 Then load task-specific context:
 
 ```
-If working on UI/design:       .plan/visual-language.md
-                               .plan/design-tokens/ (relevant file)
-                               .plan/component-specs/<component>.md
+If working on UI/design:       .plan/design-system/visual-language.md
+                               .plan/design-system/tokens/ (relevant file)
+                               .plan/design-system/components/<component>.md
 
-If working on SIGNAL/product:  .plan/signal-system.md
-                               .plan/home-screen.md
+If working on SIGNAL/product:  .plan/product/signal-system.md
+                               .plan/product/signal-states.md
+                               .plan/design-system/home-screen.md
 
 If working on backend/AI:      .plan/engineering/stack.md
-                               .plan/engineering/ai-behavior.md
                                .plan/engineering/constraints.md
+                               .plan/engineering/backend-architecture.md
+                               .plan/engineering/data-architecture.md
+                               .plan/engineering/intelligence-architecture.md
+                               .plan/engineering/ai-behavior.md
 
 If making a product decision:  .plan/product/positioning.md
                                .plan/decisions/ (scan for conflicts)
 
-If working on animation:       .plan/motion-system.md
+If working on animation:       .plan/design-system/motion-system.md
 ```
 
 **Never skip Step 1–3.** Task-specific context without foundational context produces drift.
@@ -47,13 +51,13 @@ These files define ground truth. Implementation deviates from them, not the othe
 | File | Authority over |
 |---|---|
 | `CLAUDE.md` | All session behavior and non-negotiables |
-| `.plan/core-principles.md` | Product and design philosophy — immutable |
-| `.plan/design-tokens/colors.md` | All color values and semantic rules |
-| `.plan/design-tokens/typography.md` | All font sizes, weights, usage rules |
-| `.plan/design-tokens/spacing.md` | All spacing values |
-| `.plan/design-tokens/surfaces.md` | All surface treatments, borders, radius |
-| `.plan/motion-system.md` | All animation contracts |
-| `.plan/component-specs/<component>.md` | Per-component implementation spec |
+| `.plan/product/core-principles.md` | Product and design philosophy — immutable |
+| `.plan/design-system/tokens/colors.md` | All color values and semantic rules |
+| `.plan/design-system/tokens/typography.md` | All font sizes, weights, usage rules |
+| `.plan/design-system/tokens/spacing.md` | All spacing values |
+| `.plan/design-system/tokens/surfaces.md` | All surface treatments, borders, radius |
+| `.plan/design-system/motion-system.md` | All animation contracts |
+| `.plan/design-system/components/<component>.md` | Per-component implementation spec |
 
 If the codebase contradicts one of these files, **the spec is right and the code is wrong**. Fix the code.
 
@@ -84,7 +88,7 @@ Total: ~10 minutes. After this, proceed with full context.
 These patterns are how design systems decay. Flag them immediately:
 
 ### Color drift
-- Any hex value not in `.plan/design-tokens/colors.md` → replace with token
+- Any hex value not in `.plan/design-system/tokens/colors.md` → replace with token
 - Any use of `#4ecdc4`, `#ffa552`, `#ff6b9d`, `#a78bfa`, `#ffc864` → these are banned
 - Any `box-shadow` → remove entirely
 - Any gradient background on a card or section → remove
@@ -116,7 +120,7 @@ These patterns are how design systems decay. Flag them immediately:
 
 ## How to Handle a Conflict
 
-**Scenario A: User request conflicts with a principle in `core-principles.md`**
+**Scenario A: User request conflicts with a principle in `product/core-principles.md`**
 
 1. Implement it anyway — No. Do not silently comply.
 2. Refuse flatly — No. Be useful.
@@ -124,7 +128,7 @@ These patterns are how design systems decay. Flag them immediately:
 
 Example:
 > User: "Add a streak counter to the home screen."
-> Response: "That conflicts with the anti-gamification principle in `core-principles.md` — Nouriq explicitly doesn't use streak mechanics. The underlying goal (showing consistency) is handled by the SIGNAL STATE system (e.g., 'Day 4 of this state') and the PATTERN qualifier ('consistent' / 'building' / 'irregular'). Would either of those cover what you're trying to communicate?"
+> Response: "That conflicts with the anti-gamification principle in `product/core-principles.md` — Nouriq explicitly doesn't use streak mechanics. The underlying goal (showing consistency) is handled by the SIGNAL STATE system (e.g., 'Day 4 of this state') and the PATTERN qualifier ('consistent' / 'building' / 'irregular'). Would either of those cover what you're trying to communicate?"
 
 **Scenario B: Two specs contradict each other**
 
@@ -148,13 +152,13 @@ If a decision was made:
   → Append to DECISION_LOG.md
 
 If a component spec changed during implementation:
-  → Update the component-specs/ file to match reality
+  → Update the design-system/components/ file to match reality
 
 If technical debt was added:
   → Add row to PROJECT_STATE.md#technical-debt
 
 If a design token value changed:
-  → Update the relevant design-tokens/ file
+  → Update the relevant design-system/tokens/ file
   → Update CSS custom properties in index.css
 ```
 

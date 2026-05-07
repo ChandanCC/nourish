@@ -20,12 +20,15 @@ This is a directional roadmap, not a commitment schedule. Dates are rough target
 - Backend on AWS Lambda + API Gateway
 - Frontend on S3 + CloudFront
 
-**Not yet included (spec exists, implementation pending):**
-- EntryCard redesign (spec in `component-specs/entry-card.md`)
-- SIGNAL hero component (spec in `component-specs/signal-hero.md`)
-- Home screen full redesign (spec in `home-screen.md`)
-- Design token system wired into Tailwind/CSS
-- New color palette applied to codebase
+**Completed beyond initial v1.0 scope (now done):**
+- EntryCard redesign ✅ (spec in `design-system/components/entry-card.md`)
+- Design token system (23 CSS custom properties) ✅
+- Color palette (BG/INK/GOLD/STATUS) applied to codebase ✅
+- Backend architecture fully specified ✅
+
+**Still pending for v1.1:**
+- SIGNAL hero component (spec in `design-system/components/signal-hero.md`)
+- Home screen full redesign (spec in `design-system/home-screen.md`)
 - Waveform visualization
 - STATE computation (AI-driven)
 - DELTA calculation
@@ -39,11 +42,11 @@ This is a directional roadmap, not a commitment schedule. Dates are rough target
 **Goal:** The designed product ships. All spec documents in `.plan/` are implemented.
 
 **Features:**
-- Home screen redesign per `home-screen.md`
-- SIGNAL hero with waveform per `component-specs/signal-hero.md`
-- EntryCard redesign per `component-specs/entry-card.md`
+- Home screen redesign per `design-system/home-screen.md`
+- SIGNAL hero with waveform per `design-system/components/signal-hero.md`
+- ~~EntryCard redesign per `design-system/components/entry-card.md`~~ ✅ Done
 - Command bar focused state with gold border
-- Design tokens in Tailwind: BG/INK/GOLD/STATUS CSS variables
+- ~~Design tokens in Tailwind: BG/INK/GOLD/STATUS CSS variables~~ ✅ Done
 - STATE computation (AI-driven via Claude, server-side)
 - DELTA calculation (7-day rolling vs. personal baseline)
 - Motion system: app open, entry arrival, number counting
@@ -73,7 +76,7 @@ This is a directional roadmap, not a commitment schedule. Dates are rough target
 **Goal:** Reduce logging friction. Add platform surface area.
 
 **Features:**
-- Shareable weekly report card (`future-ideas/weekly-report-share.md`)
+- Shareable weekly report card (`future/weekly-report-share.md`)
 - Barcode scanner (food database lookup)
 - Meal templates (re-log a frequent meal in one tap)
 - Capacitor wrapper (HealthKit access for HRV/sleep/workouts)

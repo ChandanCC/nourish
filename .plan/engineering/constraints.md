@@ -73,7 +73,7 @@ Running as a web app (not Capacitor/React Native) means:
 - No background sync
 - No haptic feedback API
 
-**Implication:** See `future-ideas/native-app.md` for the path to native.
+**Implication:** See `future/native-app.md` for the path to native.
 
 ---
 

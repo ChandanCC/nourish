@@ -22,18 +22,18 @@ When starting any session in this repository, load in this order:
 1. CLAUDE.md                          ← This file (always loaded first)
 2. .plan/PROJECT_STATE.md             ← Where we are right now
 3. .plan/SESSION_PROTOCOL.md          ← How to operate in this session
-4. .plan/core-principles.md           ← Product constitution (immutable)
-5. .plan/visual-language.md           ← Design system overview
-6. .plan/signal-system.md             ← The product's core concept
-7. .plan/home-screen.md               ← Primary surface architecture
+4. .plan/product/core-principles.md           ← Product constitution (immutable)
+5. .plan/design-system/visual-language.md           ← Design system overview
+6. .plan/product/signal-system.md             ← The product's core concept
+7. .plan/design-system/home-screen.md               ← Primary surface architecture
 ```
 
 Then load only what the task requires:
-- Building a component → read its spec in `.plan/component-specs/`
+- Building a component → read its spec in `.plan/design-system/components/`
 - Making a product decision → read `.plan/product/positioning.md` + relevant ADRs in `.plan/decisions/`
 - Engineering task → read `.plan/engineering/stack.md` + `.plan/engineering/constraints.md`
-- Animation work → read `.plan/motion-system.md`
-- Design token work → read all of `.plan/design-tokens/`
+- Animation work → read `.plan/design-system/motion-system.md`
+- Design token work → read all of `.plan/design-system/tokens/`
 
 ---
 
@@ -42,10 +42,10 @@ Then load only what the task requires:
 These rules are never overridden. If a request would violate them, flag the conflict and propose an alternative that doesn't.
 
 ### Design System
-1. **Color:** BG family, INK family (opacity only), GOLD (3 places maximum), STATUS (data-only). No other chromatic color. No rainbow macros. The prohibited colors in `.plan/design-tokens/colors.md` are banned.
+1. **Color:** BG family, INK family (opacity only), GOLD (3 places maximum), STATUS (data-only). No other chromatic color. No rainbow macros. The prohibited colors in `.plan/design-system/tokens/colors.md` are banned.
 2. **Type:** Syne (STATE/headers only) + DM Mono (everything else). Two fonts. Six sizes. No exceptions.
-3. **Spacing:** 4px base unit. 20px page gutter. Named tokens in `.plan/design-tokens/spacing.md`. No arbitrary values.
-4. **Motion:** Every animation must pass the "one sentence purpose" test. Easing from `.plan/motion-system.md` only. No spring physics, no bounce, no decorative motion.
+3. **Spacing:** 4px base unit. 20px page gutter. Named tokens in `.plan/design-system/tokens/spacing.md`. No arbitrary values.
+4. **Motion:** Every animation must pass the "one sentence purpose" test. Easing from `.plan/design-system/motion-system.md` only. No spring physics, no bounce, no decorative motion.
 5. **Surfaces:** Four elevation levels. No box-shadow anywhere. No glassmorphism. No gradient backgrounds.
 
 ### Product Philosophy
@@ -67,7 +67,7 @@ These rules are never overridden. If a request would violate them, flag the conf
 
 **Design uncertainty:** Default to restraint. Less color, less motion, less decoration. Ask: "what is the instrument panel equivalent of this element?"
 
-**Product uncertainty:** Read `.plan/core-principles.md`. If still uncertain, check `.plan/decisions/` for a relevant ADR. If no ADR exists, surface the decision explicitly — don't guess and implement.
+**Product uncertainty:** Read `.plan/product/core-principles.md`. If still uncertain, check `.plan/decisions/` for a relevant ADR. If no ADR exists, surface the decision explicitly — don't guess and implement.
 
 **Architecture uncertainty:** Read `.plan/engineering/constraints.md` and `.plan/engineering/stack.md`. Prefer existing patterns over new abstractions.
 
@@ -82,9 +82,9 @@ After completing work in a session, update these files if they are affected:
 | Change type | File to update |
 |---|---|
 | Feature implemented | `.plan/PROJECT_STATE.md` → mark completed |
-| Component spec changed by implementation | Update relevant `component-specs/` file |
+| Component spec changed by implementation | Update relevant `design-system/components/` file |
 | Architecture decision made | Append to `.plan/DECISION_LOG.md` + create ADR in `decisions/` if significant |
-| Design token added/changed | Update `design-tokens/` + CSS custom properties |
+| Design token added/changed | Update `design-system/tokens/` + CSS custom properties |
 | Technical debt introduced | Add to `.plan/PROJECT_STATE.md#technical-debt` |
 | Roadmap item completed | Update `.plan/product/roadmap.md` |
 

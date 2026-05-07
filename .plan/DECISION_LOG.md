@@ -222,7 +222,7 @@ Status: Active
 
 **Consequences:** The READING state subtitle must never count down to SIGNAL. Day counter (`Day 4`) is informational. The system state qualifiers (`Baseline forming` / `Pattern emerging`) communicate active observation without implying a timer.
 
-**Files updated:** `.plan/ux/onboarding-system.md#6-reading-state-active-not-empty`, `.plan/signal-system.md`
+**Files updated:** `.plan/ux/onboarding-system.md#6-reading-state-active-not-empty`, `.plan/product/signal-system.md`
 
 ---
 
@@ -237,7 +237,7 @@ Status: Active
 
 **Consequences:** Users who don't train will see `TRAINING · Not logged` indefinitely. This is acceptable — the section is low-prominence and the AI instruction line ("→ Log your session") is the only prompt. No push notification, no badge, no "complete your profile" pressure.
 
-**Files updated:** `.plan/ux/onboarding-system.md#13-workout-logging-introduction`, `.plan/home-screen.md`
+**Files updated:** `.plan/ux/onboarding-system.md#13-workout-logging-introduction`, `.plan/design-system/home-screen.md`
 
 ---
 
@@ -267,7 +267,7 @@ Status: Active
 
 **Consequences:** Settings and profile need an access pattern that isn't a tab — currently: avatar tap → settings sheet. If the product grows features that are genuinely orthogonal to the daily loop, this decision must be revisited with a new ADR.
 
-**Files updated:** `.plan/decisions/007-no-tab-navigation.md`, `.plan/home-screen.md`
+**Files updated:** `.plan/decisions/007-no-tab-navigation.md`, `.plan/design-system/home-screen.md`
 
 ---
 
@@ -282,7 +282,7 @@ Status: Active
 
 **Consequences:** Every new UI element defaults to the INK opacity hierarchy. The ONLY path to chromatic color in new elements is if they express a genuine health/nutritional status relative to a target.
 
-**Files updated:** `.plan/decisions/006-monochromatic-palette.md`, `.plan/design-tokens/colors.md`
+**Files updated:** `.plan/decisions/006-monochromatic-palette.md`, `.plan/design-system/tokens/colors.md`
 
 ---
 
@@ -312,7 +312,7 @@ Status: Active
 
 **Consequences:** Any design element that "needs a third font" is actually a design problem, not a font problem. Resolve the hierarchy with size, weight, and opacity — not a new typeface.
 
-**Files updated:** `.plan/decisions/004-two-fonts.md`, `.plan/design-tokens/typography.md`
+**Files updated:** `.plan/decisions/004-two-fonts.md`, `.plan/design-system/tokens/typography.md`
 
 ---
 
@@ -327,7 +327,7 @@ Status: Active
 
 **Consequences:** STATE computation requires AI judgment, not a formula. This is intentional — the complexity of the computation is the value. Users cannot "game" a state they don't fully understand the rules of.
 
-**Files updated:** `.plan/decisions/003-signal-not-score.md`, `.plan/signal-system.md`
+**Files updated:** `.plan/decisions/003-signal-not-score.md`, `.plan/product/signal-system.md`
 
 ---
 

@@ -3,9 +3,9 @@
 **Status:** Active — v1.0
 **Last updated:** 2026-05-07
 
-→ See: `signal-system.md` for SIGNAL zone content.
-→ See: `component-specs/command-bar.md` for bottom bar spec.
-→ See: `component-specs/entry-card.md` for entry list spec.
+→ See: `product/signal-system.md` for SIGNAL zone content.
+→ See: `design-system/components/command-bar.md` for bottom bar spec.
+→ See: `design-system/components/entry-card.md` for entry list spec.
 
 ---
 
@@ -149,7 +149,7 @@ LOGGED TODAY                3 entries
 ```
 No button. No "add" link here. Logging is via the command bar.
 
-Entries: `EntryCard` (redesigned). → See: `component-specs/entry-card.md`.
+Entries: `EntryCard` (redesigned). → See: `design-system/components/entry-card.md`.
 
 ### History
 
@@ -189,7 +189,7 @@ Sun  May 4      DRIFTING      2,140 kcal   Protein 61%
 - Focused: `border-top-color: rgba(237,184,74,0.25)`
 - Gradient fade above bar: 40px height, BG-0 to transparent, pointer-events none.
 
-→ Full spec: `component-specs/command-bar.md`
+→ Full spec: `design-system/components/command-bar.md`
 
 ---
 

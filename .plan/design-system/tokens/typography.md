@@ -4,7 +4,7 @@
 **Last updated:** 2026-05-07
 
 → See: `decisions/004-two-fonts.md` for why exactly two typefaces.
-→ See: `visual-language.md#typographic-hierarchy-does-the-heavy-lifting` for governing principle.
+→ See: `design-system/visual-language.md#typographic-hierarchy-does-the-heavy-lifting` for governing principle.
 
 ---
 

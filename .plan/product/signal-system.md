@@ -6,8 +6,8 @@
 The SIGNAL system is Nouriq's hero experience. It is the singular thing that defines the product emotionally and functionally.
 
 → See: `decisions/003-signal-not-score.md` for why this is not a numeric score.
-→ See: `component-specs/signal-hero.md` for visual implementation.
-→ See: `component-specs/waveform.md` for waveform visual spec.
+→ See: `design-system/components/signal-hero.md` for visual implementation.
+→ See: `design-system/components/waveform.md` for waveform visual spec.
 
 ---
 
@@ -91,7 +91,7 @@ The AI-computed daily caloric equilibrium based on the user's historical logging
 
 A 7-day visual of caloric position relative to baseline. The shape communicates the week's pattern at a glance.
 
-→ Full visual spec: `component-specs/waveform.md`
+→ Full visual spec: `design-system/components/waveform.md`
 
 **Semantic rules:**
 

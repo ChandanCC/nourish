@@ -3,7 +3,7 @@
 **Status:** Active — v1.0
 **Last updated:** 2026-05-07
 
-→ See: `core-principles.md#motion-carries-information-or-is-absent`
+→ See: `product/core-principles.md#motion-carries-information-or-is-absent`
 
 ---
 

@@ -1,10 +1,16 @@
 # Project State
 
-**This file answers: "where are we right now?"**
+**This file answers: "where exactly are we right now?"**
 
 Last updated: 2026-05-07
-Current version: v1.0 (core loop + design token system complete)
+Current version: v1.0 (core loop + design token system + .plan/ refactor complete)
 Next milestone: v1.1 — home screen redesign + SIGNAL + onboarding
+
+---
+
+## NEXT ACTION
+
+**Start P1 — Home Screen Architecture.** P0 and P4 are done. The design token system is live. The next implementation task is the four-zone layout per `design-system/home-screen.md`. Resolve U-001 (training section scope) before building the TODAY zone.
 
 ---
 
@@ -15,115 +21,72 @@ Core loop (log food → AI parse → save → display)    ✅ DONE
 Google OAuth + JWT auth                              ✅ DONE
 Backend on AWS Lambda                                ✅ DONE
 Frontend on S3 + CloudFront                          ✅ DONE
-.plan/ product OS fully documented                  ✅ DONE
 Backend architecture fully specified                ✅ DONE  ← D-020/D-023
+.plan/ documentation system + refactor              ✅ DONE  ← this session
 Design token CSS variables in codebase              ✅ DONE  ← P0
 EntryCard redesign (no banned colors, INK system)   ✅ DONE  ← P4
 
-Home screen redesign (per spec)                     ⏳ PENDING  ← P1
+Home screen redesign (per spec)                     ⏳ NEXT  ← P1
 SIGNAL hero + waveform                              ⏳ PENDING  ← P2/P3
+Command bar focused state                           ⏳ PENDING  ← P5
+Typography system applied (Syne/DM Mono)            ⏳ PENDING  ← P6
 STATE computation (AI-driven)                       ⏳ PENDING  ← P7
 DELTA calculation (7-day rolling)                   ⏳ PENDING  ← P7
 Motion system implementation                        ⏳ PENDING  ← P8
 Onboarding flow (3-question)                        ⏳ PENDING  ← P9
-Typography system applied (Syne/DM Mono)            ⏳ PENDING  ← P6
-Command bar focused state                           ⏳ PENDING  ← P5
 ```
 
 ---
 
-## Completed Systems
+## Completed Systems (Summary)
 
-### Infrastructure
-- **AWS Lambda + API Gateway** — backend deployed via SAM (`backend/template.yaml`)
-- **S3 + CloudFront** — frontend deployed via CDK (`frontend/infra/`)
-- **MongoDB Atlas M0** — connected, `logs` collection in use
-- **npm workspaces** — root `package.json`, `npm run dev` starts both servers
-- **CORS** — configured for CloudFront origin in production
+**Infrastructure:** Lambda + API Gateway (SAM), S3 + CloudFront (CDK), MongoDB Atlas M0, npm workspaces.
 
-### Authentication
-- **Google OAuth 2.0** — `@react-oauth/google` frontend, `google-auth-library` backend
-- **JWT** — 30-day tokens, `Authorization: Bearer` header pattern
-- **`requireAuth` middleware** — protects all `/api/*` routes
-- **Login page** — `frontend/src/pages/LoginPage.tsx`
-- **Auth hooks** — `frontend/src/hooks/useAuth.ts`, `frontend/src/lib/auth.ts`
+**Auth:** Google OAuth 2.0 (`@react-oauth/google`), JWT 30-day tokens, `requireAuth` middleware, `LoginPage.tsx`.
 
-### AI Integration
-- **Anthropic proxy** — `POST /api/analyse` on backend, never called from frontend
-- **Food parsing** — natural language → structured macros via Claude
-- **Model** — `claude-sonnet-4-6`
-- **SYSTEM_PROMPT** — server-side in `backend/src/routes/analyse.ts`
+**Core loop:** `POST /api/analyse` → Claude food parsing → `POST /api/logs` → MongoDB → home screen display.
 
-### Data
-- **Food log CRUD** — create, read, delete via `backend/src/routes/logs.ts`
-- **User-scoped** — all queries filter by `userId` (Google `sub` claim)
-- **Mongoose schema** — `backend/src/models/` (Log model)
+**Design tokens:** 23 CSS custom properties in `frontend/src/index.css`. Six type scale classes. Tailwind config updated. All banned hex values removed from codebase. `STATUS_STYLES` updated to token values.
 
-### Frontend (Current State — Pre-Redesign)
-- **Home screen** — functional but uses old design (pre-spec)
-- **Tab navigation** — WEEK / day tabs exist but not per final spec
-- **Weekly summary** — `frontend/src/components/WeeklySummary.tsx` (basic)
-- **EntryCard** — displays macros with old color-coded system (BANNED colors present — needs redesign)
-- **Color palette** — uses old hex values, not BG/INK/GOLD token system
-- **Typography** — not yet using Syne + DM Mono system
+**EntryCard:** Full redesign per spec. Collapsed/expanded states. INK-only macro rows. `--bar-fill`/`--bar-track` progress bars. No color coding.
 
----
-
-## In Progress
-
-Nothing formally in progress as of 2026-05-07. Next session picks up at v1.1 implementation.
+**Documentation system:** Complete `.plan/` product OS. Refactored to `design-system/`, `product/`, `future/` structure. Canonical source table. Glossary. SIGNAL state machine spec. Backend architecture doc. Intelligence architecture doc. Data architecture doc.
 
 ---
 
 ## Pending (v1.1 Implementation Queue)
 
-Priority order:
+Priority order. Tackle P1 first. P2/P3 require P1 layout to exist. P7 is backend — can run in parallel with P2/P3.
 
-### P0 — Design Token Foundation ✅ COMPLETE
-- [x] CSS custom properties in `frontend/src/index.css` (23 variables: BG, INK, GOLD, STATUS, WAVE, BAR)
-- [x] Type scale utility classes in `@layer components`: `.text-display` `.text-title` `.text-data` `.text-body` `.text-label` `.text-micro`
-- [x] Surface utility classes: `.surface-card` `.surface-sheet`
-- [x] Tailwind config updated — token-mapped color names (bg-0, ink-0, gold, status-up, etc.)
-- [x] All raw hex values removed from all components (zero `#ffc864`, `#0a0a0f`, `#e8e6e0`, old STATUS colors)
-- [x] All PROHIBITED colors removed (#4ecdc4, #ffa552, #ff6b9d, #a78bfa)
-- [x] STATUS_STYLES in `lib/nutrition.ts` updated to correct token values (#3ECFA2, #E8A640, #E85454)
-
-### P1 — Home Screen Architecture
-- [ ] Implement four-zone layout per `home-screen.md`
+### P1 — Home Screen Architecture ← START HERE
+- [ ] Implement four-zone layout per `design-system/home-screen.md`
 - [ ] SIGNAL hero zone (48% viewport, collapses on scroll)
 - [ ] TODAY zone (three sub-sections: Daily Position, Training, Micros)
 - [ ] LOG zone (entry list + history rows)
 - [ ] Command bar (always fixed to bottom)
 - [ ] Remove current tab-based navigation structure
+- **Blocked by:** Resolve U-001 before building Training sub-section
 
 ### P2 — SIGNAL Hero Component
 - [ ] Full hero state: wordmark + STATE text + subtitle + waveform + delta
 - [ ] Collapsed strip: sticky, 44px, STATE + delta + scroll-to-top
 - [ ] Scroll-triggered collapse behavior
-- [ ] Per spec: `component-specs/signal-hero.md`
+- [ ] Per spec: `design-system/components/signal-hero.md`
 
 ### P3 — Waveform Component
 - [ ] 7-bar visualization, full-bleed
 - [ ] Bar colors per WAVE token family (surplus/deficit/today)
-- [ ] Baseline axis
-- [ ] Day labels
+- [ ] Baseline axis + day labels
 - [ ] Tap → day selection → TODAY zone updates
-- [ ] Per spec: `component-specs/waveform.md`
+- [ ] Per spec: `design-system/components/waveform.md`
 
 ### P4 — EntryCard Redesign ✅ COMPLETE
-- [x] All PROHIBITED macro colors removed
-- [x] Collapsed state: name (BODY INK-0) + calories (DATA INK-0) + "P·C·F" summary (LABEL INK-2)
-- [x] Expanded state: macro progress rows (INK fill, no color coding) + item breakdown + timestamp
-- [x] Progress bars: `--bar-fill` (rgba 60%) track, no color coding per spec
-- [x] Delete action: LABEL text in INK-3, no colored background, hover reveals STATUS-DOWN
-- [x] Hover: border brightens to GOLD-1
-- [x] Per spec: `component-specs/entry-card.md`
 
 ### P5 — Command Bar Focused State
 - [ ] Gold border-top on focus (`rgba(237,184,74,0.25)`)
 - [ ] Scrim behind bar on focus
 - [ ] Gradient fade above bar (always present)
-- [ ] Per spec: `component-specs/command-bar.md`
+- [ ] Per spec: `design-system/components/command-bar.md`
 
 ### P6 — Typography System
 - [ ] Load Syne (700, 800) + DM Mono (400, 500) via Google Fonts
@@ -131,16 +94,18 @@ Priority order:
 - [ ] Apply DATA scale to primary values
 - [ ] Apply LABEL scale (9px, uppercase, tracked) to all labels
 - [ ] Apply MICRO scale to timestamps and metadata
-- [ ] Per spec: `design-tokens/typography.md`
+- [ ] Per spec: `design-system/tokens/typography.md`
 
 ### P7 — SIGNAL Computation
 **Architecture fully designed in `engineering/intelligence-architecture.md`**
+**State machine fully specified in `product/signal-states.md`**
 
 Tier 1 — Deterministic (backend):
 - [ ] `computeDailyTotals(logs)` — calorie + macro sums per day
 - [ ] `computeDelta(avg7d, baseline)` — percentage deviation
 - [ ] `checkReadingTrigger(daysLogged)` — hard rule: < 3 days → READING
 - [ ] `checkUnderfuelledTrigger(avg5d, baseline, daysLogged)` — hard rule
+- **Blocked by:** Resolve U-002 (baseline initial value) and U-004 (recompute frequency)
 
 Tier 2 — Statistical (backend):
 - [ ] `computeBaseline(allLoggedDays)` — weighted median, outlier suppression
@@ -169,7 +134,7 @@ Frontend:
 - [ ] Progress bar fill on mount
 - [ ] Waveform bar rise on mount (staggered 25ms)
 - [ ] Card expand/collapse animation
-- [ ] Per spec: `motion-system.md`
+- [ ] Per spec: `design-system/motion-system.md`
 
 ### P9 — Onboarding Flow
 - [ ] Welcome screen (fade-in sequence, wordmark + tagline + continue)
@@ -190,15 +155,15 @@ Frontend:
 
 ## Unresolved Decisions
 
-These questions are open. Do not implement decisions around them without explicitly resolving first:
+Do not implement anything blocked by these without resolving them first.
 
-| ID | Question | Context | Blocking |
-|---|---|---|---|
-| U-001 | Training section: manual log only or skip in v1.1? | Per onboarding spec: training section appears day 3, accepts natural language workout log. Full set/rep/weight UI is separate. Does v1.1 include the full workout sheet or just the text-log path? | P1 home screen, P9 onboarding |
-| U-002 | Baseline calorie computation: AI-computed or formula (Mifflin-St Jeor) for initial value? | First 7 days before pattern is established — what does DELTA show? | P7 SIGNAL |
-| U-003 | Rate limiting on `/api/analyse`: implement in v1.1 or defer? | Defined in `engineering/ai-behavior.md` as "v1.1", but adds complexity | P4/P7 |
-| U-004 | SIGNAL computation frequency: on every log, once daily (midnight), or on demand? | Affects UX and backend cost | P7 SIGNAL |
-| U-005 | Progressive overload detection: does it ship with v1.1 training or deferred? | Training zone shows "Progressive on N lifts" per spec but detection is not implemented | U-001 dependent |
+| ID | Question | Blocking |
+|---|---|---|
+| U-001 | Training section in v1.1: text-log only, or full workout sheet? | P1 (TODAY zone), P9 (onboarding day 3) |
+| U-002 | Baseline before 7 days of data: show DELTA as "—" or use Mifflin-St Jeor estimate? | P7 SIGNAL |
+| U-003 | Rate limiting on `/api/analyse`: implement in v1.1 or defer? | P7 SIGNAL |
+| U-004 | SIGNAL recompute frequency: on every log, once daily, or on demand? | P7 SIGNAL |
+| U-005 | Progressive overload detection: v1.1 or deferred? (depends on U-001) | U-001 dependent |
 
 ---
 
@@ -206,18 +171,15 @@ These questions are open. Do not implement decisions around them without explici
 
 | Item | Where | Impact | Priority |
 |---|---|---|---|
-| Old macro colors in EntryCard | `frontend/src/components/` | Violates design system | HIGH — fix in P4 |
-| Raw hex values throughout codebase | All components | Can't update design tokens centrally | HIGH — fix in P0 |
-| No CSS custom property system | `index.css` | Every token change requires grep-and-replace | HIGH — fix in P0 |
-| No rate limiting on `/api/analyse` | `backend/src/routes/analyse.ts` | Cost risk at scale | MEDIUM — fix in v1.1 |
+| No rate limiting on `/api/analyse` | `backend/src/routes/analyse.ts` | Cost risk at scale | MEDIUM — address in P7 |
 | No input validation on log entries | `backend/src/routes/logs.ts` | Accepts any shape; no Zod/Joi | MEDIUM |
-| localStorage JWT with no expiry check | `frontend/src/lib/auth.ts` | 30-day tokens not validated on client side | LOW — low risk in v1.0 |
-| MongoDB Atlas unrestricted network access | Atlas config | Security; not critical at current scale | LOW |
+| localStorage JWT with no expiry check | `frontend/src/lib/auth.ts` | 30-day tokens not validated client-side | LOW |
+| MongoDB Atlas unrestricted network access | Atlas config | Security; low risk at current scale | LOW |
 | No test coverage | Entire codebase | Regressions invisible | LOW — defer until v1.1 ships |
 
 ---
 
-## Environment State
+## Environment
 
 ```
 Backend dev:   npm run dev -w backend  (port 4000)
@@ -232,9 +194,8 @@ AI model:      claude-sonnet-4-6 (server-side proxy)
 Auth:          Google OAuth 2.0 (Client ID in backend/.env)
 ```
 
-Credentials stored in `backend/.env` and `frontend/.env.local`. Neither is committed. See `backend/.env.example` for required keys.
+Credentials in `backend/.env` and `frontend/.env.local`. Neither committed. See `backend/.env.example` for required keys.
 
 ---
 
-*Update this file after every significant implementation session.*
-*"significant" = a P0–P9 item above is completed, or technical debt changes.*
+*Update after every significant session: mark completed P-items, add new debt, update NEXT ACTION.*

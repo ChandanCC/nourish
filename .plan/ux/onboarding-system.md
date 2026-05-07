@@ -3,11 +3,9 @@
 **Status:** Active — v1.1 spec
 **Last updated:** 2026-05-07
 
-This file supersedes `ux/onboarding.md` (which remains as a brief summary and redirect).
-
 → For interaction rules: `ux/interaction-contracts.md`
-→ For READING state display: `component-specs/signal-hero.md`
-→ For SIGNAL first activation: `signal-system.md`
+→ For READING state display: `design-system/components/signal-hero.md`
+→ For SIGNAL first activation: `product/signal-system.md`
 
 ---
 
@@ -861,6 +859,16 @@ Day 14   Weekly SIGNAL report appears in LOG zone (Sunday)
 Day 30   Baseline recalibrated (silent)
          DELTA may shift — the system acknowledges this is intentional
 ```
+
+---
+
+## 19. Re-onboarding (Goal Change)
+
+Settings sheet → "Change goal" → goal screen reappears → protein target resets to default for new goal → READING state for 3 days while new baseline forms.
+
+No confirmation modal. No "are you sure?" No progress lost. Immediate.
+
+The existing waveform history is preserved — the system knows what the old pattern looked like. The new baseline forms against the new goal.
 
 ---
 

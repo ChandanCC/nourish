@@ -928,7 +928,7 @@ Background timer                               → not implemented; app refreshe
 
 ### Future: Native App Sync (v2.0)
 
-When Capacitor is added (see `future-ideas/native-app.md`):
+When Capacitor is added (see `future/native-app.md`):
 
 1. **Offline write queue:** user can log food offline; writes are queued locally
 2. **Queue flush on reconnect:** queued writes are POSTed in chronological order on reconnect

@@ -3,8 +3,8 @@
 **Status:** Active — v1.0
 **Last updated:** 2026-05-07
 
-→ See: `home-screen.md#zone-4-command-bar` for placement context.
-→ See: `motion-system.md#new-entry-logged` for post-submit animation.
+→ See: `design-system/home-screen.md#zone-4-command-bar` for placement context.
+→ See: `design-system/motion-system.md#new-entry-logged` for post-submit animation.
 
 ---
 
@@ -143,7 +143,7 @@ Header:   "LOG WORKOUT" — LABEL, INK-2
 Close:    ✕ icon, right-aligned, INK-2 — or swipe down
 ```
 
-Workout sheet spec is separate (not yet written — `component-specs/workout-sheet.md` TODO).
+Workout sheet spec is separate (not yet written — `design-system/components/workout-sheet.md` TODO).
 
 The sheet is not a modal — it does not disable the rest of the UI. The command bar itself slides up with the sheet.
 

@@ -3,9 +3,9 @@
 **Status:** Active — v1.0
 **Last updated:** 2026-05-07
 
-→ See: `signal-system.md#pattern-waveform` for semantic rules.
-→ See: `design-tokens/colors.md#waveform-colors` for color tokens.
-→ See: `motion-system.md#waveform-bar-tap-day-select` for tap animation.
+→ See: `product/signal-system.md#pattern-waveform` for semantic rules.
+→ See: `design-system/tokens/colors.md#waveform-colors` for color tokens.
+→ See: `design-system/motion-system.md#waveform-bar-tap-day-select` for tap animation.
 
 ---
 

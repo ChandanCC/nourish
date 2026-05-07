@@ -3,7 +3,7 @@
 **Status:** Active — v1.0
 **Last updated:** 2026-05-07
 
-→ See: `core-principles.md#product-bets` for the bets this positioning makes.
+→ See: `product/core-principles.md#product-bets` for the bets this positioning makes.
 → See: `decisions/003-signal-not-score.md` for why SIGNAL is a state, not a score.
 
 ---

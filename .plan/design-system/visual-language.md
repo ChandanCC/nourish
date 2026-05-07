@@ -3,10 +3,10 @@
 **Status:** Active — v1.0
 **Last updated:** 2026-05-07
 
-Overview of Nouriq's complete visual system. All values defined in `design-tokens/`.
+Overview of Nouriq's complete visual system. All values defined in `design-system/tokens/`.
 
 → See individual token files for exact values.
-→ See `core-principles.md#color-communicates-status-not-identity` for governing principle.
+→ See `product/core-principles.md#color-communicates-status-not-identity` for governing principle.
 
 ---
 
@@ -28,27 +28,27 @@ These share: dark environment, high-contrast text, minimal chromatic noise, typo
 
 Background is `#08080D` — a very slightly blue-violet-tinted near-black. Not pure `#000000`.
 
-Pure black reads as "app." The specific tint reads as "instrument." The difference is subtle to describe and immediately perceptible in use. → `design-tokens/surfaces.md`
+Pure black reads as "app." The specific tint reads as "instrument." The difference is subtle to describe and immediately perceptible in use. → `design-system/tokens/surfaces.md`
 
 ### 2. Warm, Not White
 
 Primary text is `#E8E3D8` — warm off-white, slightly cream. Not `#FFFFFF`.
 
-The temperature contrast (cool-tinted dark bg, warm text) creates richness without color. The eye relaxes. → `design-tokens/colors.md#ink-family`
+The temperature contrast (cool-tinted dark bg, warm text) creates richness without color. The eye relaxes. → `design-system/tokens/colors.md#ink-family`
 
 ### 3. Monochromatic With Selective Status
 
 One text color. One brand accent. Three status signals. That is the entire chromatic palette.
 
-Everything else is INK at varying opacity. → `design-tokens/colors.md`
+Everything else is INK at varying opacity. → `design-system/tokens/colors.md`
 
 ### 4. Typographic Hierarchy Does The Heavy Lifting
 
-No icons for navigation. No color for section identity. No background gradients for visual interest. Typography alone creates hierarchy through size, weight, and opacity. → `design-tokens/typography.md`
+No icons for navigation. No color for section identity. No background gradients for visual interest. Typography alone creates hierarchy through size, weight, and opacity. → `design-system/tokens/typography.md`
 
 ### 5. Borders Define, Don't Decorate
 
-Borders appear on containers (cards, inputs) to define boundaries. Never on decorative elements. Never as a design choice. → `design-tokens/surfaces.md#border-philosophy`
+Borders appear on containers (cards, inputs) to define boundaries. Never on decorative elements. Never as a design choice. → `design-system/tokens/surfaces.md#border-philosophy`
 
 ---
 
@@ -93,7 +93,7 @@ LABEL      9px  DM Mono 400 All labels (UPPERCASE, tracked)
 MICRO      8px  DM Mono 400 Metadata, timestamps
 ```
 
-Two fonts. Six sizes. No exceptions. → `design-tokens/typography.md`
+Two fonts. Six sizes. No exceptions. → `design-system/tokens/typography.md`
 
 ---
 
@@ -114,7 +114,7 @@ STATUS-MID #E8A640         Caution
 STATUS-DOWN #E85454        Alert
 ```
 
-→ Full values and semantic rules: `design-tokens/colors.md`
+→ Full values and semantic rules: `design-system/tokens/colors.md`
 
 ---
 
@@ -130,7 +130,7 @@ Standard          220ms   Transitions, expand/collapse
 Data              320ms   Bar fills, number counts
 ```
 
-→ Full contracts: `motion-system.md`
+→ Full contracts: `design-system/motion-system.md`
 
 ---
 
@@ -138,4 +138,4 @@ Data              320ms   Bar fills, number counts
 
 Base unit: 4px. Page gutter: 20px (never breaks).
 
-→ Full system: `design-tokens/spacing.md`
+→ Full system: `design-system/tokens/spacing.md`

@@ -25,7 +25,7 @@ This pattern is the default pattern for fitness apps (MyFitnessPal, Cronometer, 
 
 All text and data is `#E8E3D8` (warm off-white) at varying opacities. No per-macro colors. No per-section colors.
 
-The four banned macro colors are explicitly documented in `design-tokens/colors.md#prohibited-patterns`.
+The four banned macro colors are explicitly documented in `design-system/tokens/colors.md#prohibited-patterns`.
 
 ---
 

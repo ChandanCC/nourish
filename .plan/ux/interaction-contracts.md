@@ -5,8 +5,8 @@
 
 Defines every interactive element, its trigger, its response, and what never happens.
 
-→ See: `motion-system.md` for animation specs.
-→ See: `component-specs/` for component-level interaction detail.
+→ See: `design-system/motion-system.md` for animation specs.
+→ See: `design-system/components/` for component-level interaction detail.
 
 ---
 

@@ -3,9 +3,9 @@
 **Status:** Active — v1.0
 **Last updated:** 2026-05-07
 
-→ See: `signal-system.md` for SIGNAL semantics (STATE definitions, DELTA formula).
-→ See: `component-specs/waveform.md` for waveform visual spec.
-→ See: `motion-system.md#signal-hero-collapse-on-scroll` for collapse animation.
+→ See: `product/signal-system.md` for SIGNAL semantics (STATE definitions, DELTA formula).
+→ See: `design-system/components/waveform.md` for waveform visual spec.
+→ See: `design-system/motion-system.md#signal-hero-collapse-on-scroll` for collapse animation.
 
 ---
 
@@ -82,7 +82,7 @@ Pattern qualifiers: `consistent` / `building` / `irregular`
 
 ### Waveform
 
-Full-bleed (breaks page gutter on both sides). → Full spec: `component-specs/waveform.md`
+Full-bleed (breaks page gutter on both sides). → Full spec: `design-system/components/waveform.md`
 
 Day labels (`Mon  Tue  Wed  Thu  Fri  Sat  Sun`) sit below bars:
 ```
@@ -196,4 +196,4 @@ No color change. No scale. No screen shake. A crossfade and a quiet confirmation
 700ms   Command bar activates
 ```
 
-Full sequence: 700ms. → Full spec in `motion-system.md#app-open-sequence`.
+Full sequence: 700ms. → Full spec in `design-system/motion-system.md#app-open-sequence`.

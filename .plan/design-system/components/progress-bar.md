@@ -3,8 +3,8 @@
 **Status:** Active — v1.0
 **Last updated:** 2026-05-07
 
-→ See: `component-specs/macro-row.md` for usage in macro rows.
-→ See: `motion-system.md#progress-bar-fill-on-mount` for animation.
+→ See: `design-system/components/macro-row.md` for usage in macro rows.
+→ See: `design-system/motion-system.md#progress-bar-fill-on-mount` for animation.
 
 ---
 
@@ -61,7 +61,7 @@ Duration: 120ms total (60ms up, 60ms down)
 Easing: LINEAR both directions
 ```
 
-One pulse. Not repeated. → `motion-system.md#goal-completion-pulse`.
+One pulse. Not repeated. → `design-system/motion-system.md#goal-completion-pulse`.
 
 ---
 

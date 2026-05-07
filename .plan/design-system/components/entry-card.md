@@ -3,9 +3,9 @@
 **Status:** Active — v1.0
 **Last updated:** 2026-05-07
 
-→ See: `home-screen.md#zone-3-log` for placement context.
-→ See: `motion-system.md#new-entry-logged` for entry animation.
-→ See: `design-tokens/colors.md#prohibited-patterns` for old macro colors that must not appear.
+→ See: `design-system/home-screen.md#zone-3-log` for placement context.
+→ See: `design-system/motion-system.md#new-entry-logged` for entry animation.
+→ See: `design-system/tokens/colors.md#prohibited-patterns` for old macro colors that must not appear.
 
 ---
 

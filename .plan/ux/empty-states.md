@@ -3,7 +3,7 @@
 **Status:** Active — v1.0
 **Last updated:** 2026-05-07
 
-→ See: `core-principles.md` principle: "Absence is a design choice."
+→ See: `product/core-principles.md` principle: "Absence is a design choice."
 
 ---
 
@@ -114,7 +114,7 @@ No "Nothing logged on this day" message. The zero-height bar already communicate
 | Prohibited | Why |
 |---|---|
 | Illustrations of food, plates, vegetables | Consumer/playful aesthetic; conflicts with instrument reference |
-| Emoji | See: `visual-language.md#what-the-visual-language-deliberately-avoids` |
+| Emoji | See: `design-system/visual-language.md#what-the-visual-language-deliberately-avoids` |
 | "Get started" buttons | Command bar is always visible; a second CTA is noise |
 | Encouragement ("You're doing great, keep going!") | Praise-based language for absence is tone-deaf |
 | Skeleton screens / loading shimmer | Data is either there or it's not. No in-between. |

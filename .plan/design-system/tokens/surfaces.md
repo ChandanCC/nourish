@@ -3,7 +3,7 @@
 **Status:** Active — v1.0
 **Last updated:** 2026-05-07
 
-→ See: `design-tokens/colors.md#background-family` for background color values.
+→ See: `design-system/tokens/colors.md#background-family` for background color values.
 
 ---
 

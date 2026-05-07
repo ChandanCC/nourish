@@ -7,7 +7,7 @@
 
 ## Current State
 
-The Weekly SIGNAL Report format is fully specified in `signal-system.md#weekly-signal-report`. The report is generated every Sunday. The display format exists in the spec.
+The Weekly SIGNAL Report format is fully specified in `product/signal-system.md#weekly-signal-report`. The report is generated every Sunday. The display format exists in the spec.
 
 What is not built: making it shareable.
 

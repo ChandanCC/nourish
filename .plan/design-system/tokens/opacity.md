@@ -3,8 +3,8 @@
 **Status:** Active — v1.0
 **Last updated:** 2026-05-07
 
-→ See: `design-tokens/colors.md#ink-family` for INK opacity system.
-→ See: `core-principles.md` principle: "Opacity is the first tool, color is the last."
+→ See: `design-system/tokens/colors.md#ink-family` for INK opacity system.
+→ See: `product/core-principles.md` principle: "Opacity is the first tool, color is the last."
 
 ---
 

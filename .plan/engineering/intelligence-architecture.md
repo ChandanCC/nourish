@@ -6,7 +6,7 @@
 This document defines the complete computational and behavioral model for Nouriq's AI layer.
 
 → `engineering/ai-behavior.md` — prompts and API contracts derived from this architecture
-→ `signal-system.md` — product-facing description of SIGNAL (this doc is the implementation spec)
+→ `product/signal-system.md` — product-facing description of SIGNAL (this doc is the implementation spec)
 
 ---
 
@@ -1123,5 +1123,5 @@ type StateLabel =
 
 *This document defines the complete intelligence model.*
 *Implementation detail (exact prompts, API contracts): `engineering/ai-behavior.md`*
-*Product-facing description: `signal-system.md`*
+*Product-facing description: `product/signal-system.md`*
 *Update this document when: algorithm changes, thresholds change, new state added, edge case discovered in production.*

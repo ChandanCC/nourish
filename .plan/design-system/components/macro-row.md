@@ -3,8 +3,8 @@
 **Status:** Active — v1.0
 **Last updated:** 2026-05-07
 
-→ See: `home-screen.md#zone-2a-daily-position` for placement context.
-→ See: `component-specs/progress-bar.md` for progress bar sub-component.
+→ See: `design-system/home-screen.md#zone-2a-daily-position` for placement context.
+→ See: `design-system/components/progress-bar.md` for progress bar sub-component.
 
 ---
 
@@ -33,7 +33,7 @@ Label:       LABEL — 9px DM Mono 400, uppercase, INK-2
              "PROTEIN" / "CARBS" / "FAT" / "FIBER"
 
 Progress bar: flex-grow, center column
-              → See: component-specs/progress-bar.md
+              → See: design-system/components/progress-bar.md
 
 Value:       "89g of 140g"
              "89g" — DATA — 16px DM Mono 500, INK-0
@@ -54,7 +54,7 @@ Prefix: → (not a bullet, not an emoji)
 Position: below progress bar, 8px margin-top
 ```
 
-**Present only when actionable.** If the user has met their protein target, this line is absent. Not replaced with a success message — just absent. → `core-principles.md` principle: "Absence is the reward."
+**Present only when actionable.** If the user has met their protein target, this line is absent. Not replaced with a success message — just absent. → `product/core-principles.md` principle: "Absence is the reward."
 
 ---
 
