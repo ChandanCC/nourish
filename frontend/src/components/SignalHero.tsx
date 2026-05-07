@@ -1,4 +1,5 @@
 import type { AuthUser } from '../lib/auth';
+import Waveform from './Waveform';
 
 interface SignalHeroProps {
   state: string;
@@ -134,18 +135,9 @@ export default function SignalHero({
         )}
       </div>
 
-      {/* Waveform placeholder — full-bleed, replaced by Waveform component in P02-003 */}
-      <div
-        style={{
-          marginTop: 20,
-          height: 80,
-          background: 'var(--bg-1)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <span className="text-micro">— waveform —</span>
+      {/* Waveform — full-bleed (no horizontal padding, breaks page gutter) */}
+      <div style={{ marginTop: 20 }}>
+        <Waveform days={[]} selectedDay={6} baseline={1850} />
       </div>
 
       {/* Delta line */}
