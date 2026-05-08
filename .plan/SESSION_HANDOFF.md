@@ -83,3 +83,35 @@ The implementation plan is complete. The product is at M5. Natural next steps:
 2. **Production MongoDB Atlas**: Move from development cluster to production cluster with proper IP allowlists and connection pooling.
 3. **End-to-end smoke test**: Create a test user, complete onboarding, log 7 days of meals, verify SIGNAL state transitions.
 4. **Backend tests for routes**: The intelligence engine has unit tests (16 passing). The routes have no integration tests yet.
+
+---
+
+## Post-M5 Sessions
+
+### 2026-05-08 — Infrastructure + Provider Architecture
+
+**External dependency strategy** (`docs(infra): define external dependency and API strategy`):
+- `.plan/engineering/api-dependency-map.md` — 8 services documented with 14 fields each
+- `.env.example` — all env vars with classification
+- `.plan/engineering/service-classification.md` — REQUIRED_NOW / MVP_LATER / PRODUCTION_ONLY / FUTURE_OPTIONAL / EXPERIMENTAL
+
+**Provider-agnostic intelligence layer** (`refactor(ai): establish provider-agnostic intelligence architecture`):
+- `backend/src/providers/` — `types.ts`, `anthropic.ts`, `registry.ts`
+- All Anthropic-specific logic extracted from `analyse.ts` and `tier3.ts`
+- `parsedByModel` now stamped by backend from `provider.canonicalId` — frontend no longer hardcodes model name
+- `signal.ts` records `provider:model` canonical format in `SignalState.aiModel`
+- Invariant B-003 updated to protect full provider boundary
+- Docs: `provider-abstraction-audit.md`, `provider-abstraction.md`
+
+**Gemini 2.5 Flash integration** (`feat(ai): integrate Gemini 2.5 Flash provider`):
+- `backend/src/providers/google.ts` — `GoogleProvider` implementing `CompletionProvider`
+- Uses `responseMimeType: 'application/json'` — enforces valid JSON output without regex stripping
+- Registry defaults updated to Gemini 2.5 Flash as active default provider
+- To use: set `GEMINI_API_KEY` in `backend/.env` (no other changes needed)
+- To revert to Anthropic: `AI_PROVIDER_PARSING=anthropic` + `ANTHROPIC_API_KEY`
+
+**Current active defaults:**
+```
+AI_PROVIDER_PARSING=gemini     → gemini-2.5-flash
+AI_PROVIDER_SYNTHESIS=gemini   → gemini-2.5-flash
+```

@@ -1,6 +1,6 @@
 # Provider Abstraction
 
-**Status:** Active — v1.0
+**Status:** Active — v1.1
 **Last updated:** 2026-05-08
 
 Defines how Nouriq's intelligence layer remains provider-agnostic. Supersedes the Anthropic-specific framing in `ai-behavior.md`.
@@ -105,29 +105,36 @@ The provider returns raw text or null. Domain code owns JSON parsing, schema val
 
 ## Runtime Configuration
 
+**Active defaults** (Gemini 2.5 Flash — low cost, high speed):
 ```bash
-# Provider selection — change these to switch providers
-AI_PROVIDER_PARSING=anthropic      # or: google, openai
-AI_PROVIDER_SYNTHESIS=anthropic    # or: google, openai
+AI_PROVIDER_PARSING=gemini
+AI_PROVIDER_SYNTHESIS=gemini
+AI_MODEL_PARSING=gemini-2.5-flash
+AI_MODEL_SYNTHESIS=gemini-2.5-flash
+GEMINI_API_KEY=your-key          # from aistudio.google.com
+```
 
-# Model selection — provider-specific model identifiers
+**Switch to Anthropic** (higher instruction-following fidelity):
+```bash
+AI_PROVIDER_PARSING=anthropic
+AI_PROVIDER_SYNTHESIS=anthropic
 AI_MODEL_PARSING=claude-sonnet-4-6
 AI_MODEL_SYNTHESIS=claude-sonnet-4-6
-
-# Provider API keys — only the active provider's key is needed
 ANTHROPIC_API_KEY=sk-ant-...
-GEMINI_API_KEY=                    # needed if AI_PROVIDER_*=google
-OPENAI_API_KEY=                    # needed if AI_PROVIDER_*=openai
 ```
 
-Switching from Anthropic to Google for parsing:
+**Mixed** (cheapest parsing, best synthesis):
 ```bash
-AI_PROVIDER_PARSING=google
-AI_MODEL_PARSING=gemini-1.5-flash
+AI_PROVIDER_PARSING=gemini
+AI_MODEL_PARSING=gemini-2.5-flash
 GEMINI_API_KEY=your-key
+
+AI_PROVIDER_SYNTHESIS=anthropic
+AI_MODEL_SYNTHESIS=claude-sonnet-4-6
+ANTHROPIC_API_KEY=sk-ant-...
 ```
 
-No code changes. Deploy and restart.
+No code changes required for any of the above. Deploy and restart.
 
 ---
 
@@ -182,6 +189,15 @@ Capability-specific routing is already supported: parsing and synthesis are conf
 
 ---
 
+## Implemented Providers
+
+| Provider | File | Status | Structured output |
+|---|---|---|---|
+| Anthropic | `providers/anthropic.ts` | Live | Via prompt instruction |
+| Google (Gemini) | `providers/google.ts` | Live — **default** | `responseMimeType: application/json` |
+
+Google's `responseMimeType: 'application/json'` enforces valid JSON at the API level — no markdown stripping, no regex fallbacks. This is the primary reliability advantage of Gemini for structured extraction tasks.
+
 ## Adding a New Provider
 
 1. Create `backend/src/providers/<name>.ts` implementing `CompletionProvider`
@@ -191,6 +207,18 @@ Capability-specific routing is already supported: parsing and synthesis are conf
 5. Update `api-dependency-map.md` with the new service entry
 
 No changes to domain code. No changes to routes, services, or intelligence tiers.
+
+## Future: Multimodal Extension Point
+
+`GoogleProvider.complete()` currently passes a text-only `parts` array. The Gemini API natively supports mixed `parts` (text + inline image data). When image meal parsing is roadmapped (v2.0), the extension point is:
+
+```typescript
+// Future: extend CompletionOptions with optional imageBase64
+// GoogleProvider adds { inlineData: { mimeType, data } } to the parts array
+// No other code changes required
+```
+
+This requires no interface changes to `CompletionProvider` — a new optional field on `CompletionOptions` is sufficient.
 
 ---
 
