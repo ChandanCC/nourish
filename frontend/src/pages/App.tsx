@@ -92,6 +92,9 @@ export default function App() {
         fiberG: parsed.fiber,
         parseNote: parsed.note ?? null,
         parsedByModel: parsed.parsedByModel,
+        confidence: parsed.confidence,
+        sourceType: parsed.sourceType,
+        sourceId: parsed.sourceId,
         idempotencyKey: uuidv4(),
       });
       setInput('');

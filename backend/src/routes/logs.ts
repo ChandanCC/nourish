@@ -5,6 +5,9 @@ import { FoodEntry } from '../models/FoodEntry';
 import { computeDayAggregate } from '../services/computeDayAggregate';
 import { validate } from '../middleware/validate';
 
+const CONFIDENCE_VALUES = ['recalled','estimated','low_confidence','matched','verified','user_corrected'] as const;
+const SOURCE_TYPE_VALUES = ['personal_memory','ai_estimate','authoritative_db','user_input'] as const;
+
 const logEntrySchema = z.object({
   rawInput:       z.string().min(1).max(2000),
   name:           z.string().min(1).max(200),
@@ -14,7 +17,10 @@ const logEntrySchema = z.object({
   fatG:           z.number().min(0).max(500).default(0),
   fiberG:         z.number().min(0).max(200).default(0),
   parseNote:      z.string().max(500).nullable().default(null),
-  parsedByModel:  z.string().min(1).max(100),
+  parsedByModel:  z.string().min(1).max(150),
+  confidence:     z.enum(CONFIDENCE_VALUES).default('estimated'),
+  sourceType:     z.enum(SOURCE_TYPE_VALUES).default('ai_estimate'),
+  sourceId:       z.string().max(200).nullable().default(null),
   idempotencyKey: z.string().uuid().nullable().default(null),
 });
 
@@ -51,6 +57,9 @@ router.post('/', validate(logEntrySchema), async (req: Request, res: Response) =
       fiberG,
       parseNote,
       parsedByModel,
+      confidence,
+      sourceType,
+      sourceId,
       idempotencyKey,
     } = req.body;
 
@@ -78,6 +87,9 @@ router.post('/', validate(logEntrySchema), async (req: Request, res: Response) =
       fatG:     fatG     ?? 0,
       fiberG:   fiberG   ?? 0,
       parseNote,
+      confidence:  confidence  ?? 'estimated',
+      sourceType:  sourceType  ?? 'ai_estimate',
+      sourceId:    sourceId    ?? null,
       isDeleted: false,
       deletedAt: null,
       source: 'user_input',

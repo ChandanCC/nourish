@@ -118,6 +118,20 @@ function extractJSON(raw: string) {
   throw new Error('Could not parse API response');
 }
 
+export type NutritionConfidence =
+  | 'recalled'
+  | 'estimated'
+  | 'low_confidence'
+  | 'matched'
+  | 'verified'
+  | 'user_corrected';
+
+export type SourceType =
+  | 'personal_memory'
+  | 'ai_estimate'
+  | 'authoritative_db'
+  | 'user_input';
+
 export interface AnalyseResult {
   name: string;
   calories: number;
@@ -127,6 +141,9 @@ export interface AnalyseResult {
   fiber: number;
   note: string | null;
   parsedByModel: string;
+  confidence: NutritionConfidence;
+  sourceType: SourceType;
+  sourceId: string | null;
 }
 
 export async function analyseFood(text: string): Promise<AnalyseResult> {
@@ -142,9 +159,12 @@ export async function analyseFood(text: string): Promise<AnalyseResult> {
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || `API ${res.status}`);
+  const confidence: NutritionConfidence = (data.confidence as NutritionConfidence) ?? 'estimated';
+  const sourceType: SourceType          = (data.sourceType as SourceType) ?? 'ai_estimate';
+  const sourceId: string | null         = data.sourceId ?? null;
   if (data.result && typeof data.result === 'object' && !Array.isArray(data.result)) {
-    return { ...data.result, parsedByModel: data.parsedByModel ?? '' } as AnalyseResult;
+    return { ...data.result, parsedByModel: data.parsedByModel ?? '', confidence, sourceType, sourceId } as AnalyseResult;
   }
   const legacy = extractJSON(typeof data.result === 'string' ? data.result : JSON.stringify(data.result));
-  return { ...legacy, parsedByModel: data.parsedByModel ?? '' };
+  return { ...legacy, parsedByModel: data.parsedByModel ?? '', confidence, sourceType, sourceId };
 }

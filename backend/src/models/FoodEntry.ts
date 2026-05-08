@@ -1,5 +1,19 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 
+export type NutritionConfidence =
+  | 'recalled'        // personal memory hit — deterministic replay
+  | 'estimated'       // AI parse, AI expressed high/medium confidence
+  | 'low_confidence'  // AI parse, AI expressed low confidence
+  | 'matched'         // authoritative DB match (future)
+  | 'verified'        // barcode scan or user confirmation (future)
+  | 'user_corrected'; // user edited values — overrides all
+
+export type SourceType =
+  | 'personal_memory'  // recalled from user's food memory
+  | 'ai_estimate'      // AI semantic parse
+  | 'authoritative_db' // USDA / Open Food Facts (future)
+  | 'user_input';      // manual user correction (future)
+
 export interface IFoodEntry extends Document {
   _id: Types.ObjectId;
   userId: Types.ObjectId;
@@ -9,7 +23,7 @@ export interface IFoodEntry extends Document {
 
   rawInput: string;         // immutable — exactly what the user typed
   parsedAt: Date;
-  parsedByModel: string;    // canonical "provider:model" e.g. "anthropic:claude-sonnet-4-6"
+  parsedByModel: string;    // canonical "provider:model" e.g. "google:gemini-2.5-flash"
   name: string;
   calories: number;
   proteinG: number;
@@ -17,6 +31,10 @@ export interface IFoodEntry extends Document {
   fatG: number;
   fiberG: number;
   parseNote: string | null;
+
+  confidence: NutritionConfidence;
+  sourceType: SourceType;
+  sourceId: string | null;  // audit only — which memory/DB record matched; not a live join
 
   isDeleted: boolean;
   deletedAt: Date | null;
@@ -42,6 +60,10 @@ const FoodEntrySchema = new Schema<IFoodEntry>(
     fatG:           { type: Number, required: true },
     fiberG:         { type: Number, required: true },
     parseNote:      { type: String, default: null },
+
+    confidence:     { type: String, enum: ['recalled','estimated','low_confidence','matched','verified','user_corrected'], required: true },
+    sourceType:     { type: String, enum: ['personal_memory','ai_estimate','authoritative_db','user_input'], required: true },
+    sourceId:       { type: String, default: null },
 
     isDeleted:      { type: Boolean, default: false },
     deletedAt:      { type: Date, default: null },

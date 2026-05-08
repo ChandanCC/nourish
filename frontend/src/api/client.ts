@@ -63,6 +63,9 @@ export interface LogEntryPayload {
   fiberG: number;
   parseNote: string | null;
   parsedByModel: string;
+  confidence: string;
+  sourceType: string;
+  sourceId: string | null;
   idempotencyKey: string;
 }
 
