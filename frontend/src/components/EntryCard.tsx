@@ -3,6 +3,7 @@ import type { FoodEntry } from '../types';
 
 interface Props {
   entry: FoodEntry;
+  index: number;
   onDelete: (id: string) => void;
   deleting?: boolean;
 }
@@ -13,8 +14,9 @@ const MACROS: { key: 'proteinG' | 'carbsG' | 'fatG'; label: string; target: numb
   { key: 'fatG',     label: 'FAT',     target: 55  },
 ];
 
-export default function EntryCard({ entry, onDelete, deleting }: Props) {
+export default function EntryCard({ entry, index, onDelete, deleting }: Props) {
   const [expanded, setExpanded] = useState(false);
+  const delay = Math.min(index * 40, 400);
 
   return (
     <div
@@ -23,7 +25,8 @@ export default function EntryCard({ entry, onDelete, deleting }: Props) {
         background: 'var(--bg-1)',
         border: '1px solid var(--ink-4)',
         borderRadius: 12,
-        transition: 'border-color 150ms',
+        transition: 'border-color 150ms linear',
+        animation: `entryArrival 200ms var(--ease-arrive) ${delay}ms both`,
       }}
       onMouseEnter={e => ((e.currentTarget as HTMLDivElement).style.borderColor = 'var(--gold-1)')}
       onMouseLeave={e => ((e.currentTarget as HTMLDivElement).style.borderColor = 'var(--ink-4)')}
@@ -43,11 +46,23 @@ export default function EntryCard({ entry, onDelete, deleting }: Props) {
         </div>
       </div>
 
-      {/* Expanded panel */}
-      {expanded && (
+      {/* Expanded panel — always in DOM, height animated */}
+      <div
+        style={{
+          maxHeight: expanded ? 300 : 0,
+          overflow: 'hidden',
+          transition: expanded
+            ? 'max-height 220ms var(--ease-arrive)'
+            : 'max-height 200ms var(--ease-depart)',
+        }}
+      >
         <div
           onClick={e => e.stopPropagation()}
-          style={{ borderTop: '1px solid var(--ink-4)' }}
+          style={{
+            borderTop: '1px solid var(--ink-4)',
+            opacity: expanded ? 1 : 0,
+            transition: expanded ? 'opacity 150ms linear 80ms' : 'opacity 100ms linear',
+          }}
           className="px-3 pb-3 pt-2.5"
         >
           {MACROS.map(({ key, label, target }) => {
@@ -93,7 +108,7 @@ export default function EntryCard({ entry, onDelete, deleting }: Props) {
                 cursor: deleting ? 'not-allowed' : 'pointer',
                 padding: 0,
                 opacity: deleting ? 0.4 : 1,
-                transition: 'color 150ms',
+                transition: 'color 150ms linear',
               }}
               onMouseEnter={e => !deleting && ((e.currentTarget as HTMLButtonElement).style.color = 'var(--status-down)')}
               onMouseLeave={e => ((e.currentTarget as HTMLButtonElement).style.color = 'var(--ink-3)')}
@@ -102,7 +117,7 @@ export default function EntryCard({ entry, onDelete, deleting }: Props) {
             </button>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

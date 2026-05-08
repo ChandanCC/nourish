@@ -1,3 +1,6 @@
+import { useState, useEffect } from 'react';
+import { useCountUp } from '../hooks/useCountUp';
+
 interface MacroRowProps {
   label: string;
   current: number;
@@ -6,6 +9,10 @@ interface MacroRowProps {
 }
 
 export default function MacroRow({ label, current, target, unit }: MacroRowProps) {
+  const animated = useCountUp(current);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
   const pct = target ? Math.min(current / target, 1) : 0;
   const isOver = target !== null && current > target;
 
@@ -42,9 +49,10 @@ export default function MacroRow({ label, current, target, unit }: MacroRowProps
             top: 0,
             left: 0,
             bottom: 0,
-            width: `${pct * 100}%`,
+            width: mounted ? `${pct * 100}%` : '0%',
             background: isOver ? 'rgba(232,227,216,0.90)' : 'var(--bar-fill)',
             borderRadius: 2,
+            transition: 'width 320ms var(--ease-data) 80ms',
           }}
         />
       </div>
@@ -60,7 +68,7 @@ export default function MacroRow({ label, current, target, unit }: MacroRowProps
             color: 'var(--ink-0)',
           }}
         >
-          {current}{unit}
+          {animated}{unit}
         </span>
         {target !== null && (
           <span

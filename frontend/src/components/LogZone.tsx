@@ -18,10 +18,11 @@ export default function LogZone({ entries, isLoading, activeDay, deletingId, onD
       {isLoading ? (
         <div className="text-center opacity-20 py-8 text-[11px] tracking-widest">LOADING...</div>
       ) : entries.length > 0 ? (
-        entries.map(entry => (
+        entries.map((entry, i) => (
           <EntryCard
             key={entry._id}
             entry={entry}
+            index={i}
             onDelete={onDelete}
             deleting={deletingId === entry._id}
           />

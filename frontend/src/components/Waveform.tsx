@@ -39,12 +39,17 @@ const MOCK_DAYS: WaveformDay[] = [
 ];
 const MOCK_BASELINE = 1850;
 
+import { useState, useEffect } from 'react';
+
 export default function Waveform({
   days = MOCK_DAYS,
   selectedDay = 6,
   baseline = MOCK_BASELINE,
   onDaySelect,
 }: WaveformProps) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
   return (
     <div
       style={{
@@ -105,17 +110,17 @@ export default function Waveform({
                   ...(isSurplus
                     ? {
                         bottom: CONTAINER_H - BASELINE_Y,
-                        height: barH,
+                        height: mounted ? barH : 0,
                         borderRadius: '2px 2px 0 0',
                       }
                     : {
                         top: BASELINE_Y,
-                        height: barH,
+                        height: mounted ? barH : 0,
                         borderRadius: '0 0 2px 2px',
                       }),
                   background: barColor,
                   opacity: barOpacity,
-                  transition: 'opacity 150ms ease',
+                  transition: `height 300ms var(--ease-data) ${i * 30}ms, opacity 150ms linear`,
                   zIndex: 2,
                 }}
               />

@@ -2,7 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes entryArrival {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 :root {
+  /* Motion easing */
+  --ease-arrive: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-depart: cubic-bezier(0.5, 0, 0.84, 0);
+  --ease-data:   cubic-bezier(0.0, 0.0, 0.2, 1);
   /* Typography */
   --font-display: 'Syne', sans-serif;
   --font-mono: 'DM Mono', monospace;

@@ -33,6 +33,7 @@ export default function SignalZone({
   waveformDays, selectedDayIndex, onDaySelect,
 }: SignalZoneProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [visible, setVisible] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -48,10 +49,12 @@ export default function SignalZone({
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => { setVisible(true); }, []);
+
   const barDays = toWaveformBarDays(waveformDays);
 
   return (
-    <>
+    <div style={{ opacity: visible ? 1 : 0, transition: 'opacity 400ms linear' }}>
       {/* Collapsed strip (sticky) */}
       {isCollapsed && (
         <div
@@ -93,6 +96,6 @@ export default function SignalZone({
 
       {/* Sentinel: when this leaves the viewport, collapse triggers */}
       <div ref={sentinelRef} style={{ height: 0 }} />
-    </>
+    </div>
   );
 }
