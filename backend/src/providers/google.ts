@@ -39,9 +39,12 @@ export class GoogleProvider implements CompletionProvider {
           contents: [{ role: 'user', parts: [{ text: userMessage }] }],
           generationConfig: {
             maxOutputTokens: maxTokens,
-            // Forces valid JSON output — eliminates markdown code block wrapping.
-            // Future multimodal: add responseMimeType + responseSchema for image parsing.
             responseMimeType: 'application/json',
+            // Gemini 2.5 Flash uses thinking tokens by default, which consume the
+            // maxOutputTokens budget before the actual response. Disabled here because
+            // structured JSON extraction does not benefit from extended reasoning,
+            // and thinking tokens would exhaust the budget before the response is written.
+            thinkingConfig: { thinkingBudget: 0 },
           },
         }),
         signal,
