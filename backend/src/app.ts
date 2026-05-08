@@ -8,6 +8,7 @@ import authRouter from './routes/auth';
 import analyseRouter from './routes/analyse';
 import homeRouter from './routes/home';
 import signalRouter from './routes/signal';
+import userRouter from './routes/user';
 import { requireAuth } from './middleware/auth';
 
 const analyseLimiter = rateLimit({
@@ -22,7 +23,7 @@ const app = express();
 app.use(helmet());
 app.use(cors({
   origin: process.env.CORS_ORIGIN || '*',
-  methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 app.use(morgan('combined'));
@@ -35,6 +36,7 @@ app.use('/api/logs', requireAuth, logsRouter);
 app.use('/api/home', requireAuth, homeRouter);
 app.use('/api/signal', requireAuth, signalRouter);
 app.use('/api/analyse', requireAuth, analyseLimiter, analyseRouter);
+app.use('/api/user', requireAuth, userRouter);
 
 // ── 404 ──────────────────────────────────────────────────────────────────────
 app.use((_req, res) => res.status(404).json({ error: 'Not found' }));

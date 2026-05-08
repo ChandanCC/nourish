@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { getToken } from '../lib/auth';
-import type { NutritionDay, HomeScreenPayload, FoodEntry } from '../types';
+import type { NutritionDay, HomeScreenPayload, FoodEntry, UserGoal } from '../types';
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
 
@@ -76,4 +76,8 @@ export async function logEntry(payload: LogEntryPayload): Promise<FoodEntry> {
 export async function deleteLogEntry(entryId: string): Promise<FoodEntry> {
   const { data } = await client.delete<{ data: FoodEntry }>(`/logs/${entryId}`);
   return data.data;
+}
+
+export async function saveOnboarding(goal: UserGoal, proteinTargetG: number): Promise<void> {
+  await client.patch('/user/onboarding', { goal, protein_target: proteinTargetG });
 }

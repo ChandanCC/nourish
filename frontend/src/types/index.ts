@@ -104,4 +104,7 @@ export interface HomeScreenPayload {
   waveform: HomeWaveformDay[];
   entries: FoodEntry[];
   userId: string;
+  onboardingComplete: boolean;
 }
+
+export type UserGoal = 'muscle_gain' | 'fat_loss' | 'maintenance' | 'performance';

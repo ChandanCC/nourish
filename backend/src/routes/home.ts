@@ -3,6 +3,7 @@ import { Types } from 'mongoose';
 import { DayAggregate } from '../models/DayAggregate';
 import { FoodEntry } from '../models/FoodEntry';
 import { SignalState } from '../models/SignalState';
+import { User } from '../models/User';
 
 export interface WaveformDay {
   date: string;
@@ -49,6 +50,7 @@ export interface HomeScreenPayload {
   waveform: WaveformDay[];
   entries: FoodEntrySummary[];
   userId: string;
+  onboardingComplete: boolean;
 }
 
 function formatDelta(pct: number): string {
@@ -62,6 +64,7 @@ const router = Router();
 router.get('/', async (req: Request, res: Response) => {
   try {
     const userId = new Types.ObjectId(req.user!.userId);
+    const userDoc = await User.findById(userId).lean();
     const today = new Date().toISOString().split('T')[0];
 
     // Fetch last 7 days of aggregates for waveform
@@ -135,6 +138,7 @@ router.get('/', async (req: Request, res: Response) => {
         parseNote: e.parseNote,
       })),
       userId: req.user!.userId,
+      onboardingComplete: userDoc?.onboardingComplete ?? false,
     };
 
     res.json(payload);
