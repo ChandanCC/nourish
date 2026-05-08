@@ -1,5 +1,5 @@
 import { computeTier1 } from './tier1';
-import { computeTier2 } from './tier2';
+import { computeTier2, computeBaseline } from './tier2';
 import type {
   DayData, SignalComputeInput, SignalComputeResult, StateLabel, PatternQualifier,
 } from './types';
@@ -23,9 +23,7 @@ export function computeSignal(input: SignalComputeInput): SignalComputeResult {
     proteinTargetG, goal, accountAgeDays, trainingSessions7d,
   } = input;
 
-  // P05-001: Tier 1 needs baseline context for UNDERFUELLED check.
   // Run a provisional baseline first so Tier 1 can evaluate UNDERFUELLED.
-  const { computeBaseline } = require('./tier2') as typeof import('./tier2');
   const provisionalBaseline = computeBaseline(allLoggedDays);
 
   const tier1 = computeTier1(

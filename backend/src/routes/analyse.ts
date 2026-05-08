@@ -2,12 +2,34 @@ import { Router, Request, Response } from 'express';
 
 const router = Router();
 
-const SYSTEM_PROMPT = `You are a nutrition analysis expert. Analyze all food items and return ONLY raw JSON. Start with { end with }.
+const SYSTEM_PROMPT = `You are a precise nutrition parser. The user will describe what they ate.
 
-Return this exact structure (use 0 for unknowns, never omit fields):
-{"items":[{"name":"","quantity":"","calories":0,"protein":0,"carbs":0,"fat":0,"fiber":0,"mealLabel":""}],"totals":{"calories":0,"protein":0,"carbs":0,"fat":0,"fiber":0},"micros":{"vitaminC":0,"vitaminD":0,"vitaminB12":0,"vitaminA":0,"vitaminE":0,"vitaminK":0,"calcium":0,"iron":0,"magnesium":0,"zinc":0,"potassium":0,"sodium":0,"omega3":0,"folate":0},"summary":""}
+Extract:
+- A clean, readable name for the entry (short, no measurement units in the name)
+- Calories (kcal, integer)
+- Protein (g, integer)
+- Carbohydrates (g, integer)
+- Fat (g, integer)
+- Fiber (g, integer)
 
-Rules: macros/fiber in grams, calories in kcal. Indian food = IFCT data. Low-fat milk=1.5% fat ~60kcal/100ml. mealLabel: Breakfast/Lunch/Dinner/Snack/Other. Output ONLY JSON.`;
+Return ONLY a JSON object. No explanation. No markdown. No prose.
+
+Use standard reference values for foods. If a portion size is not specified, use a standard serving.
+If you cannot identify a food item, use your best estimate and flag it.
+For Indian food, use IFCT reference values.
+
+Format:
+{
+  "name": "string",
+  "calories": number,
+  "protein": number,
+  "carbs": number,
+  "fat": number,
+  "fiber": number,
+  "note": "string | null"
+}
+
+The "note" field: include only if there is something important about the parse — e.g., "Portion size assumed as 1 medium chicken breast (150g). Adjust if different." Null otherwise.`;
 
 router.post('/', async (req: Request, res: Response) => {
   const { text } = req.body;
@@ -23,29 +45,36 @@ router.post('/', async (req: Request, res: Response) => {
   }
 
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+
     const upstream = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
-        'Content-Type':  'application/json',
-        'x-api-key':     apiKey,
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model:      'claude-sonnet-4-6',
-        max_tokens: 5000,
-        system:     SYSTEM_PROMPT,
-        messages:   [{ role: 'user', content: text }],
+        model: 'claude-sonnet-4-6',
+        max_tokens: 512,
+        system: SYSTEM_PROMPT,
+        messages: [{ role: 'user', content: text }],
       }),
+      signal: controller.signal,
     });
 
-    const data = await upstream.json() as any;
+    clearTimeout(timeout);
 
     if (!upstream.ok) {
-      res.status(upstream.status).json({ error: data?.error?.message || 'Claude API error' });
+      const err = await upstream.json() as any;
+      res.status(upstream.status).json({ error: err?.error?.message || 'Claude API error' });
       return;
     }
+
+    const data = await upstream.json() as any;
     if (data.stop_reason === 'max_tokens') {
-      res.status(422).json({ error: 'Response cut off — try a smaller meal' });
+      res.status(422).json({ error: 'Response truncated — try a shorter description' });
       return;
     }
 
@@ -55,8 +84,31 @@ router.post('/', async (req: Request, res: Response) => {
       return;
     }
 
-    res.json({ result: textBlock.text });
-  } catch (err) {
+    let parsed: any;
+    try {
+      parsed = JSON.parse(textBlock.text);
+    } catch {
+      res.status(422).json({ error: "Couldn't parse that. Try again." });
+      return;
+    }
+
+    // Validate and sanitize output
+    const result = {
+      name:     String(parsed.name ?? 'Unknown food'),
+      calories: Math.max(0, Math.round(Number(parsed.calories) || 0)),
+      protein:  Math.max(0, Math.round(Number(parsed.protein)  || 0)),
+      carbs:    Math.max(0, Math.round(Number(parsed.carbs)    || 0)),
+      fat:      Math.max(0, Math.round(Number(parsed.fat)      || 0)),
+      fiber:    Math.max(0, Math.round(Number(parsed.fiber)    || 0)),
+      note:     parsed.note ? String(parsed.note) : null,
+    };
+
+    res.json({ result });
+  } catch (err: any) {
+    if (err?.name === 'AbortError') {
+      res.status(504).json({ error: 'Server timeout. Try again.' });
+      return;
+    }
     console.error('Analyse error:', err);
     res.status(502).json({ error: 'Failed to reach Claude API' });
   }
