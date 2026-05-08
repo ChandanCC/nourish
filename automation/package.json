@@ -1,0 +1,17 @@
+{
+  "name": "automation",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "validate": "node scripts/validate-all.js",
+    "validate:smoke": "node scripts/validate-smoke.js",
+    "validate:visual": "node scripts/validate-visual.js",
+    "validate:invariants": "node scripts/validate-invariants.js",
+    "validate:replay": "node scripts/validate-replay.js",
+    "validate:task": "node scripts/validate-task.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1"
+  }
+}

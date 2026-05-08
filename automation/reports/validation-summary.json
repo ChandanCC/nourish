@@ -1,0 +1,32 @@
+{
+  "ts": "2026-05-08T05:05:01.432Z",
+  "elapsed": "18.1s",
+  "passed": 6,
+  "total": 6,
+  "results": [
+    {
+      "name": "invariants",
+      "ok": true
+    },
+    {
+      "name": "build-backend",
+      "ok": true
+    },
+    {
+      "name": "build-frontend",
+      "ok": true
+    },
+    {
+      "name": "backend-tests",
+      "ok": true
+    },
+    {
+      "name": "smoke",
+      "ok": true
+    },
+    {
+      "name": "replay",
+      "ok": true
+    }
+  ]
+}

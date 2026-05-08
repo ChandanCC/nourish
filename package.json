@@ -3,11 +3,18 @@
   "private": true,
   "workspaces": [
     "frontend",
-    "backend"
+    "backend",
+    "automation"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev -w backend\" \"npm run dev -w frontend\"",
-    "build": "npm run build -w backend && npm run build -w frontend"
+    "dev":                 "concurrently \"npm run dev -w backend\" \"npm run dev -w frontend\"",
+    "build":               "npm run build -w backend && npm run build -w frontend",
+    "validate":            "npm run validate -w automation",
+    "validate:smoke":      "npm run validate:smoke -w automation",
+    "validate:visual":     "npm run validate:visual -w automation",
+    "validate:invariants": "npm run validate:invariants -w automation",
+    "validate:replay":     "npm run validate:replay -w automation",
+    "validate:task":       "npm run validate:task -w automation"
   },
   "devDependencies": {
     "concurrently": "^9.2.1"

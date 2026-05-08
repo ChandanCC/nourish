@@ -1,0 +1,1011 @@
+{
+  "config": {
+    "configFile": "/Users/chandan_cc/Projects/nourish/automation/playwright.config.js",
+    "rootDir": "/Users/chandan_cc/Projects/nourish/automation",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 3
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/Users/chandan_cc/Projects/nourish/automation/reports/playwright-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 3
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/Users/chandan_cc/Projects/nourish/automation",
+        "testIgnore": [],
+        "testMatch": [
+          "smoke/**/*.spec.js",
+          "visual/**/*.spec.js",
+          "replay/**/*.spec.js"
+        ],
+        "timeout": 15000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "reports/playwright.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.59.1",
+    "workers": 5,
+    "webServer": {
+      "command": "npm run build -w frontend && npm run preview -w frontend",
+      "url": "http://localhost:4173",
+      "reuseExistingServer": true,
+      "timeout": 60000,
+      "stdout": "ignore",
+      "stderr": "pipe"
+    }
+  },
+  "suites": [
+    {
+      "title": "replay/flows/auth-wall.spec.js",
+      "file": "replay/flows/auth-wall.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Unauthenticated user flow",
+          "file": "replay/flows/auth-wall.spec.js",
+          "line": 8,
+          "column": 6,
+          "specs": [
+            {
+              "title": "landing on / shows login, not home screen",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 15000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1799,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-08T05:04:55.395Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f7615b638699a8297c00-bb242d821a790fd6e302",
+              "file": "replay/flows/auth-wall.spec.js",
+              "line": 9,
+              "column": 3
+            },
+            {
+              "title": "login page does not crash on render",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 15000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 665,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-08T05:04:57.309Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f7615b638699a8297c00-dfed9cc3a00cb44445da",
+              "file": "replay/flows/auth-wall.spec.js",
+              "line": 21,
+              "column": 3
+            },
+            {
+              "title": "login page contains a sign-in action",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 15000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1691,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-08T05:04:57.980Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f7615b638699a8297c00-0be342ac712baa364d39",
+              "file": "replay/flows/auth-wall.spec.js",
+              "line": 29,
+              "column": 3
+            },
+            {
+              "title": "direct navigation without token stays on login",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 15000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1712,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-08T05:04:59.676Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f7615b638699a8297c00-9bc2a739c3bc26b1186f",
+              "file": "replay/flows/auth-wall.spec.js",
+              "line": 38,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "replay/flows/food-log.spec.js",
+      "file": "replay/flows/food-log.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Command bar behavior",
+          "file": "replay/flows/food-log.spec.js",
+          "line": 20,
+          "column": 6,
+          "specs": [
+            {
+              "title": "textarea is present and focusable",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 15000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "/Users/chandan_cc/Projects/nourish/automation/replay/flows/food-log.spec.js",
+                        "line": 22,
+                        "column": 24
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "skipped",
+                      "duration": 145,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-08T05:04:55.396Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "location": {
+                            "file": "/Users/chandan_cc/Projects/nourish/automation/replay/flows/food-log.spec.js",
+                            "line": 22,
+                            "column": 24
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "9fabbe468d8ffc94f047-8ccd09936f43930d4ae8",
+              "file": "replay/flows/food-log.spec.js",
+              "line": 30,
+              "column": 3
+            },
+            {
+              "title": "LOG IT button is disabled when textarea is empty",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 15000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "/Users/chandan_cc/Projects/nourish/automation/replay/flows/food-log.spec.js",
+                        "line": 22,
+                        "column": 24
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "skipped",
+                      "duration": 57,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-08T05:04:55.659Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "location": {
+                            "file": "/Users/chandan_cc/Projects/nourish/automation/replay/flows/food-log.spec.js",
+                            "line": 22,
+                            "column": 24
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "9fabbe468d8ffc94f047-2304e7709b408f2d5ee2",
+              "file": "replay/flows/food-log.spec.js",
+              "line": 38,
+              "column": 3
+            },
+            {
+              "title": "LOG IT button enables when text is typed",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 15000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "/Users/chandan_cc/Projects/nourish/automation/replay/flows/food-log.spec.js",
+                        "line": 22,
+                        "column": 24
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "skipped",
+                      "duration": 77,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-08T05:04:55.723Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "location": {
+                            "file": "/Users/chandan_cc/Projects/nourish/automation/replay/flows/food-log.spec.js",
+                            "line": 22,
+                            "column": 24
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "9fabbe468d8ffc94f047-6e77c972157dc5371340",
+              "file": "replay/flows/food-log.spec.js",
+              "line": 45,
+              "column": 3
+            },
+            {
+              "title": "⌘↩ shortcut label is visible near command bar",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 15000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "/Users/chandan_cc/Projects/nourish/automation/replay/flows/food-log.spec.js",
+                        "line": 22,
+                        "column": 24
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "skipped",
+                      "duration": 59,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-08T05:04:55.807Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "location": {
+                            "file": "/Users/chandan_cc/Projects/nourish/automation/replay/flows/food-log.spec.js",
+                            "line": 22,
+                            "column": 24
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "9fabbe468d8ffc94f047-d85fb50d797819e1b441",
+              "file": "replay/flows/food-log.spec.js",
+              "line": 52,
+              "column": 3
+            },
+            {
+              "title": "focus state applies gold border tint to command bar",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 15000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "/Users/chandan_cc/Projects/nourish/automation/replay/flows/food-log.spec.js",
+                        "line": 22,
+                        "column": 24
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "skipped",
+                      "duration": 48,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-08T05:04:55.870Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "location": {
+                            "file": "/Users/chandan_cc/Projects/nourish/automation/replay/flows/food-log.spec.js",
+                            "line": 22,
+                            "column": 24
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "9fabbe468d8ffc94f047-7be19ae95f14c091bf0c",
+              "file": "replay/flows/food-log.spec.js",
+              "line": 57,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Entry card interaction",
+          "file": "replay/flows/food-log.spec.js",
+          "line": 67,
+          "column": 6,
+          "specs": [
+            {
+              "title": "entry cards are present when entries exist",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 15000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "/Users/chandan_cc/Projects/nourish/automation/replay/flows/food-log.spec.js",
+                        "line": 69,
+                        "column": 24
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "skipped",
+                      "duration": 61,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-08T05:04:55.922Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "location": {
+                            "file": "/Users/chandan_cc/Projects/nourish/automation/replay/flows/food-log.spec.js",
+                            "line": 69,
+                            "column": 24
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "9fabbe468d8ffc94f047-a2d3b424fa45ff84d187",
+              "file": "replay/flows/food-log.spec.js",
+              "line": 76,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "READING state display",
+          "file": "replay/flows/food-log.spec.js",
+          "line": 84,
+          "column": 6,
+          "specs": [
+            {
+              "title": "SIGNAL zone renders a state label",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 15000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "/Users/chandan_cc/Projects/nourish/automation/replay/flows/food-log.spec.js",
+                        "line": 86,
+                        "column": 24
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "skipped",
+                      "duration": 47,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-08T05:04:55.987Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "location": {
+                            "file": "/Users/chandan_cc/Projects/nourish/automation/replay/flows/food-log.spec.js",
+                            "line": 86,
+                            "column": 24
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "9fabbe468d8ffc94f047-e264a869e4bec347173c",
+              "file": "replay/flows/food-log.spec.js",
+              "line": 93,
+              "column": 3
+            },
+            {
+              "title": "waveform bars are present in SIGNAL zone",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 15000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "/Users/chandan_cc/Projects/nourish/automation/replay/flows/food-log.spec.js",
+                        "line": 86,
+                        "column": 24
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "skipped",
+                      "duration": 46,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-08T05:04:56.037Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "location": {
+                            "file": "/Users/chandan_cc/Projects/nourish/automation/replay/flows/food-log.spec.js",
+                            "line": 86,
+                            "column": 24
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "9fabbe468d8ffc94f047-d4c5776722d69672face",
+              "file": "replay/flows/food-log.spec.js",
+              "line": 100,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "replay/flows/onboarding.spec.js",
+      "file": "replay/flows/onboarding.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Onboarding flow",
+          "file": "replay/flows/onboarding.spec.js",
+          "line": 18,
+          "column": 6,
+          "specs": [
+            {
+              "title": "welcome screen renders \"Get started\"",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 15000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "/Users/chandan_cc/Projects/nourish/automation/replay/flows/onboarding.spec.js",
+                        "line": 20,
+                        "column": 24
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "skipped",
+                      "duration": 129,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-08T05:04:55.398Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "location": {
+                            "file": "/Users/chandan_cc/Projects/nourish/automation/replay/flows/onboarding.spec.js",
+                            "line": 20,
+                            "column": 24
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "6d2011b379b39c581bfc-79d47e709b5ee4d1b2d2",
+              "file": "replay/flows/onboarding.spec.js",
+              "line": 31,
+              "column": 3
+            },
+            {
+              "title": "\"Get started\" advances to goal selection",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 15000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "/Users/chandan_cc/Projects/nourish/automation/replay/flows/onboarding.spec.js",
+                        "line": 20,
+                        "column": 24
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "skipped",
+                      "duration": 58,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-08T05:04:55.641Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "location": {
+                            "file": "/Users/chandan_cc/Projects/nourish/automation/replay/flows/onboarding.spec.js",
+                            "line": 20,
+                            "column": 24
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "6d2011b379b39c581bfc-6e3bdc7fc6057eb37aa5",
+              "file": "replay/flows/onboarding.spec.js",
+              "line": 36,
+              "column": 3
+            },
+            {
+              "title": "Continue is disabled before goal selection",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 15000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "/Users/chandan_cc/Projects/nourish/automation/replay/flows/onboarding.spec.js",
+                        "line": 20,
+                        "column": 24
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "skipped",
+                      "duration": 65,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-08T05:04:55.704Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "location": {
+                            "file": "/Users/chandan_cc/Projects/nourish/automation/replay/flows/onboarding.spec.js",
+                            "line": 20,
+                            "column": 24
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "6d2011b379b39c581bfc-3833293a2d1a52edbe4d",
+              "file": "replay/flows/onboarding.spec.js",
+              "line": 41,
+              "column": 3
+            },
+            {
+              "title": "selecting a goal enables Continue",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 15000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "/Users/chandan_cc/Projects/nourish/automation/replay/flows/onboarding.spec.js",
+                        "line": 20,
+                        "column": 24
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "skipped",
+                      "duration": 40,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-08T05:04:55.774Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "location": {
+                            "file": "/Users/chandan_cc/Projects/nourish/automation/replay/flows/onboarding.spec.js",
+                            "line": 20,
+                            "column": 24
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "6d2011b379b39c581bfc-3f7f32c21d734dadc041",
+              "file": "replay/flows/onboarding.spec.js",
+              "line": 52,
+              "column": 3
+            },
+            {
+              "title": "protein target defaults to 160",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 15000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "/Users/chandan_cc/Projects/nourish/automation/replay/flows/onboarding.spec.js",
+                        "line": 20,
+                        "column": 24
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "skipped",
+                      "duration": 63,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-08T05:04:55.820Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "location": {
+                            "file": "/Users/chandan_cc/Projects/nourish/automation/replay/flows/onboarding.spec.js",
+                            "line": 20,
+                            "column": 24
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "6d2011b379b39c581bfc-bb2f19dce8ff52f382b2",
+              "file": "replay/flows/onboarding.spec.js",
+              "line": 62,
+              "column": 3
+            },
+            {
+              "title": "\"Finish setup\" is present on protein screen",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 15000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "/Users/chandan_cc/Projects/nourish/automation/replay/flows/onboarding.spec.js",
+                        "line": 20,
+                        "column": 24
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "skipped",
+                      "duration": 62,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-08T05:04:55.887Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "location": {
+                            "file": "/Users/chandan_cc/Projects/nourish/automation/replay/flows/onboarding.spec.js",
+                            "line": 20,
+                            "column": 24
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "6d2011b379b39c581bfc-32f7ae509e09a9e24179",
+              "file": "replay/flows/onboarding.spec.js",
+              "line": 72,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-05-08T05:04:53.005Z",
+    "duration": 8412.607,
+    "expected": 4,
+    "skipped": 14,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

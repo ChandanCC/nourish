@@ -78,12 +78,26 @@ When a task's acceptance criteria are satisfied:
 ```
 Complete all applicable sections. Do not skip sections that are inconvenient.
 
-**Step 2 — Run build verification**
+**Step 2 — Run post-task validation**
 ```bash
-npm run build -w frontend    # must produce 0 TypeScript errors
-# or
-npm run build -w backend
+npm run validate:task
 ```
+This runs in <30s and covers:
+- Invariant scanner (static code analysis — catches forbidden patterns)
+- TypeScript builds (frontend + backend)
+- Backend unit tests (vitest)
+
+If any step fails, fix before proceeding to documentation or commit.
+
+For full validation (needs running server):
+```bash
+npm run validate        # all checks including smoke + replay
+npm run validate:smoke  # boot checks only
+npm run validate:replay # behavioral flow replay
+```
+
+Invariant violations are **blocking** — they represent architecture or design system violations.
+Build failures are **blocking** — never commit with a broken build.
 
 **Step 3 — Update documentation**
 

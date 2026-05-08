@@ -54,9 +54,9 @@ router.post('/', validate(logEntrySchema), async (req: Request, res: Response) =
       idempotencyKey,
     } = req.body;
 
-    // Idempotency check — reject duplicate submissions
+    // Idempotency check — isDeleted intentionally omitted: duplicate guard spans full key history including soft-deleted entries
     if (idempotencyKey) {
-      const existing = await FoodEntry.findOne({ idempotencyKey }).lean();
+      const existing = await FoodEntry.findOne({ idempotencyKey }).lean(); // invariant-exception: idempotency
       if (existing) {
         res.status(200).json({ data: existing, duplicate: true });
         return;

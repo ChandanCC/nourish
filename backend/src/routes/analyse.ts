@@ -84,7 +84,7 @@ router.post('/', async (req: Request, res: Response) => {
       return;
     }
 
-    let parsed: any;
+    let parsed: Record<string, unknown>;
     try {
       parsed = JSON.parse(textBlock.text);
     } catch {
