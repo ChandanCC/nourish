@@ -1,152 +1,111 @@
 import { Router, Request, Response } from 'express';
-import { v4 as uuidv4 } from 'uuid';
-import { NutritionDay, IMicros, ITotals, IEntry } from '../models/NutritionDay';
+import { Types } from 'mongoose';
+import { FoodEntry } from '../models/FoodEntry';
+import { computeDayAggregate } from '../services/computeDayAggregate';
 
 const router = Router();
 
-// ── helpers ──────────────────────────────────────────────────────────────────
-function sumTotals(entries: IEntry[]): ITotals {
-  return {
-    calories: entries.reduce((s, e) => s + (e.totals?.calories || 0), 0),
-    protein:  entries.reduce((s, e) => s + (e.totals?.protein  || 0), 0),
-    carbs:    entries.reduce((s, e) => s + (e.totals?.carbs    || 0), 0),
-    fat:      entries.reduce((s, e) => s + (e.totals?.fat      || 0), 0),
-    fiber:    entries.reduce((s, e) => s + (e.totals?.fiber    || 0), 0),
-  };
-}
-
-const MICRO_KEYS: (keyof IMicros)[] = [
-  'vitaminC','vitaminD','vitaminB12','vitaminA','vitaminE','vitaminK',
-  'calcium','iron','magnesium','zinc','potassium','sodium','omega3','folate',
-];
-
-function sumMicros(entries: IEntry[]): IMicros {
-  const result = {} as IMicros;
-  MICRO_KEYS.forEach(k => {
-    result[k] = entries.reduce((s, e) => s + (e.micros?.[k] || 0), 0);
-  });
-  return result;
-}
-
-// ── GET /logs?days=15  — fetch history ───────────────────────────────────────
+// GET /api/logs?date=YYYY-MM-DD  — entries for a day (today if omitted)
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const userId = req.user!.userId;
+    const userId = new Types.ObjectId(req.user!.userId);
+    const date = (req.query.date as string) ?? new Date().toISOString().split('T')[0];
 
-    const days = Math.min(parseInt(req.query.days as string) || 15, 30);
-    const since = new Date();
-    since.setDate(since.getDate() - days);
-    const sinceKey = since.toISOString().split('T')[0];
-
-    const docs = await NutritionDay.find({ userId, dateKey: { $gte: sinceKey } })
-      .sort({ dateKey: -1 })
-      .limit(days)
+    const entries = await FoodEntry.find({ userId, mealDate: date, isDeleted: false })
+      .sort({ loggedAt: -1 })
       .lean();
 
-    res.json({ data: docs });
+    res.json({ data: entries });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to fetch logs' });
+    res.status(500).json({ error: 'Failed to fetch entries' });
   }
 });
 
-// ── GET /logs/:dateKey  — single day ─────────────────────────────────────────
-router.get('/:dateKey', async (req: Request, res: Response) => {
+// POST /api/logs  — create a FoodEntry and recompute DayAggregate
+router.post('/', async (req: Request, res: Response) => {
   try {
-    const userId = req.user!.userId;
+    const userId = new Types.ObjectId(req.user!.userId);
+    const {
+      rawInput,
+      name,
+      calories,
+      proteinG,
+      carbsG,
+      fatG,
+      fiberG,
+      parseNote = null,
+      parsedByModel,
+      idempotencyKey = null,
+    } = req.body;
 
-    const { dateKey } = req.params;
-    const doc = await NutritionDay.findOne({ userId, dateKey }).lean();
-    if (!doc) return res.status(404).json({ error: 'No log for this date' });
-
-    res.json({ data: doc });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Failed to fetch day' });
-  }
-});
-
-// ── POST /logs/:dateKey/entries  — add an entry ───────────────────────────────
-router.post('/:dateKey/entries', async (req: Request, res: Response) => {
-  try {
-    const userId = req.user!.userId;
-
-    const { dateKey } = req.params;
-    const { rawText, summary, items, totals, micros } = req.body;
-
-    if (!rawText || !totals) {
-      return res.status(400).json({ error: 'rawText and totals are required' });
+    if (!rawInput || !name || calories == null || !parsedByModel) {
+      res.status(400).json({ error: 'rawInput, name, calories, parsedByModel required' });
+      return;
     }
 
-    const entry: IEntry = {
-      entryId: uuidv4(),
-      rawText,
-      summary: summary || '',
-      items:   items   || [],
-      totals,
-      micros:  micros  || {},
+    // Idempotency check — reject duplicate submissions
+    if (idempotencyKey) {
+      const existing = await FoodEntry.findOne({ idempotencyKey }).lean();
+      if (existing) {
+        res.status(200).json({ data: existing, duplicate: true });
+        return;
+      }
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    const entry = await FoodEntry.create({
+      userId,
+      mealDate: today,
       loggedAt: new Date(),
-    };
+      rawInput,
+      parsedAt: new Date(),
+      parsedByModel,
+      name,
+      calories: Math.round(calories),
+      proteinG: proteinG ?? 0,
+      carbsG:   carbsG   ?? 0,
+      fatG:     fatG     ?? 0,
+      fiberG:   fiberG   ?? 0,
+      parseNote,
+      isDeleted: false,
+      deletedAt: null,
+      source: 'user_input',
+      idempotencyKey,
+    });
 
-    // Upsert the day document, push entry
-    const doc = await NutritionDay.findOneAndUpdate(
-      { userId, dateKey },
-      { $push: { entries: entry } },
-      { new: true, upsert: true }
-    );
+    await computeDayAggregate(userId, today);
 
-    if (!doc) throw new Error('Upsert failed');
-
-    // Recalculate aggregated totals/micros
-    doc.dailyTotals = sumTotals(doc.entries);
-    doc.dailyMicros = sumMicros(doc.entries);
-    await doc.save();
-
-    res.status(201).json({ data: doc });
+    res.status(201).json({ data: entry });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to add entry' });
+    res.status(500).json({ error: 'Failed to create entry' });
   }
 });
 
-// ── DELETE /logs/:dateKey/entries/:entryId ────────────────────────────────────
-router.delete('/:dateKey/entries/:entryId', async (req: Request, res: Response) => {
+// DELETE /api/logs/:id  — soft-delete a FoodEntry and recompute DayAggregate
+router.delete('/:id', async (req: Request, res: Response) => {
   try {
-    const userId = req.user!.userId;
+    const userId = new Types.ObjectId(req.user!.userId);
+    const entryId = new Types.ObjectId(String(req.params['id']));
 
-    const { dateKey, entryId } = req.params;
-
-    const doc = await NutritionDay.findOneAndUpdate(
-      { userId, dateKey },
-      { $pull: { entries: { entryId } } },
-      { new: true }
+    const entry = await FoodEntry.findOneAndUpdate(
+      { _id: entryId, userId, isDeleted: false },
+      { $set: { isDeleted: true, deletedAt: new Date() } },
+      { new: true },
     );
 
-    if (!doc) return res.status(404).json({ error: 'Day not found' });
+    if (!entry) {
+      res.status(404).json({ error: 'Entry not found' });
+      return;
+    }
 
-    // Recalculate
-    doc.dailyTotals = sumTotals(doc.entries);
-    doc.dailyMicros = sumMicros(doc.entries);
-    await doc.save();
+    await computeDayAggregate(userId, entry.mealDate);
 
-    res.json({ data: doc });
+    res.json({ data: entry });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to delete entry' });
-  }
-});
-
-// ── DELETE /logs/:dateKey  — wipe a whole day ─────────────────────────────────
-router.delete('/:dateKey', async (req: Request, res: Response) => {
-  try {
-    const userId = req.user!.userId;
-
-    const { dateKey } = req.params;
-    await NutritionDay.deleteOne({ userId, dateKey });
-    res.json({ message: 'Day deleted' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Failed to delete day' });
   }
 });
 
