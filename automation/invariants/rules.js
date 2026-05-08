@@ -239,13 +239,22 @@ export const RULES = [
     id: 'B-003',
     category: 'architecture',
     severity: 'error',
-    description: 'Anthropic client called directly in a route handler — must be in a service (tier3.ts)',
+    description: 'AI provider called directly in route handler — must use provider registry (src/providers/registry.ts)',
     globs: ['backend/src/routes/**/*.ts'],
     check(filePath, _lines, content) {
       return matchLinesWhere(content, t =>
         !isComment(t) && (
+          // SDK instantiation
           /new\s+Anthropic\b/.test(t) ||
-          /client\.messages\.create/.test(t)
+          /client\.messages\.create/.test(t) ||
+          // Direct provider API calls (raw fetch to known AI endpoints)
+          /api\.anthropic\.com/.test(t) ||
+          /generativelanguage\.googleapis\.com/.test(t) ||
+          /api\.openai\.com/.test(t) ||
+          // Direct env key access in routes (should use registry)
+          /process\.env\.ANTHROPIC_API_KEY/.test(t) ||
+          /process\.env\.GEMINI_API_KEY/.test(t) ||
+          /process\.env\.OPENAI_API_KEY/.test(t)
         )
       );
     },

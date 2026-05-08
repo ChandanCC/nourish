@@ -91,7 +91,7 @@ export default function App() {
         fatG: parsed.fat,
         fiberG: parsed.fiber,
         parseNote: parsed.note ?? null,
-        parsedByModel: 'claude-sonnet-4-6',
+        parsedByModel: parsed.parsedByModel,
         idempotencyKey: uuidv4(),
       });
       setInput('');

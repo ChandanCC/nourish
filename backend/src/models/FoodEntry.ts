@@ -9,7 +9,7 @@ export interface IFoodEntry extends Document {
 
   rawInput: string;         // immutable — exactly what the user typed
   parsedAt: Date;
-  parsedByModel: string;    // "claude-sonnet-4-6"
+  parsedByModel: string;    // canonical "provider:model" e.g. "anthropic:claude-sonnet-4-6"
   name: string;
   calories: number;
   proteinG: number;

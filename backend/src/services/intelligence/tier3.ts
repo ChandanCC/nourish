@@ -1,4 +1,5 @@
 import type { SignalComputeResult, StateLabel, PatternQualifier } from './types';
+import { getSignalSynthesisProvider } from '../../providers/registry';
 
 export interface Tier3Input {
   computeResult: SignalComputeResult;
@@ -15,6 +16,8 @@ export interface Tier3Output {
   pattern: PatternQualifier | null;
   aiInstruction: string | null;
   reasoning: string;
+  providerId: string;
+  modelId: string;
 }
 
 const PROHIBITED_PATTERNS = [
@@ -24,7 +27,7 @@ const PROHIBITED_PATTERNS = [
   /based on your data/i, /!/,
 ];
 
-function validateOutput(raw: unknown, candidateStates: StateLabel[]): Tier3Output | null {
+function validateOutput(raw: unknown, candidateStates: StateLabel[]): Omit<Tier3Output, 'providerId' | 'modelId'> | null {
   if (typeof raw !== 'object' || raw === null) return null;
   const obj = raw as Record<string, unknown>;
 
@@ -45,16 +48,14 @@ function validateOutput(raw: unknown, candidateStates: StateLabel[]): Tier3Outpu
   const reasoning = typeof obj['reasoning'] === 'string' ? obj['reasoning'] : '';
 
   if (aiInstruction !== null) {
-    // Enforce max length
     if (aiInstruction.length > 120) aiInstruction = aiInstruction.slice(0, 120);
-    // Check prohibited patterns
     if (PROHIBITED_PATTERNS.some(p => p.test(aiInstruction!))) aiInstruction = null;
   }
 
   return { state, pattern, aiInstruction, reasoning };
 }
 
-const SIGNAL_SYSTEM_PROMPT = `You are Nouriq's nutrition intelligence engine. You receive pre-computed statistics about a user's recent logging pattern. Your job is to:
+const SIGNAL_SYNTHESIS_PROMPT = `You are Nouriq's nutrition intelligence engine. You receive pre-computed statistics about a user's recent logging pattern. Your job is to:
 1. Select the most accurate STATE from the candidate_states list
 2. Confirm or adjust the pattern qualifier
 3. Generate one instruction line (or null)
@@ -70,10 +71,10 @@ VALID EXAMPLES: "Protein is 48g below target — add a protein source to dinner.
 Return ONLY valid JSON matching: { "state": string, "pattern": string|null, "ai_instruction": string|null, "reasoning": string }
 No markdown. No prose outside JSON.`;
 
-export async function callTier3(
-  input: Tier3Input,
-  anthropicApiKey: string,
-): Promise<Tier3Output | null> {
+export async function callTier3(input: Tier3Input): Promise<Tier3Output | null> {
+  const provider = getSignalSynthesisProvider();
+  if (!provider) return null;
+
   const { computeResult, goal, proteinTargetG, baselineKcal, baselineEstablished, trainingSessions7d } = input;
 
   const hoursNow = new Date().getHours();
@@ -112,31 +113,21 @@ export async function callTier3(
   const timeout = setTimeout(() => controller.abort(), 10000);
 
   try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': anthropicApiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 512,
-        system: SIGNAL_SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: userMessage }],
-      }),
+    const rawText = await provider.complete({
+      systemPrompt: SIGNAL_SYNTHESIS_PROMPT,
+      userMessage,
+      maxTokens: 512,
       signal: controller.signal,
     });
 
     clearTimeout(timeout);
-    if (!resp.ok) return null;
+    if (rawText === null) return null;
 
-    const data = await resp.json() as any;
-    const textBlock = data.content?.find((b: { type: string }) => b.type === 'text');
-    if (!textBlock?.text) return null;
+    const parsed = JSON.parse(rawText);
+    const validated = validateOutput(parsed, computeResult.candidateStates);
+    if (!validated) return null;
 
-    const parsed = JSON.parse(textBlock.text);
-    return validateOutput(parsed, computeResult.candidateStates);
+    return { ...validated, providerId: provider.providerId, modelId: provider.modelId };
   } catch {
     clearTimeout(timeout);
     return null;

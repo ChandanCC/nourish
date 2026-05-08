@@ -126,6 +126,7 @@ export interface AnalyseResult {
   fat: number;
   fiber: number;
   note: string | null;
+  parsedByModel: string;
 }
 
 export async function analyseFood(text: string): Promise<AnalyseResult> {
@@ -141,10 +142,9 @@ export async function analyseFood(text: string): Promise<AnalyseResult> {
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || `API ${res.status}`);
-  // New API returns structured result directly
   if (data.result && typeof data.result === 'object' && !Array.isArray(data.result)) {
-    return data.result as AnalyseResult;
+    return { ...data.result, parsedByModel: data.parsedByModel ?? '' } as AnalyseResult;
   }
-  // Legacy path: parse from string (backward compat)
-  return extractJSON(typeof data.result === 'string' ? data.result : JSON.stringify(data.result));
+  const legacy = extractJSON(typeof data.result === 'string' ? data.result : JSON.stringify(data.result));
+  return { ...legacy, parsedByModel: data.parsedByModel ?? '' };
 }

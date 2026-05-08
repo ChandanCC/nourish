@@ -5,6 +5,7 @@ import { SignalState } from '../models/SignalState';
 import { User } from '../models/User';
 import { computeSignal } from '../services/intelligence/orchestrator';
 import { callTier3 } from '../services/intelligence/tier3';
+import { getSignalSynthesisProvider } from '../providers/registry';
 import type { DayData } from '../services/intelligence/types';
 
 const router = Router();
@@ -45,7 +46,7 @@ router.post('/recompute', async (req: Request, res: Response) => {
       totalVolumeKg: a.totalVolumeKg,
     });
 
-    const accountCreatedAt = (user as any).createdAt ?? new Date();
+    const accountCreatedAt = (user as unknown as Record<string, unknown>)['createdAt'] as Date ?? new Date();
     const accountAgeDays = Math.round((Date.now() - new Date(accountCreatedAt).getTime()) / 86400000);
     const trainingSessions7d = window14.filter(a => {
       const d = new Date();
@@ -71,33 +72,32 @@ router.post('/recompute', async (req: Request, res: Response) => {
     let finalPattern = computeResult.patternQualifier;
     let aiInstruction: string | null = null;
     let aiReasoning = '';
+    let aiModelRecord = '';
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
+    const synthesisProvider = getSignalSynthesisProvider();
     const shouldCallAI =
-      apiKey &&
+      synthesisProvider !== null &&
       computeResult.state !== 'READING' &&
       computeResult.state !== 'UNDERFUELLED' &&
       computeResult.confidenceScore >= 60;
 
     if (shouldCallAI) {
-      const tier3 = await callTier3(
-        {
-          computeResult,
-          goal: 'maintain',
-          proteinTargetG: DEFAULT_PROTEIN_TARGET,
-          baselineKcal: computeResult.baselineKcal,
-          baselineEstablished: computeResult.tier2.baseline.baselineEstablished,
-          accountAgeDays,
-          trainingSessions7d,
-        },
-        apiKey!,
-      );
+      const tier3 = await callTier3({
+        computeResult,
+        goal: 'maintain',
+        proteinTargetG: DEFAULT_PROTEIN_TARGET,
+        baselineKcal: computeResult.baselineKcal,
+        baselineEstablished: computeResult.tier2.baseline.baselineEstablished,
+        accountAgeDays,
+        trainingSessions7d,
+      });
 
       if (tier3) {
         finalState = tier3.state;
         finalPattern = tier3.pattern;
         aiInstruction = tier3.aiInstruction;
         aiReasoning = tier3.reasoning;
+        aiModelRecord = `${tier3.providerId}:${tier3.modelId}`;
       }
     }
 
@@ -122,7 +122,7 @@ router.post('/recompute', async (req: Request, res: Response) => {
       avgCalories7d: computeResult.tier1.avgCalories7d,
       proteinAdherence5d: computeResult.tier1.proteinAdherence5d,
       cv7d: computeResult.tier2.cv7d,
-      aiModel: shouldCallAI ? 'claude-sonnet-4-6' : '',
+      aiModel: aiModelRecord,
       aiReasoning,
       isCurrentState: true,
       triggerType: 'log_entry',
@@ -137,6 +137,8 @@ router.post('/recompute', async (req: Request, res: Response) => {
         confidenceScore: computeResult.confidenceScore,
       },
     });
+
+    void newState;
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Signal computation failed' });
