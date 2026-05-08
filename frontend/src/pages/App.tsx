@@ -7,6 +7,7 @@ import SignalZone from '../components/SignalZone';
 import TodayZone from '../components/TodayZone';
 import LogZone from '../components/LogZone';
 import SignalExplanation from '../components/SignalExplanation';
+import ErrorBoundary from '../components/ErrorBoundary';
 import LoginPage from './LoginPage';
 import WelcomeScreen from './onboarding/WelcomeScreen';
 import GoalSelectionScreen from './onboarding/GoalSelectionScreen';
@@ -149,31 +150,37 @@ export default function App() {
         onClearError={() => setError(null)}
         textareaRef={textareaRef}
       >
-        <SignalZone
-          user={user}
-          onLogout={logout}
-          state={signal?.state ?? 'READING'}
-          subtitle={signal?.subtitle ?? null}
-          delta={signal?.delta ?? null}
-          aiInstruction={signal?.aiInstruction ?? null}
-          waveformDays={waveformDays}
-          selectedDayIndex={effectiveIndex}
-          onDaySelect={setSelectedDayIndex}
-        />
+        <ErrorBoundary>
+          <SignalZone
+            user={user}
+            onLogout={logout}
+            state={signal?.state ?? 'READING'}
+            subtitle={signal?.subtitle ?? null}
+            delta={signal?.delta ?? null}
+            aiInstruction={signal?.aiInstruction ?? null}
+            waveformDays={waveformDays}
+            selectedDayIndex={effectiveIndex}
+            onDaySelect={setSelectedDayIndex}
+          />
+        </ErrorBoundary>
 
-        <TodayZone
-          protein={todayData?.protein ?? 0}
-          proteinTarget={todayData?.targets.protein ?? 160}
-          aiInstruction={signal?.aiInstruction ?? null}
-        />
+        <ErrorBoundary>
+          <TodayZone
+            protein={todayData?.protein ?? 0}
+            proteinTarget={todayData?.targets.protein ?? 160}
+            aiInstruction={signal?.aiInstruction ?? null}
+          />
+        </ErrorBoundary>
 
-        <LogZone
-          entries={entries}
-          isLoading={false}
-          activeDay={today}
-          deletingId={deletingId}
-          onDelete={handleDelete}
-        />
+        <ErrorBoundary>
+          <LogZone
+            entries={entries}
+            isLoading={false}
+            activeDay={today}
+            deletingId={deletingId}
+            onDelete={handleDelete}
+          />
+        </ErrorBoundary>
       </HomeScreen>
 
       {showExplanation && <SignalExplanation onDismiss={handleDismissExplanation} />}

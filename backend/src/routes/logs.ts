@@ -1,7 +1,22 @@
 import { Router, Request, Response } from 'express';
 import { Types } from 'mongoose';
+import { z } from 'zod';
 import { FoodEntry } from '../models/FoodEntry';
 import { computeDayAggregate } from '../services/computeDayAggregate';
+import { validate } from '../middleware/validate';
+
+const logEntrySchema = z.object({
+  rawInput:       z.string().min(1).max(2000),
+  name:           z.string().min(1).max(200),
+  calories:       z.number().int().min(0).max(10000),
+  proteinG:       z.number().min(0).max(500).default(0),
+  carbsG:         z.number().min(0).max(1000).default(0),
+  fatG:           z.number().min(0).max(500).default(0),
+  fiberG:         z.number().min(0).max(200).default(0),
+  parseNote:      z.string().max(500).nullable().default(null),
+  parsedByModel:  z.string().min(1).max(100),
+  idempotencyKey: z.string().uuid().nullable().default(null),
+});
 
 const router = Router();
 
@@ -23,7 +38,7 @@ router.get('/', async (req: Request, res: Response) => {
 });
 
 // POST /api/logs  — create a FoodEntry and recompute DayAggregate
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', validate(logEntrySchema), async (req: Request, res: Response) => {
   try {
     const userId = new Types.ObjectId(req.user!.userId);
     const {
@@ -34,15 +49,10 @@ router.post('/', async (req: Request, res: Response) => {
       carbsG,
       fatG,
       fiberG,
-      parseNote = null,
+      parseNote,
       parsedByModel,
-      idempotencyKey = null,
+      idempotencyKey,
     } = req.body;
-
-    if (!rawInput || !name || calories == null || !parsedByModel) {
-      res.status(400).json({ error: 'rawInput, name, calories, parsedByModel required' });
-      return;
-    }
 
     // Idempotency check — reject duplicate submissions
     if (idempotencyKey) {

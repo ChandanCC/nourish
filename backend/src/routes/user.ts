@@ -1,30 +1,23 @@
 import { Router, Request, Response } from 'express';
 import { Types } from 'mongoose';
-import { User, type UserGoal } from '../models/User';
+import { z } from 'zod';
+import { User } from '../models/User';
+import { validate } from '../middleware/validate';
 
-const VALID_GOALS: UserGoal[] = ['muscle_gain', 'fat_loss', 'maintenance', 'performance'];
+const onboardingSchema = z.object({
+  goal:           z.enum(['muscle_gain', 'fat_loss', 'maintenance', 'performance']),
+  protein_target: z.number().int().min(30).max(500),
+});
 
 const router = Router();
 
-router.patch('/onboarding', async (req: Request, res: Response) => {
-  const { goal, protein_target } = req.body as { goal: unknown; protein_target: unknown };
-
-  if (!VALID_GOALS.includes(goal as UserGoal)) {
-    res.status(400).json({ error: 'Invalid goal' });
-    return;
-  }
-
-  const rawTarget = Number(protein_target);
-  if (!Number.isInteger(rawTarget)) {
-    res.status(400).json({ error: 'protein_target must be an integer' });
-    return;
-  }
-  const proteinTargetG = Math.max(30, Math.min(500, rawTarget));
+router.patch('/onboarding', validate(onboardingSchema), async (req: Request, res: Response) => {
+  const { goal, protein_target: proteinTargetG } = req.body as z.infer<typeof onboardingSchema>;
 
   const userId = new Types.ObjectId(req.user!.userId);
   const updated = await User.findByIdAndUpdate(
     userId,
-    { $set: { goal, proteinTargetG, onboardingComplete: true } },
+    { $set: { goal, proteinTargetG: proteinTargetG, onboardingComplete: true } },
     { new: true, select: '-__v' },
   ).lean();
 

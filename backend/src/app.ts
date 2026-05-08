@@ -10,6 +10,7 @@ import homeRouter from './routes/home';
 import signalRouter from './routes/signal';
 import userRouter from './routes/user';
 import { requireAuth } from './middleware/auth';
+import { requestLogger } from './middleware/requestLogger';
 
 const analyseLimiter = rateLimit({
   windowMs: 60 * 1000,
@@ -20,12 +21,21 @@ const analyseLimiter = rateLimit({
 
 const app = express();
 
-app.use(helmet());
+app.disable('x-powered-by');
+app.use(helmet({
+  hsts: process.env.NODE_ENV === 'production'
+    ? { maxAge: 31536000, includeSubDomains: true }
+    : false,
+  contentSecurityPolicy: {
+    directives: { defaultSrc: ["'self'"] },
+  },
+}));
 app.use(cors({
   origin: process.env.CORS_ORIGIN || '*',
   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
+app.use(requestLogger);
 app.use(morgan('combined'));
 app.use(express.json({ limit: '2mb' }));
 
