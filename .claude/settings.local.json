@@ -1,7 +1,15 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(grep -n \"#[0-9a-fA-F]\\\\{3,6\\\\}\" /Users/chandan_cc/Projects/nourish/frontend/src/components/HomeScreen.tsx /Users/chandan_cc/Projects/nourish/frontend/src/components/SignalZone.tsx)",
+      "Bash(git add *)",
+      "Bash(git commit -m 'P01-001: home screen zone scaffold — four-zone layout with fixed command bar *)",
+      "Bash(git commit -m 'P01-002: remove tab navigation — day/week view, macros/micros tabs, weekly summary *)",
+      "Bash(git -C /Users/chandan_cc/Projects/nourish add frontend/src/components/HomeScreen.tsx)",
+      "Bash(git -C /Users/chandan_cc/Projects/nourish commit -m ' *)",
+      "Bash(npm test *)"
     ]
   }
 }
