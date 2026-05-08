@@ -57,3 +57,51 @@ export interface NutritionDay {
 
 export type MacroKey = 'calories' | 'protein' | 'carbs' | 'fat' | 'fiber';
 export type StatusColor = 'green' | 'yellow' | 'red' | 'dim';
+
+// New data model types (Phase 04+ architecture)
+export interface FoodEntry {
+  _id: string;
+  mealDate: string;
+  loggedAt: string;
+  rawInput: string;
+  name: string;
+  calories: number;
+  proteinG: number;
+  carbsG: number;
+  fatG: number;
+  fiberG: number;
+  parseNote: string | null;
+}
+
+export interface HomeWaveformDay {
+  date: string;
+  calories: number;
+  entryCount: number;
+}
+
+export interface HomeScreenPayload {
+  today: {
+    date: string;
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+    fiber: number;
+    entryCount: number;
+    targets: {
+      calories: number | null;
+      protein: number;
+    };
+  };
+  signal: {
+    state: string;
+    subtitle: string | null;
+    delta: string | null;
+    patternQualifier: string | null;
+    aiInstruction: string | null;
+    isStale: boolean;
+  };
+  waveform: HomeWaveformDay[];
+  entries: FoodEntry[];
+  userId: string;
+}

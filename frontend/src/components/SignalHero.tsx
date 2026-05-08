@@ -1,13 +1,22 @@
 import type { AuthUser } from '../lib/auth';
 import Waveform from './Waveform';
 
+interface WaveformBarDay {
+  calories: number;
+  isToday: boolean;
+  label: string;
+}
+
 interface SignalHeroProps {
   state: string;
-  subtitle?: string;
+  subtitle?: string | null;
   delta?: string | null;
   isCollapsed: boolean;
   user: AuthUser | null;
   onLogout: () => void;
+  waveformDays?: WaveformBarDay[];
+  selectedDay?: number;
+  onDaySelect?: (index: number) => void;
 }
 
 export default function SignalHero({
@@ -17,6 +26,9 @@ export default function SignalHero({
   isCollapsed,
   user,
   onLogout,
+  waveformDays = [],
+  selectedDay = 0,
+  onDaySelect,
 }: SignalHeroProps) {
   if (isCollapsed) {
     return (
@@ -135,9 +147,14 @@ export default function SignalHero({
         )}
       </div>
 
-      {/* Waveform — full-bleed (no horizontal padding, breaks page gutter) */}
+      {/* Waveform — full-bleed */}
       <div style={{ marginTop: 20 }}>
-        <Waveform days={[]} selectedDay={6} baseline={1850} />
+        <Waveform
+          days={waveformDays}
+          selectedDay={selectedDay}
+          baseline={1850}
+          onDaySelect={onDaySelect}
+        />
       </div>
 
       {/* Delta line */}

@@ -1,24 +1,20 @@
 import { useState } from 'react';
-import type { Entry } from '../types';
-import { MACRO_GOALS } from '../lib/nutrition';
+import type { FoodEntry } from '../types';
 
 interface Props {
-  entry: Entry;
-  onDelete: (entryId: string) => void;
+  entry: FoodEntry;
+  onDelete: (id: string) => void;
   deleting?: boolean;
 }
 
-const MACROS: { key: 'protein' | 'carbs' | 'fat'; label: string }[] = [
-  { key: 'protein', label: 'PROTEIN' },
-  { key: 'carbs',   label: 'CARBS'   },
-  { key: 'fat',     label: 'FAT'     },
+const MACROS: { key: 'proteinG' | 'carbsG' | 'fatG'; label: string; target: number }[] = [
+  { key: 'proteinG', label: 'PROTEIN', target: 160 },
+  { key: 'carbsG',   label: 'CARBS',   target: 200 },
+  { key: 'fatG',     label: 'FAT',     target: 55  },
 ];
 
 export default function EntryCard({ entry, onDelete, deleting }: Props) {
   const [expanded, setExpanded] = useState(false);
-
-  const name = entry.summary || entry.rawText.slice(0, 60);
-  const { calories, protein, carbs, fat } = entry.totals;
 
   return (
     <div
@@ -33,15 +29,15 @@ export default function EntryCard({ entry, onDelete, deleting }: Props) {
       onMouseLeave={e => ((e.currentTarget as HTMLDivElement).style.borderColor = 'var(--ink-4)')}
       onClick={() => setExpanded(x => !x)}
     >
-      {/* Collapsed header — always visible */}
+      {/* Collapsed header */}
       <div className="px-3 pt-3 pb-2.5">
         <div className="flex justify-between items-start gap-3 mb-1.5">
-          <span className="text-body flex-1 min-w-0">{name}</span>
-          <span className="text-data" style={{ flexShrink: 0 }}>{Math.round(calories)}</span>
+          <span className="text-body flex-1 min-w-0">{entry.name}</span>
+          <span className="text-data" style={{ flexShrink: 0 }}>{entry.calories}</span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-label">
-            P {Math.round(protein)}g · C {Math.round(carbs)}g · F {Math.round(fat)}g
+            P {entry.proteinG}g · C {entry.carbsG}g · F {entry.fatG}g
           </span>
           <span className="text-micro">{expanded ? '▲' : '▼'}</span>
         </div>
@@ -54,10 +50,9 @@ export default function EntryCard({ entry, onDelete, deleting }: Props) {
           style={{ borderTop: '1px solid var(--ink-4)' }}
           className="px-3 pb-3 pt-2.5"
         >
-          {/* Macro progress rows — INK fill only, no color coding */}
-          {MACROS.map(({ key, label }) => {
-            const value = entry.totals[key];
-            const pct   = Math.min((value / MACRO_GOALS[key]) * 100, 100);
+          {MACROS.map(({ key, label, target }) => {
+            const value = entry[key];
+            const pct = Math.min((value / target) * 100, 100);
             return (
               <div key={key} className="flex items-center gap-2 mb-2">
                 <span className="text-label" style={{ width: 52, flexShrink: 0 }}>{label}</span>
@@ -65,35 +60,21 @@ export default function EntryCard({ entry, onDelete, deleting }: Props) {
                   <div style={{ width: `${pct}%`, height: '100%', borderRadius: 2, background: 'var(--bar-fill)' }} />
                 </div>
                 <span className="text-micro" style={{ flexShrink: 0, fontVariantNumeric: 'tabular-nums', width: 28, textAlign: 'right' }}>
-                  {Math.round(value)}g
+                  {value}g
                 </span>
               </div>
             );
           })}
 
-          {/* Per-item breakdown */}
-          {entry.items?.length > 0 && (
-            <div style={{ borderTop: '1px solid var(--ink-4)', marginTop: 8, paddingTop: 8 }}>
-              {entry.items.map((item, i) => (
-                <div key={i} className="flex justify-between items-baseline gap-2 mb-1">
-                  <span style={{ fontSize: 11, fontFamily: '"DM Mono", monospace', color: 'var(--ink-2)', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {item.mealLabel && (
-                      <span style={{ marginRight: 6, color: 'var(--ink-3)' }}>[{item.mealLabel}]</span>
-                    )}
-                    {item.name}
-                    {item.quantity && (
-                      <span style={{ color: 'var(--ink-3)', marginLeft: 4 }}>{item.quantity}</span>
-                    )}
-                  </span>
-                  <span className="text-micro" style={{ flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
-                    {item.calories}kcal
-                  </span>
-                </div>
-              ))}
+          {entry.parseNote && (
+            <div
+              className="text-micro"
+              style={{ color: 'var(--ink-3)', marginTop: 6, marginBottom: 4 }}
+            >
+              {entry.parseNote}
             </div>
           )}
 
-          {/* Footer — timestamp + delete */}
           <div
             style={{ borderTop: '1px solid var(--ink-4)', marginTop: 8, paddingTop: 8 }}
             className="flex justify-between items-center"
@@ -102,7 +83,7 @@ export default function EntryCard({ entry, onDelete, deleting }: Props) {
               {new Date(entry.loggedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
             </span>
             <button
-              onClick={() => onDelete(entry.entryId)}
+              onClick={() => onDelete(entry._id)}
               disabled={deleting}
               className="text-label"
               style={{

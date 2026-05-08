@@ -8,10 +8,10 @@
 ## Current State
 
 ```
-Active task:      P02-001 — Typography System Application
-Last completed:   P01-004 — LOG Zone Structure
+Active task:      P07-001 — useHomeScreen Hook
+Last completed:   P06-004 — Rate Limiting on /api/analyse
 Blocked tasks:    None
-Current phase:    Phase 01 — Frontend Layout Foundation
+Current phase:    Phase 07 — Frontend Integration
 ```
 
 ---
@@ -20,13 +20,13 @@ Current phase:    Phase 01 — Frontend Layout Foundation
 
 | Milestone | Description | Status | Tasks Required |
 |---|---|---|---|
-| M1: Visual Skeleton | Full home screen with static data | 0 / 12 tasks | P01-001→P02-004, P03-001 |
-| M2: Backend Ready | Backend serves real SIGNAL | 0 / 13 tasks | P04-001→P06-003 |
+| M1: Visual Skeleton | Full home screen with static data | 10 / 10 tasks ✅ | P01-001→P02-005, P03-001 |
+| M2: Backend Ready | Backend serves real SIGNAL | 13 / 13 tasks ✅ | P04-001→P06-003 |
 | M3: Living Product | Frontend wired to backend | 0 / 6 tasks | P07-001→P07-006 |
 | M4: Polished | Motion system complete | 0 / 6 tasks | P08-001→P08-006 |
 | M5: Ship-Ready | Onboarding + hardening | 0 / 11 tasks | P09-001→P10-004 |
 
-**Overall: 4 / 48 tasks complete**
+**Overall: 25 / 48 tasks complete**
 
 ---
 
@@ -35,11 +35,11 @@ Current phase:    Phase 01 — Frontend Layout Foundation
 | Phase | Tasks | Complete | Status |
 |---|---|---|---|
 | Phase 01: Frontend Layout | 4 | 4 | COMPLETE |
-| Phase 02: Frontend Display | 5 | 0 | NOT_STARTED |
-| Phase 03: Command Bar | 1 | 0 | NOT_STARTED |
-| Phase 04: Backend Data | 6 | 0 | NOT_STARTED |
-| Phase 05: Intelligence Engine | 5 | 0 | NOT_STARTED |
-| Phase 06: AI Synthesis | 4 | 0 | NOT_STARTED |
+| Phase 02: Frontend Display | 5 | 5 | COMPLETE |
+| Phase 03: Command Bar | 1 | 1 | COMPLETE |
+| Phase 04: Backend Data | 6 | 6 | COMPLETE |
+| Phase 05: Intelligence Engine | 5 | 5 | COMPLETE |
+| Phase 06: AI Synthesis | 4 | 4 | COMPLETE |
 | Phase 07: Integration | 6 | 0 | NOT_STARTED |
 | Phase 08: Motion System | 6 | 0 | NOT_STARTED |
 | Phase 09: Onboarding | 7 | 0 | NOT_STARTED |
@@ -55,6 +55,18 @@ Current phase:    Phase 01 — Frontend Layout Foundation
 | P01-002 | Remove Tab Navigation | P01-002 |
 | P01-003 | TODAY Zone Structure | P01-003 |
 | P01-004 | LOG Zone Structure | P01-004 |
+| P02-001 | Typography System Application | P02-001 |
+| P02-002 | Signal Hero Component | P02-002 |
+| P02-003 | Waveform Component | P02-003 |
+| P02-004 | Scroll Collapse Behavior | P02-004 |
+| P02-005 | Macro Rows in TODAY Zone | P02-005 |
+| P03-001 | Command Bar Focus State | P03-001 |
+| P04-001 | User Model + auth upsert | P04-001+P04-002 |
+| P04-002 | FoodEntry Model | P04-001+P04-002 |
+| P04-003 | DayAggregate Model | P04-003→P04-006 |
+| P04-004 | computeDayAggregate service | P04-003→P04-006 |
+| P04-005 | POST/DELETE /api/logs (FoodEntry + soft-delete) | P04-003→P04-006 |
+| P04-006 | GET /api/home endpoint | P04-003→P04-006 |
 
 ---
 
@@ -127,6 +139,7 @@ These must be resolved before the tasks that depend on them:
 | Date | Tasks Completed | Notes |
 |---|---|---|
 | 2026-05-07 | — | Implementation plan created. P01-001 is next. |
+| 2026-05-07 | P01-001 → P02-005 | Phases 01–02 complete. M1 one task from complete (P03-001 remaining). |
 
 ---
 

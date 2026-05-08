@@ -1,11 +1,27 @@
 import MacroRow from './MacroRow';
 
-export default function TodayZone() {
+interface TodayZoneProps {
+  protein: number;
+  proteinTarget: number;
+  aiInstruction: string | null;
+}
+
+export default function TodayZone({ protein, proteinTarget, aiInstruction }: TodayZoneProps) {
   return (
     <div className="today-zone">
       {/* 2A — Daily Position: protein row (default); full panel on calorie tap — P03+ */}
       <div className="today-daily-position px-5 py-4">
-        <MacroRow label="Protein" current={89} target={140} unit="g" />
+        <MacroRow label="Protein" current={protein} target={proteinTarget} unit="g" />
+
+        {/* AI instruction line — absent when null (silence is the signal) */}
+        {aiInstruction && (
+          <div
+            className="text-body"
+            style={{ marginTop: 8, color: 'var(--ink-1)' }}
+          >
+            → {aiInstruction}
+          </div>
+        )}
       </div>
 
       {/* 2B — Training: text-log placeholder (U-001 unresolved) */}

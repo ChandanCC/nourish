@@ -1,9 +1,9 @@
 import EntryCard from './EntryCard';
-import { getTodayKey, formatDate } from '../lib/nutrition';
-import type { Entry } from '../types/index';
+import { getTodayKey } from '../lib/nutrition';
+import type { FoodEntry } from '../types/index';
 
 interface LogZoneProps {
-  entries: Entry[];
+  entries: FoodEntry[];
   isLoading: boolean;
   activeDay: string;
   deletingId: string | null;
@@ -18,17 +18,17 @@ export default function LogZone({ entries, isLoading, activeDay, deletingId, onD
       {isLoading ? (
         <div className="text-center opacity-20 py-8 text-[11px] tracking-widest">LOADING...</div>
       ) : entries.length > 0 ? (
-        [...entries].reverse().map(entry => (
+        entries.map(entry => (
           <EntryCard
-            key={entry.entryId}
+            key={entry._id}
             entry={entry}
             onDelete={onDelete}
-            deleting={deletingId === entry.entryId}
+            deleting={deletingId === entry._id}
           />
         ))
       ) : (
         <div className="text-center opacity-15 py-10 text-[11px] tracking-widest">
-          {isToday ? 'NOTHING LOGGED TODAY YET' : `NO DATA FOR ${formatDate(activeDay).toUpperCase()}`}
+          {isToday ? 'NOTHING LOGGED TODAY YET' : 'NO DATA'}
         </div>
       )}
     </div>

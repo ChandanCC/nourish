@@ -1,11 +1,7 @@
 import { useState } from 'react';
 import type { ReactNode, RefObject } from 'react';
-import type { AuthUser } from '../lib/auth';
-import SignalZone from './SignalZone';
 
 interface HomeScreenProps {
-  user: AuthUser | null;
-  onLogout: () => void;
   input: string;
   setInput: (v: string) => void;
   analysing: boolean;
@@ -17,8 +13,6 @@ interface HomeScreenProps {
 }
 
 export default function HomeScreen({
-  user,
-  onLogout,
   input,
   setInput,
   analysing,
@@ -64,7 +58,6 @@ export default function HomeScreen({
         className="max-w-lg mx-auto"
         style={{ minHeight: '100vh', paddingBottom: '88px', color: 'var(--ink-0)' }}
       >
-        <SignalZone user={user} onLogout={onLogout} />
         {children}
       </div>
 

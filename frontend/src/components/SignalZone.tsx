@@ -1,13 +1,37 @@
 import { useState, useRef, useEffect } from 'react';
 import type { AuthUser } from '../lib/auth';
+import type { HomeWaveformDay } from '../types';
 import SignalHero from './SignalHero';
+
+function toWaveformBarDays(days: HomeWaveformDay[]) {
+  const today = new Date().toISOString().split('T')[0];
+  return days.map(d => ({
+    calories: d.calories,
+    isToday: d.date === today,
+    label: new Date(d.date + 'T12:00:00')
+      .toLocaleDateString('en-US', { weekday: 'short' })
+      .toUpperCase()
+      .slice(0, 3),
+  }));
+}
 
 interface SignalZoneProps {
   user: AuthUser | null;
   onLogout: () => void;
+  state: string;
+  subtitle: string | null;
+  delta: string | null;
+  aiInstruction: string | null;
+  waveformDays: HomeWaveformDay[];
+  selectedDayIndex: number;
+  onDaySelect: (index: number) => void;
 }
 
-export default function SignalZone({ user, onLogout }: SignalZoneProps) {
+export default function SignalZone({
+  user, onLogout,
+  state, subtitle, delta,
+  waveformDays, selectedDayIndex, onDaySelect,
+}: SignalZoneProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
@@ -24,9 +48,11 @@ export default function SignalZone({ user, onLogout }: SignalZoneProps) {
     return () => observer.disconnect();
   }, []);
 
+  const barDays = toWaveformBarDays(waveformDays);
+
   return (
     <>
-      {/* Collapsed strip (sticky) — rendered outside the hero so it doesn't scroll away */}
+      {/* Collapsed strip (sticky) */}
       {isCollapsed && (
         <div
           style={{
@@ -41,9 +67,9 @@ export default function SignalZone({ user, onLogout }: SignalZoneProps) {
         >
           <div style={{ width: '100%', maxWidth: '32rem' }}>
             <SignalHero
-              state="READING"
-              subtitle="Day 3 · Baseline forming"
-              delta={null}
+              state={state}
+              subtitle={subtitle}
+              delta={delta}
               isCollapsed={true}
               user={user}
               onLogout={onLogout}
@@ -52,14 +78,17 @@ export default function SignalZone({ user, onLogout }: SignalZoneProps) {
         </div>
       )}
 
-      {/* Full hero */}
+      {/* Full hero with live waveform */}
       <SignalHero
-        state="READING"
-        subtitle="Day 3 · Baseline forming"
-        delta={null}
+        state={state}
+        subtitle={subtitle}
+        delta={delta}
         isCollapsed={false}
         user={user}
         onLogout={onLogout}
+        waveformDays={barDays}
+        selectedDay={selectedDayIndex}
+        onDaySelect={onDaySelect}
       />
 
       {/* Sentinel: when this leaves the viewport, collapse triggers */}

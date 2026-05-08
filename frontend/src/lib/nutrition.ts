@@ -118,7 +118,17 @@ function extractJSON(raw: string) {
   throw new Error('Could not parse API response');
 }
 
-export async function analyseFood(text: string) {
+export interface AnalyseResult {
+  name: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  fiber: number;
+  note: string | null;
+}
+
+export async function analyseFood(text: string): Promise<AnalyseResult> {
   const { getToken } = await import('./auth');
   const base = (import.meta.env.VITE_API_URL || 'http://localhost:4000/api');
   const res = await fetch(`${base}/analyse`, {
@@ -131,5 +141,10 @@ export async function analyseFood(text: string) {
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || `API ${res.status}`);
-  return extractJSON(data.result);
+  // New API returns structured result directly
+  if (data.result && typeof data.result === 'object' && !Array.isArray(data.result)) {
+    return data.result as AnalyseResult;
+  }
+  // Legacy path: parse from string (backward compat)
+  return extractJSON(typeof data.result === 'string' ? data.result : JSON.stringify(data.result));
 }

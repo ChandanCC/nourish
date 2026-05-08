@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { getToken } from '../lib/auth';
-import type { NutritionDay } from '../types';
+import type { NutritionDay, HomeScreenPayload, FoodEntry } from '../types';
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
 
@@ -44,5 +44,36 @@ export async function addEntry(dateKey: string, payload: AddEntryPayload): Promi
 
 export async function deleteEntry(dateKey: string, entryId: string): Promise<NutritionDay> {
   const { data } = await client.delete<{ data: NutritionDay }>(`/logs/${dateKey}/entries/${entryId}`);
+  return data.data;
+}
+
+// New architecture API calls
+export async function fetchHomeScreen(): Promise<HomeScreenPayload> {
+  const { data } = await client.get<HomeScreenPayload>('/home');
+  return data;
+}
+
+export interface LogEntryPayload {
+  rawInput: string;
+  name: string;
+  calories: number;
+  proteinG: number;
+  carbsG: number;
+  fatG: number;
+  fiberG: number;
+  parseNote: string | null;
+  parsedByModel: string;
+  idempotencyKey: string;
+}
+
+export async function logEntry(payload: LogEntryPayload): Promise<FoodEntry> {
+  const { data } = await client.post<{ data: FoodEntry }>('/logs', payload, {
+    headers: { 'X-Idempotency-Key': payload.idempotencyKey },
+  });
+  return data.data;
+}
+
+export async function deleteLogEntry(entryId: string): Promise<FoodEntry> {
+  const { data } = await client.delete<{ data: FoodEntry }>(`/logs/${entryId}`);
   return data.data;
 }

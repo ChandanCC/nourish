@@ -10,6 +10,20 @@ export interface WaveformDay {
   entryCount: number;
 }
 
+export interface FoodEntrySummary {
+  _id: string;
+  mealDate: string;
+  loggedAt: string;
+  rawInput: string;
+  name: string;
+  calories: number;
+  proteinG: number;
+  carbsG: number;
+  fatG: number;
+  fiberG: number;
+  parseNote: string | null;
+}
+
 export interface HomeScreenPayload {
   today: {
     date: string;
@@ -33,6 +47,7 @@ export interface HomeScreenPayload {
     isStale: boolean;
   };
   waveform: WaveformDay[];
+  entries: FoodEntrySummary[];
   userId: string;
 }
 
@@ -106,6 +121,19 @@ router.get('/', async (req: Request, res: Response) => {
         isStale: false,
       },
       waveform,
+      entries: todayEntries.map(e => ({
+        _id: e._id.toString(),
+        mealDate: e.mealDate,
+        loggedAt: e.loggedAt.toISOString(),
+        rawInput: e.rawInput,
+        name: e.name,
+        calories: e.calories,
+        proteinG: e.proteinG,
+        carbsG: e.carbsG,
+        fatG: e.fatG,
+        fiberG: e.fiberG,
+        parseNote: e.parseNote,
+      })),
       userId: req.user!.userId,
     };
 
