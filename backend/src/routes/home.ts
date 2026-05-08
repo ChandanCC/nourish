@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { Types } from 'mongoose';
 import { DayAggregate } from '../models/DayAggregate';
 import { FoodEntry } from '../models/FoodEntry';
+import { SignalState } from '../models/SignalState';
 
 export interface WaveformDay {
   date: string;
@@ -35,6 +36,12 @@ export interface HomeScreenPayload {
   userId: string;
 }
 
+function formatDelta(pct: number): string {
+  if (Math.abs(pct) < 3) return 'Near baseline';
+  const sign = pct > 0 ? '+' : '';
+  return `${sign}${Math.round(pct)}% ${pct > 0 ? 'above' : 'below'} your baseline`;
+}
+
 const router = Router();
 
 router.get('/', async (req: Request, res: Response) => {
@@ -65,6 +72,9 @@ router.get('/', async (req: Request, res: Response) => {
       .sort({ loggedAt: -1 })
       .lean();
 
+    // Fetch current SignalState
+    const currentSignal = await SignalState.findOne({ userId, isCurrentState: true }).lean();
+
     const waveform: WaveformDay[] = aggregates.map(a => ({
       date: a.date,
       calories: a.totalCalories,
@@ -86,10 +96,12 @@ router.get('/', async (req: Request, res: Response) => {
         },
       },
       signal: {
-        state: 'READING',
+        state: currentSignal?.state ?? 'READING',
         subtitle: null,
-        delta: null,
-        patternQualifier: null,
+        delta: currentSignal?.deltaPercent != null
+          ? formatDelta(currentSignal.deltaPercent)
+          : null,
+        patternQualifier: currentSignal?.patternQualifier ?? null,
         aiInstruction: null,
         isStale: false,
       },

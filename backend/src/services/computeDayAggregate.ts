@@ -1,6 +1,7 @@
 import { Types } from 'mongoose';
 import { FoodEntry } from '../models/FoodEntry';
 import { DayAggregate } from '../models/DayAggregate';
+import { recomputeSignal } from './recomputeSignal';
 
 const DEFAULT_PROTEIN_TARGET = 160;
 
@@ -50,4 +51,11 @@ export async function computeDayAggregate(
     },
     { upsert: true },
   );
+
+  // Trigger SIGNAL recompute if date is in last 14 days
+  const fourteenDaysAgo = new Date();
+  fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 13);
+  if (date >= fourteenDaysAgo.toISOString().split('T')[0]) {
+    recomputeSignal(userId).catch(err => console.error('recomputeSignal failed:', err));
+  }
 }
