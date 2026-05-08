@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { OAuth2Client } from 'google-auth-library';
 import jwt from 'jsonwebtoken';
+import { User } from '../models/User';
 
 const router = Router();
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -23,8 +24,29 @@ router.post('/google', async (req: Request, res: Response) => {
       return;
     }
 
+    const user = await User.findOneAndUpdate(
+      { googleId: payload.sub },
+      {
+        $set: {
+          name:       payload.name ?? '',
+          picture:    payload.picture ?? '',
+          lastSeenAt: new Date(),
+        },
+        $setOnInsert: {
+          email:    payload.email ?? '',
+          timezone: 'UTC',
+        },
+      },
+      { new: true, upsert: true },
+    );
+
     const token = jwt.sign(
-      { userId: payload.sub, email: payload.email ?? '', name: payload.name ?? '' },
+      {
+        userId:   user._id.toString(),
+        googleId: payload.sub,
+        email:    payload.email ?? '',
+        name:     payload.name ?? '',
+      },
       process.env.JWT_SECRET!,
       { expiresIn: '30d' },
     );

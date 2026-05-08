@@ -2,7 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
 interface AuthPayload {
-  userId: string;
+  userId: string;   // MongoDB User._id as string
+  googleId: string; // Google OAuth sub
   email: string;
   name: string;
 }
