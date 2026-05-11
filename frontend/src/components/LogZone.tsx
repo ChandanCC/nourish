@@ -13,11 +13,46 @@ interface LogZoneProps {
   onEdit: (id: string, payload: EditEntryPayload) => void;
 }
 
+function formatDayLabel(dateStr: string): string {
+  const d = new Date(dateStr + 'T12:00:00');
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }).toUpperCase();
+}
+
 export default function LogZone({ entries, isLoading, activeDay, deletingId, editingId, onDelete, onEdit }: LogZoneProps) {
   const isToday = activeDay === getTodayKey();
 
   return (
     <div className="log-zone px-5 py-3">
+      {/* Past-day context header */}
+      {!isToday && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          marginBottom: 12,
+          paddingBottom: 10,
+          borderBottom: '1px solid var(--ink-4)',
+        }}>
+          <span style={{
+            fontSize: 9,
+            fontFamily: 'var(--font-mono)',
+            letterSpacing: '0.1em',
+            color: 'var(--ink-3)',
+          }}>
+            {formatDayLabel(activeDay)}
+          </span>
+          {entries.length > 0 && (
+            <span style={{
+              fontSize: 9,
+              fontFamily: 'var(--font-mono)',
+              color: 'var(--ink-4)',
+            }}>
+              · {entries.length} {entries.length === 1 ? 'ENTRY' : 'ENTRIES'}
+            </span>
+          )}
+        </div>
+      )}
+
       {isLoading ? (
         <div className="text-center opacity-20 py-8 text-[11px] tracking-widest">LOADING...</div>
       ) : entries.length > 0 ? (

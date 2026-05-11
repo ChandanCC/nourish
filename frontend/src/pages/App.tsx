@@ -218,7 +218,7 @@ export default function App() {
           <LogZone
             entries={entries}
             isLoading={false}
-            activeDay={today}
+            activeDay={activeData?.today?.date ?? today}
             deletingId={deletingId}
             editingId={editingId}
             onDelete={handleDelete}
