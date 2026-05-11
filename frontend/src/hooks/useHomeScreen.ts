@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchHomeScreen, logEntry, deleteLogEntry } from '../api/client';
-import type { LogEntryPayload } from '../api/client';
+import { fetchHomeScreen, logEntry, deleteLogEntry, editLogEntry } from '../api/client';
+import type { LogEntryPayload, EditEntryPayload } from '../api/client';
 
 export const HOME_QUERY_KEY = ['home'] as const;
 
@@ -28,6 +28,17 @@ export function useDeleteEntry() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (entryId: string) => deleteLogEntry(entryId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: HOME_QUERY_KEY });
+    },
+  });
+}
+
+export function useEditEntry() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: EditEntryPayload }) =>
+      editLogEntry(id, payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: HOME_QUERY_KEY });
     },

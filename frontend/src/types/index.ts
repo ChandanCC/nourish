@@ -71,6 +71,14 @@ export interface FoodEntry {
   fatG: number;
   fiberG: number;
   parseNote: string | null;
+  ironMg: number;
+  calciumMg: number;
+  vitaminDMcg: number;
+  vitaminB12Mcg: number;
+  magnesiumMg: number;
+  zincMg: number;
+  potassiumMg: number;
+  sodiumMg: number;
 }
 
 export interface HomeWaveformDay {

@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { useHomeScreen, useLogEntry, useDeleteEntry } from '../hooks/useHomeScreen';
+import { useHomeScreen, useLogEntry, useDeleteEntry, useEditEntry } from '../hooks/useHomeScreen';
 import { getTodayKey, analyseFood } from '../lib/nutrition';
+import type { EditEntryPayload } from '../api/client';
 import HomeScreen from '../components/HomeScreen';
 import SignalZone from '../components/SignalZone';
 import TodayZone from '../components/TodayZone';
@@ -11,7 +12,7 @@ import ErrorBoundary from '../components/ErrorBoundary';
 import LoginPage from './LoginPage';
 import WelcomeScreen from './onboarding/WelcomeScreen';
 import GoalSelectionScreen from './onboarding/GoalSelectionScreen';
-import ProteinTargetScreen from './onboarding/ProteinTargetScreen';
+import WeightScreen from './onboarding/WeightScreen';
 import type { UserGoal } from '../types';
 
 type OnboardingStep = 'welcome' | 'goal' | 'protein';
@@ -32,6 +33,7 @@ export default function App() {
   const [analysing, setAnalysing] = useState(false);
   const [error, setError]         = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [editingId, setEditingId]   = useState<string | null>(null);
   const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
 
   // Onboarding state
@@ -45,8 +47,9 @@ export default function App() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const { data: homeData } = useHomeScreen();
-  const logEntryMutation   = useLogEntry();
+  const logEntryMutation    = useLogEntry();
   const deleteEntryMutation = useDeleteEntry();
+  const editEntryMutation   = useEditEntry();
 
   const today = getTodayKey();
 
@@ -123,6 +126,13 @@ export default function App() {
     finally { setDeletingId(null); }
   }
 
+  async function handleEdit(entryId: string, payload: EditEntryPayload) {
+    setEditingId(entryId);
+    try { await editEntryMutation.mutateAsync({ id: entryId, payload }); }
+    catch (e: unknown) { setError(e instanceof Error ? e.message : 'Edit failed'); }
+    finally { setEditingId(null); }
+  }
+
   if (!isAuthenticated) return <LoginPage onLogin={login} />;
 
   // Onboarding gate: homeData loaded and not complete
@@ -139,9 +149,9 @@ export default function App() {
     }
     if (onboardingStep === 'protein' && selectedGoal) {
       return (
-        <ProteinTargetScreen
+        <WeightScreen
           goal={selectedGoal}
-          onComplete={() => { /* homeData refetch via invalidateQueries in ProteinTargetScreen */ }}
+          onComplete={() => { /* homeData refetch via invalidateQueries in WeightScreen */ }}
         />
       );
     }
@@ -195,7 +205,9 @@ export default function App() {
             isLoading={false}
             activeDay={today}
             deletingId={deletingId}
+            editingId={editingId}
             onDelete={handleDelete}
+            onEdit={handleEdit}
           />
         </ErrorBoundary>
       </HomeScreen>

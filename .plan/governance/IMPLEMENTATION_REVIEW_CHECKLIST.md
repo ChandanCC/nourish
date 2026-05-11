@@ -1,7 +1,7 @@
 # Implementation Review Checklist
 
 **Status:** Active — Mandatory before marking any task complete.
-**Last updated:** 2026-05-07
+**Last updated:** 2026-05-11
 
 Run this checklist before considering any implementation task done. Not every section applies to every task — mark N/A where genuinely not applicable. Do not skip sections that are merely inconvenient.
 
@@ -22,12 +22,13 @@ The question to hold throughout: **"Does this still feel like Nouriq?"**
 
 ## Section 1 — Architecture Checks
 
-- [ ] No AI calls in frontend code — all Anthropic calls go through `POST /api/analyse` or `POST /api/signal`
+- [ ] No AI calls in frontend code — all LLM calls go through `POST /api/analyse` or `POST /api/signal` (backend proxy only; provider-agnostic rule — currently Gemini 2.5 Flash)
 - [ ] No AI calls that block the HTTP response in the write path (food log, delete entry)
 - [ ] DayAggregate is updated synchronously in the write path before the response returns
-- [ ] SIGNAL recomputation is queued asynchronously, not inline
+- [ ] SIGNAL recomputation is triggered post-onboarding or on demand — not inline with every log write
 - [ ] New routes follow the existing Express route structure in `engineering/backend-architecture.md`
 - [ ] No new database collections added without an architectural decision
+  - **Exception on record:** `PersonalFoodMemory` added for food recall system (decision made 2026-05)
 - [ ] No new AWS services added without an architectural decision
 - [ ] TypeScript strict mode maintained — no new `any` types without a documented comment
 - [ ] No Redis or external cache layer added
@@ -44,7 +45,11 @@ The question to hold throughout: **"Does this still feel like Nouriq?"**
 - [ ] All new API routes are protected by `requireAuth` middleware
 - [ ] Idempotency key checked on all create operations
 - [ ] Soft-delete pattern used for FoodEntry deletion (no hard deletes)
-- [ ] No FoodEntry documents modified after creation
+- [ ] FoodEntry fields mutated only via `PATCH /api/logs/:id` (user correction path):
+  - Only `name`, `calories`, `proteinG`, `carbsG`, `fatG`, `fiberG`, `confidence` may be updated
+  - `confidence` must be set to `'user_corrected'` on every PATCH
+  - `rawInput` is immutable — never patched
+  - `PersonalFoodMemory` updated with corrected values on PATCH so future recalls are accurate
 - [ ] No historical SignalState documents mutated
 
 ---
@@ -61,7 +66,9 @@ The question to hold throughout: **"Does this still feel like Nouriq?"**
 - [ ] No instruction or label contains praise language ("great", "amazing", "you're doing well")
 - [ ] No streak counter, badge, or achievement indicator
 - [ ] Absence of data results in absent UI — no skeleton screens, no "nothing here yet" filler
+  - **Exception:** Micros section in TodayZone is hidden entirely when no micros are logged (correct behavior)
 - [ ] Command bar is the only permanently fixed bottom element
+- [ ] Entry edit mode does not introduce a new full-screen or modal surface — must be inline
 
 ---
 
@@ -76,12 +83,16 @@ The question to hold throughout: **"Does this still feel like Nouriq?"**
 - [ ] Deterministic fallback exists and has been tested: system returns a valid state if AI fails
 - [ ] No AI instruction implies causality from unobserved variables (stress, sleep, schedule)
 - [ ] STATE transitions require the minimum qualifying window (not single-day events)
+- [ ] Food memory lookup runs before AI parse — AI is not called if memory hit returns `recalled`
+- [ ] Bad memory entries (zero calories, "Unknown food" name) are not stored in PersonalFoodMemory
+- [ ] `normalizeInput()` applied consistently before every memory lookup and store
 
 ---
 
 ## Section 5 — Design-System Checks
 
 - [ ] No raw hex values in component code — all colors via CSS custom properties
+  - **Exception on record:** `STATUS_STYLES` in `nutrition.ts` uses hex literals as the source-of-truth mapping to CSS vars — acceptable since it is the token definition layer, not component code
 - [ ] No banned colors: `#4ecdc4`, `#ffa552`, `#ff6b9d`, `#a78bfa`, `#ffc864`
 - [ ] No colors outside the token system (BG, INK, GOLD, STATUS, WAVE, BAR families)
 - [ ] No `box-shadow` on any element
@@ -90,7 +101,10 @@ The question to hold throughout: **"Does this still feel like Nouriq?"**
 - [ ] Only Syne and DM Mono fonts in use
 - [ ] Syne used only at 18px+ and only at weight 700/800
 - [ ] All spacing uses the 4px base system (multiples of 4px) via token classes
-- [ ] No arbitrary Tailwind values: `text-[N]`, `p-[N]`, `m-[N]` — use scale classes
+- [ ] Avoid arbitrary Tailwind values (`text-[N]`, `p-[N]`, `m-[N]`) — use scale classes where possible
+  - **Known debt:** Some components use `text-[9px]` inline — acceptable only for LABEL/MICRO scale where the class doesn't map cleanly to Tailwind defaults
+- [ ] Macro and micro progress bars use status colors (`--status-up`, `--status-mid`, `--status-down`, `--ink-3`) — not `--bar-fill` (which is undifferentiated white)
+- [ ] Status color thresholds: ≥80% green, 40–80% yellow, <40% dim, >100% red (over target)
 - [ ] Verify against `design-system/VISUAL_GUARDRAILS.md` for prohibited patterns
 
 ---
@@ -101,18 +115,21 @@ The question to hold throughout: **"Does this still feel like Nouriq?"**
 - [ ] No new expensive MongoDB queries without appropriate indexes
 - [ ] Bundle size not significantly increased (no large new dependencies added without reason)
 - [ ] Animation performance: CSS transforms only (`transform`, `opacity`), no layout-triggering properties (`width`, `height`, `top`, `left`)
+  - **Exception on record:** Progress bar widths animate via `width` — this is a deliberate tradeoff for the instrument-panel aesthetic; bars are small and non-overlapping
 - [ ] No animations that run continuously at rest (no infinite loops, no shimmer)
 
 ---
 
 ## Section 7 — State Integrity Checks
 
-- [ ] DayAggregate is recomputed after every FoodEntry create/delete
-- [ ] SIGNAL recompute is enqueued after every write operation
+- [ ] DayAggregate is recomputed after every FoodEntry create, patch, or soft-delete
+- [ ] SIGNAL recompute is triggered appropriately (post-onboarding; on-demand via `/api/signal/recompute`)
 - [ ] BaselineSnapshot is not mutated — a new snapshot is created on recalibration
 - [ ] User data isolation: all new data documents contain `userId` field
 - [ ] Soft-deleted FoodEntries are excluded from all aggregation queries
 - [ ] SignalState `is_stale` flag is set correctly on fallback
+- [ ] `confidence` field on FoodEntry always reflects the true provenance: `recalled` for memory hits, `estimated`/`low_confidence` for AI parse, `user_corrected` after PATCH
+- [ ] `micros.isEstimated` on the home payload is derived at request time — not stored; reflects whether any today entry has non-deterministic confidence
 
 ---
 

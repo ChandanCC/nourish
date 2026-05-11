@@ -8,13 +8,22 @@ interface MacroRowProps {
   unit: string;
 }
 
+function barColor(pct: number, isOver: boolean): string {
+  if (isOver) return 'var(--status-down)';
+  if (pct >= 0.8) return 'var(--status-up)';
+  if (pct >= 0.4) return 'var(--status-mid)';
+  return 'var(--ink-3)';
+}
+
 export default function MacroRow({ label, current, target, unit }: MacroRowProps) {
   const animated = useCountUp(current);
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
 
-  const pct = target ? Math.min(current / target, 1) : 0;
+  const rawPct = target ? current / target : 0;
+  const pct    = Math.min(rawPct, 1);
   const isOver = target !== null && current > target;
+  const color  = barColor(rawPct, isOver);
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -50,7 +59,7 @@ export default function MacroRow({ label, current, target, unit }: MacroRowProps
             left: 0,
             bottom: 0,
             width: mounted ? `${pct * 100}%` : '0%',
-            background: isOver ? 'rgba(232,227,216,0.90)' : 'var(--bar-fill)',
+            background: color,
             borderRadius: 2,
             transition: 'width 320ms var(--ease-data) 80ms',
           }}
@@ -65,7 +74,7 @@ export default function MacroRow({ label, current, target, unit }: MacroRowProps
             fontWeight: 500,
             letterSpacing: '-0.01em',
             fontVariantNumeric: 'tabular-nums',
-            color: 'var(--ink-0)',
+            color,
           }}
         >
           {animated}{unit}

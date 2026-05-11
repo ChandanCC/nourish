@@ -89,6 +89,31 @@ export async function deleteLogEntry(entryId: string): Promise<FoodEntry> {
   return data.data;
 }
 
-export async function saveOnboarding(goal: UserGoal, proteinTargetG: number): Promise<void> {
-  await client.patch('/user/onboarding', { goal, protein_target: proteinTargetG });
+export interface EditEntryPayload {
+  rawInput: string;
+  name: string;
+  calories: number;
+  proteinG: number;
+  carbsG: number;
+  fatG: number;
+  fiberG: number;
+  parseNote: string | null;
+  parsedByModel: string;
+  ironMg: number;
+  calciumMg: number;
+  vitaminDMcg: number;
+  vitaminB12Mcg: number;
+  magnesiumMg: number;
+  zincMg: number;
+  potassiumMg: number;
+  sodiumMg: number;
+}
+
+export async function editLogEntry(entryId: string, payload: EditEntryPayload): Promise<FoodEntry> {
+  const { data } = await client.patch<{ data: FoodEntry }>(`/logs/${entryId}`, payload);
+  return data.data;
+}
+
+export async function saveOnboarding(goal: UserGoal, weightKg: number): Promise<void> {
+  await client.patch('/user/onboarding', { goal, weight_kg: weightKg });
 }

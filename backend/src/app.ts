@@ -17,7 +17,7 @@ const analyseLimiter = rateLimit({
   max: 10,
   keyGenerator: (req) => req.user?.userId ?? req.ip ?? 'unknown',
   handler: (_req, res) => res.status(429).json({ error: 'rate_limit', retryAfter: 60 }),
-  validate: { xForwardedForHeader: false },
+  validate: { xForwardedForHeader: false, keyGeneratorIpFallback: false },
 });
 
 const app = express();

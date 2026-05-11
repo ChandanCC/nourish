@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { FoodEntry } from '../models/FoodEntry';
 import { computeDayAggregate } from '../services/computeDayAggregate';
 import { validate } from '../middleware/validate';
+import { normalizeInput, storeFoodMemory } from '../services/foodMemory';
 
 const CONFIDENCE_VALUES = ['recalled','estimated','low_confidence','matched','verified','user_corrected'] as const;
 const SOURCE_TYPE_VALUES = ['personal_memory','ai_estimate','authoritative_db','user_input'] as const;
@@ -126,6 +127,73 @@ router.post('/', validate(logEntrySchema), async (req: Request, res: Response) =
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to create entry' });
+  }
+});
+
+const editEntrySchema = z.object({
+  rawInput:      z.string().min(1).max(2000),
+  name:          z.string().min(1).max(200),
+  calories:      z.number().int().min(0).max(10000),
+  proteinG:      z.number().min(0).max(500).default(0),
+  carbsG:        z.number().min(0).max(1000).default(0),
+  fatG:          z.number().min(0).max(500).default(0),
+  fiberG:        z.number().min(0).max(200).default(0),
+  parseNote:     z.string().max(500).nullable().default(null),
+  parsedByModel: z.string().max(150).default('user_edit'),
+  ironMg:        z.number().min(0).default(0),
+  calciumMg:     z.number().min(0).default(0),
+  vitaminDMcg:   z.number().min(0).default(0),
+  vitaminB12Mcg: z.number().min(0).default(0),
+  magnesiumMg:   z.number().min(0).default(0),
+  zincMg:        z.number().min(0).default(0),
+  potassiumMg:   z.number().min(0).default(0),
+  sodiumMg:      z.number().min(0).default(0),
+});
+
+// PATCH /api/logs/:id  — re-analyse edit: updates rawInput + all nutrition, marks user_corrected
+router.patch('/:id', validate(editEntrySchema), async (req: Request, res: Response) => {
+  try {
+    const userId  = new Types.ObjectId(req.user!.userId);
+    const entryId = new Types.ObjectId(String(req.params['id']));
+    const {
+      rawInput, name, calories, proteinG, carbsG, fatG, fiberG,
+      parseNote, parsedByModel,
+      ironMg, calciumMg, vitaminDMcg, vitaminB12Mcg, magnesiumMg, zincMg, potassiumMg, sodiumMg,
+    } = req.body;
+
+    const entry = await FoodEntry.findOneAndUpdate(
+      { _id: entryId, userId, isDeleted: false },
+      {
+        $set: {
+          rawInput,
+          name,
+          calories: Math.round(calories),
+          proteinG, carbsG, fatG, fiberG,
+          parseNote, parsedByModel,
+          ironMg, calciumMg, vitaminDMcg, vitaminB12Mcg, magnesiumMg, zincMg, potassiumMg, sodiumMg,
+          confidence: 'user_corrected',
+          sourceType: 'user_input',
+        },
+      },
+      { new: true },
+    );
+
+    if (!entry) {
+      res.status(404).json({ error: 'Entry not found' });
+      return;
+    }
+
+    await computeDayAggregate(userId, entry.mealDate);
+
+    await storeFoodMemory(userId, normalizeInput(rawInput), {
+      name, calories, proteinG, carbsG, fatG, fiberG, parseNote,
+      ironMg, calciumMg, vitaminDMcg, vitaminB12Mcg, magnesiumMg, zincMg, potassiumMg, sodiumMg,
+    }, 'user_edit', 'user_corrected');
+
+    res.json({ data: entry });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update entry' });
   }
 });
 

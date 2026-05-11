@@ -23,6 +23,14 @@ export interface FoodEntrySummary {
   fatG: number;
   fiberG: number;
   parseNote: string | null;
+  ironMg: number;
+  calciumMg: number;
+  vitaminDMcg: number;
+  vitaminB12Mcg: number;
+  magnesiumMg: number;
+  zincMg: number;
+  potassiumMg: number;
+  sodiumMg: number;
 }
 
 export interface MacroTargets {
@@ -71,28 +79,31 @@ export interface HomeScreenPayload {
   onboardingComplete: boolean;
 }
 
-function computeMacroTargets(goal: string | null, proteinTargetG: number): MacroTargets {
-  const p = proteinTargetG;
-  let calorieTarget: number;
-  let fatTargetG: number;
-  let fiberTargetG: number;
+const KCAL_PER_KG: Record<string, number> = {
+  muscle_gain: 38,
+  fat_loss:    28,
+  performance: 40,
+  maintenance: 33,
+};
 
-  if (goal === 'muscle_gain') {
-    calorieTarget = Math.round(p * 4 / 0.30);
-    fatTargetG    = Math.round(calorieTarget * 0.28 / 9);
-    fiberTargetG  = 30;
-  } else if (goal === 'fat_loss') {
-    calorieTarget = Math.round(p * 4 / 0.35);
-    fatTargetG    = Math.round(calorieTarget * 0.25 / 9);
-    fiberTargetG  = 35;
+function computeMacroTargets(goal: string | null, proteinTargetG: number, weightKg: number): MacroTargets {
+  const p = proteinTargetG;
+  const g = goal ?? 'maintenance';
+
+  let calorieTarget: number;
+  if (weightKg > 0) {
+    calorieTarget = Math.round((KCAL_PER_KG[g] ?? 33) * weightKg);
   } else {
-    // maintenance / performance / null
-    calorieTarget = Math.round(p * 4 / 0.28);
-    fatTargetG    = Math.round(calorieTarget * 0.30 / 9);
-    fiberTargetG  = 30;
+    // legacy fallback for users without weight set
+    const ratio = g === 'muscle_gain' ? 0.30 : g === 'fat_loss' ? 0.35 : 0.28;
+    calorieTarget = Math.round(p * 4 / ratio);
   }
 
+  const fatPct     = g === 'fat_loss' ? 0.25 : 0.28;
+  const fatTargetG = Math.round(calorieTarget * fatPct / 9);
+  const fiberTargetG = g === 'fat_loss' ? 35 : 30;
   const carbsTargetG = Math.max(0, Math.round((calorieTarget - p * 4 - fatTargetG * 9) / 4));
+
   return { calories: calorieTarget, protein: p, carbs: carbsTargetG, fat: fatTargetG, fiber: fiberTargetG };
 }
 
@@ -151,7 +162,7 @@ router.get('/', async (req: Request, res: Response) => {
         fat:      todayAgg?.totalFatG      ?? 0,
         fiber:    todayAgg?.totalFiberG    ?? 0,
         entryCount: todayAgg?.entryCount   ?? 0,
-        targets: computeMacroTargets(userDoc?.goal ?? null, userDoc?.proteinTargetG ?? 160),
+        targets: computeMacroTargets(userDoc?.goal ?? null, userDoc?.proteinTargetG ?? 160, userDoc?.weightKg ?? 0),
         micros: {
           iron:       todayAgg?.totalIronMg        ?? 0,
           calcium:    todayAgg?.totalCalciumMg     ?? 0,
@@ -187,6 +198,14 @@ router.get('/', async (req: Request, res: Response) => {
         fatG: e.fatG,
         fiberG: e.fiberG,
         parseNote: e.parseNote,
+        ironMg:        e.ironMg        ?? 0,
+        calciumMg:     e.calciumMg     ?? 0,
+        vitaminDMcg:   e.vitaminDMcg   ?? 0,
+        vitaminB12Mcg: e.vitaminB12Mcg ?? 0,
+        magnesiumMg:   e.magnesiumMg   ?? 0,
+        zincMg:        e.zincMg        ?? 0,
+        potassiumMg:   e.potassiumMg   ?? 0,
+        sodiumMg:      e.sodiumMg      ?? 0,
       })),
       userId: req.user!.userId,
       onboardingComplete: userDoc?.onboardingComplete ?? false,

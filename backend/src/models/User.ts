@@ -12,6 +12,7 @@ export interface IUser extends Document {
   onboardingComplete: boolean;
   goal: UserGoal | null;
   proteinTargetG: number;
+  weightKg: number;
   createdAt: Date;
   lastSeenAt: Date;
 }
@@ -26,6 +27,7 @@ const UserSchema = new Schema<IUser>(
     onboardingComplete: { type: Boolean, default: false },
     goal:               { type: String, default: null },
     proteinTargetG:     { type: Number, default: 160 },
+    weightKg:           { type: Number, default: 0 },
     lastSeenAt:         { type: Date, default: Date.now },
   },
   { timestamps: true },

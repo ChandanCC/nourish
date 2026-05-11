@@ -24,9 +24,9 @@ const MICRO_CONFIG: Array<{ key: keyof Omit<DayMicros, 'isEstimated'>; label: st
 ];
 
 const STATUS_COLOR: Record<string, string> = {
-  green:  'var(--status-green)',
-  yellow: 'var(--status-yellow)',
-  red:    'var(--status-red)',
+  green:  'var(--status-up)',
+  yellow: 'var(--status-mid)',
+  red:    'var(--status-down)',
   dim:    'var(--ink-3)',
 };
 
