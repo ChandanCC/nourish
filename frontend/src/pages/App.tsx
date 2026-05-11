@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { useHomeScreen, useLogEntry, useDeleteEntry, useEditEntry } from '../hooks/useHomeScreen';
+import { useHomeScreen, useHomeForDate, useLogEntry, useDeleteEntry, useEditEntry } from '../hooks/useHomeScreen';
 import { getTodayKey, analyseFood } from '../lib/nutrition';
 import type { EditEntryPayload } from '../api/client';
 import HomeScreen from '../components/HomeScreen';
@@ -55,6 +55,20 @@ export default function App() {
 
   const waveformDays = homeData?.waveform ?? [];
   const effectiveIndex = selectedDayIndex ?? 6; // today is always at index 6 in the 7-day waveform
+
+  // Compute the date corresponding to the selected waveform bar
+  const isViewingToday = effectiveIndex === 6;
+  const selectedDate = (() => {
+    if (isViewingToday) return null;
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - effectiveIndex));
+    return d.toISOString().split('T')[0];
+  })();
+
+  const { data: pastDayData } = useHomeForDate(selectedDate);
+
+  // Active data: past day when a bar is selected, today's home data otherwise
+  const activeData = isViewingToday ? homeData : (pastDayData ?? homeData);
 
   // Show first-time SIGNAL explanation once per device after onboarding
   useEffect(() => {
@@ -158,8 +172,8 @@ export default function App() {
   }
 
   const signal = homeData?.signal;
-  const todayData = homeData?.today;
-  const entries = homeData?.entries ?? [];
+  const todayData = activeData?.today;
+  const entries = activeData?.entries ?? [];
 
   return (
     <>

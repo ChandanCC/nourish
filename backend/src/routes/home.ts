@@ -119,26 +119,34 @@ router.get('/', async (req: Request, res: Response) => {
   try {
     const userId = new Types.ObjectId(req.user!.userId);
     const userDoc = await User.findById(userId).lean();
-    const today = new Date().toISOString().split('T')[0];
+    const realToday = new Date().toISOString().split('T')[0];
 
-    // Fetch last 7 days of aggregates for waveform
+    // Optional date param — must be YYYY-MM-DD and within the last 7 days
+    const dateParam = typeof req.query.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(req.query.date)
+      ? req.query.date
+      : null;
+    const viewDate = dateParam ?? realToday;
+
+    // Fetch last 7 days of aggregates for waveform (always anchored to real today)
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
     const windowStart = sevenDaysAgo.toISOString().split('T')[0];
 
     const aggregates = await DayAggregate.find({
       userId,
-      date: { $gte: windowStart, $lte: today },
+      date: { $gte: windowStart, $lte: realToday },
     })
       .sort({ date: 1 })
       .lean();
 
-    const todayAgg = aggregates.find(a => a.date === today);
+    // Aggregate for the viewed date (may be today or a past day in the window)
+    const viewAgg = aggregates.find(a => a.date === viewDate)
+      ?? (dateParam ? await DayAggregate.findOne({ userId, date: viewDate }).lean() : null);
 
-    // Fetch today's entries for LOG zone (non-deleted, most recent first)
-    const todayEntries = await FoodEntry.find({
+    // Entries for the viewed date
+    const viewEntries = await FoodEntry.find({
       userId,
-      mealDate: today,
+      mealDate: viewDate,
       isDeleted: false,
     })
       .sort({ loggedAt: -1 })
@@ -155,24 +163,24 @@ router.get('/', async (req: Request, res: Response) => {
 
     const payload: HomeScreenPayload = {
       today: {
-        date: today,
-        calories: todayAgg?.totalCalories ?? 0,
-        protein:  todayAgg?.totalProteinG  ?? 0,
-        carbs:    todayAgg?.totalCarbsG    ?? 0,
-        fat:      todayAgg?.totalFatG      ?? 0,
-        fiber:    todayAgg?.totalFiberG    ?? 0,
-        entryCount: todayAgg?.entryCount   ?? 0,
+        date: viewDate,
+        calories: viewAgg?.totalCalories ?? 0,
+        protein:  viewAgg?.totalProteinG  ?? 0,
+        carbs:    viewAgg?.totalCarbsG    ?? 0,
+        fat:      viewAgg?.totalFatG      ?? 0,
+        fiber:    viewAgg?.totalFiberG    ?? 0,
+        entryCount: viewAgg?.entryCount   ?? 0,
         targets: computeMacroTargets(userDoc?.goal ?? null, userDoc?.proteinTargetG ?? 160, userDoc?.weightKg ?? 0),
         micros: {
-          iron:       todayAgg?.totalIronMg        ?? 0,
-          calcium:    todayAgg?.totalCalciumMg     ?? 0,
-          vitaminD:   todayAgg?.totalVitaminDMcg   ?? 0,
-          vitaminB12: todayAgg?.totalVitaminB12Mcg ?? 0,
-          magnesium:  todayAgg?.totalMagnesiumMg   ?? 0,
-          zinc:       todayAgg?.totalZincMg        ?? 0,
-          potassium:  todayAgg?.totalPotassiumMg   ?? 0,
-          sodium:     todayAgg?.totalSodiumMg      ?? 0,
-          isEstimated: todayEntries.some(e => e.confidence !== 'recalled' && e.confidence !== 'user_corrected'),
+          iron:       viewAgg?.totalIronMg        ?? 0,
+          calcium:    viewAgg?.totalCalciumMg     ?? 0,
+          vitaminD:   viewAgg?.totalVitaminDMcg   ?? 0,
+          vitaminB12: viewAgg?.totalVitaminB12Mcg ?? 0,
+          magnesium:  viewAgg?.totalMagnesiumMg   ?? 0,
+          zinc:       viewAgg?.totalZincMg        ?? 0,
+          potassium:  viewAgg?.totalPotassiumMg   ?? 0,
+          sodium:     viewAgg?.totalSodiumMg      ?? 0,
+          isEstimated: viewEntries.some(e => e.confidence !== 'recalled' && e.confidence !== 'user_corrected'),
         },
       },
       signal: {
@@ -186,7 +194,7 @@ router.get('/', async (req: Request, res: Response) => {
         isStale: false,
       },
       waveform,
-      entries: todayEntries.map(e => ({
+      entries: viewEntries.map(e => ({
         _id: e._id.toString(),
         mealDate: e.mealDate,
         loggedAt: e.loggedAt.toISOString(),

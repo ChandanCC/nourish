@@ -53,6 +53,11 @@ export async function fetchHomeScreen(): Promise<HomeScreenPayload> {
   return data;
 }
 
+export async function fetchHomeScreenForDate(date: string): Promise<HomeScreenPayload> {
+  const { data } = await client.get<HomeScreenPayload>('/home', { params: { date } });
+  return data;
+}
+
 export interface LogEntryPayload {
   rawInput: string;
   name: string;
