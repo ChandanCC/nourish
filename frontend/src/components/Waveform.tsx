@@ -1,3 +1,5 @@
+import { useState, useEffect } from 'react';
+
 interface WaveformDay {
   calories: number;
   isToday: boolean;
@@ -11,12 +13,13 @@ interface WaveformProps {
   onDaySelect?: (index: number) => void;
 }
 
-const BASELINE_Y = 40;   // px from top of bar area
-const MAX_SURPLUS = 38;  // max pixels above baseline
-const MAX_DEFICIT = 22;  // max pixels below baseline (leaves room for labels)
-const BAR_AREA_H = 68;   // total height before labels
-const LABEL_H   = 16;    // height reserved for day labels
+const BASELINE_Y = 40;
+const MAX_SURPLUS = 38;
+const MAX_DEFICIT = 22;
+const BAR_AREA_H = 68;
+const LABEL_H   = 16;
 const CONTAINER_H = BAR_AREA_H + LABEL_H; // 84px
+const TODAY_IDX = 6; // today is always last in the 7-day array
 
 function surplusHeight(calories: number, baseline: number): number {
   if (calories <= baseline) return 0;
@@ -28,27 +31,17 @@ function deficitHeight(calories: number, baseline: number): number {
   return Math.min(((baseline - calories) / baseline) * MAX_DEFICIT * 2, MAX_DEFICIT);
 }
 
-const MOCK_DAYS: WaveformDay[] = [
-  { calories: 1620, isToday: false, label: 'MON' },
-  { calories: 1850, isToday: false, label: 'TUE' },
-  { calories: 2180, isToday: false, label: 'WED' },
-  { calories: 1400, isToday: false, label: 'THU' },
-  { calories: 1960, isToday: false, label: 'FRI' },
-  { calories: 2250, isToday: false, label: 'SAT' },
-  { calories: 1720, isToday: true,  label: 'SUN' },
-];
-const MOCK_BASELINE = 1850;
-
-import { useState, useEffect } from 'react';
-
 export default function Waveform({
-  days = MOCK_DAYS,
-  selectedDay = 6,
-  baseline = MOCK_BASELINE,
+  days,
+  selectedDay = TODAY_IDX,
+  baseline = 1850,
   onDaySelect,
 }: WaveformProps) {
   const [mounted, setMounted] = useState(false);
+  const [hoveredDay, setHoveredDay] = useState<number | null>(null);
   useEffect(() => { setMounted(true); }, []);
+
+  const hasNonTodaySelected = selectedDay !== TODAY_IDX;
 
   return (
     <div
@@ -59,7 +52,7 @@ export default function Waveform({
         display: 'flex',
       }}
     >
-      {/* Baseline axis — full width */}
+      {/* Baseline axis */}
       <div
         style={{
           position: 'absolute',
@@ -73,35 +66,61 @@ export default function Waveform({
         }}
       />
 
-      {/* Bar columns */}
       {days.map((day, i) => {
         const isSelected = i === selectedDay;
+        const isHovered = i === hoveredDay;
         const isSurplus = day.calories > baseline;
-        const barH = isSurplus
+        const isEmpty = day.calories === 0;
+
+        const barH = isEmpty ? 0 : isSurplus
           ? surplusHeight(day.calories, baseline)
           : deficitHeight(day.calories, baseline);
+
         const barColor = day.isToday
           ? 'var(--wave-today)'
           : isSurplus
           ? 'var(--wave-surplus)'
           : 'var(--wave-deficit)';
-        const barOpacity = isSelected ? 1 : 0.75;
+
+        // Opacity: selected=1, hovered=0.8, dim others when non-today selected
+        let barOpacity: number;
+        if (isSelected) {
+          barOpacity = 1;
+        } else if (isHovered) {
+          barOpacity = hasNonTodaySelected ? 0.55 : 0.8;
+        } else if (hasNonTodaySelected) {
+          barOpacity = day.isToday ? 0.45 : 0.3;
+        } else {
+          barOpacity = day.isToday ? 1 : 0.55;
+        }
+
+        const labelColor = day.isToday || isSelected
+          ? 'var(--ink-1)'
+          : isHovered
+          ? 'var(--ink-2)'
+          : 'var(--ink-3)';
 
         return (
           <div
             key={i}
             onClick={() => onDaySelect?.(i)}
+            onMouseEnter={() => setHoveredDay(i)}
+            onMouseLeave={() => setHoveredDay(null)}
             style={{
               flex: 1,
               position: 'relative',
               cursor: 'pointer',
               height: CONTAINER_H,
+              borderRadius: 3,
+              background: isHovered ? 'rgba(232,227,216,0.03)' : 'transparent',
+              transition: 'background 100ms linear',
             }}
             role="button"
-            aria-label={`${day.label} ${day.calories} kcal`}
+            aria-label={`${day.label} ${isEmpty ? 'no data' : `${day.calories} kcal`}`}
+            aria-pressed={isSelected}
           >
-            {/* Bar */}
-            {day.calories > 0 && barH > 0 && (
+            {/* Bar — only rendered when there is data */}
+            {!isEmpty && barH > 0 && (
               <div
                 style={{
                   position: 'absolute',
@@ -139,13 +158,13 @@ export default function Waveform({
                 justifyContent: 'center',
                 fontSize: 9,
                 fontFamily: 'var(--font-mono)',
-                fontWeight: 400,
+                fontWeight: isSelected || day.isToday ? 500 : 400,
                 letterSpacing: '0.06em',
-                textTransform: 'uppercase',
-                color: day.isToday || isSelected ? 'var(--ink-1)' : 'var(--ink-3)',
+                color: labelColor,
+                transition: 'color 150ms linear',
               }}
             >
-              {day.label.slice(0, 1)}
+              {day.label}
             </div>
           </div>
         );

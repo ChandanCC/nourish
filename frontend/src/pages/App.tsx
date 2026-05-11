@@ -54,7 +54,7 @@ export default function App() {
   const today = getTodayKey();
 
   const waveformDays = homeData?.waveform ?? [];
-  const effectiveIndex = selectedDayIndex ?? (waveformDays.length > 0 ? waveformDays.length - 1 : 0);
+  const effectiveIndex = selectedDayIndex ?? 6; // today is always at index 6 in the 7-day waveform
 
   // Show first-time SIGNAL explanation once per device after onboarding
   useEffect(() => {
@@ -182,6 +182,7 @@ export default function App() {
             aiInstruction={signal?.aiInstruction ?? null}
             waveformDays={waveformDays}
             selectedDayIndex={effectiveIndex}
+            baseline={todayData?.targets?.calories ?? 1850}
             onDaySelect={setSelectedDayIndex}
           />
         </ErrorBoundary>
