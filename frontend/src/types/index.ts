@@ -89,8 +89,11 @@ export interface HomeScreenPayload {
     fiber: number;
     entryCount: number;
     targets: {
-      calories: number | null;
+      calories: number;
       protein: number;
+      carbs: number;
+      fat: number;
+      fiber: number;
     };
   };
   signal: {

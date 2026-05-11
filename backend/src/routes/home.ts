@@ -25,6 +25,14 @@ export interface FoodEntrySummary {
   parseNote: string | null;
 }
 
+export interface MacroTargets {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  fiber: number;
+}
+
 export interface HomeScreenPayload {
   today: {
     date: string;
@@ -34,10 +42,7 @@ export interface HomeScreenPayload {
     fat: number;
     fiber: number;
     entryCount: number;
-    targets: {
-      calories: number | null;
-      protein: number;
-    };
+    targets: MacroTargets;
   };
   signal: {
     state: string;
@@ -51,6 +56,31 @@ export interface HomeScreenPayload {
   entries: FoodEntrySummary[];
   userId: string;
   onboardingComplete: boolean;
+}
+
+function computeMacroTargets(goal: string | null, proteinTargetG: number): MacroTargets {
+  const p = proteinTargetG;
+  let calorieTarget: number;
+  let fatTargetG: number;
+  let fiberTargetG: number;
+
+  if (goal === 'muscle_gain') {
+    calorieTarget = Math.round(p * 4 / 0.30);
+    fatTargetG    = Math.round(calorieTarget * 0.28 / 9);
+    fiberTargetG  = 30;
+  } else if (goal === 'fat_loss') {
+    calorieTarget = Math.round(p * 4 / 0.35);
+    fatTargetG    = Math.round(calorieTarget * 0.25 / 9);
+    fiberTargetG  = 35;
+  } else {
+    // maintenance / performance / null
+    calorieTarget = Math.round(p * 4 / 0.28);
+    fatTargetG    = Math.round(calorieTarget * 0.30 / 9);
+    fiberTargetG  = 30;
+  }
+
+  const carbsTargetG = Math.max(0, Math.round((calorieTarget - p * 4 - fatTargetG * 9) / 4));
+  return { calories: calorieTarget, protein: p, carbs: carbsTargetG, fat: fatTargetG, fiber: fiberTargetG };
 }
 
 function formatDelta(pct: number): string {
@@ -108,10 +138,7 @@ router.get('/', async (req: Request, res: Response) => {
         fat:      todayAgg?.totalFatG      ?? 0,
         fiber:    todayAgg?.totalFiberG    ?? 0,
         entryCount: todayAgg?.entryCount   ?? 0,
-        targets: {
-          calories: null,
-          protein:  todayAgg?.proteinTargetG ?? 160,
-        },
+        targets: computeMacroTargets(userDoc?.goal ?? null, userDoc?.proteinTargetG ?? 160),
       },
       signal: {
         state: currentSignal?.state ?? 'READING',

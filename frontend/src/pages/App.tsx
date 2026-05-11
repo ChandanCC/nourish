@@ -65,9 +65,10 @@ export default function App() {
     if (!homeData?.onboardingComplete) return;
     if (signalTriggerFired.current) return;
     signalTriggerFired.current = true;
-    fetch('/api/signal/recompute', {
+    const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+    fetch(`${apiBase}/signal/recompute`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${localStorage.getItem('nouriq_token')}` },
+      headers: { Authorization: `Bearer ${localStorage.getItem('nourish_token')}` },
     }).catch(() => { /* non-critical */ });
   }, [homeData?.onboardingComplete]);
 
@@ -169,8 +170,12 @@ export default function App() {
 
         <ErrorBoundary>
           <TodayZone
+            calories={todayData?.calories ?? 0}
             protein={todayData?.protein ?? 0}
-            proteinTarget={todayData?.targets.protein ?? 160}
+            carbs={todayData?.carbs ?? 0}
+            fat={todayData?.fat ?? 0}
+            fiber={todayData?.fiber ?? 0}
+            targets={todayData?.targets ?? { calories: 2000, protein: 160, carbs: 200, fat: 65, fiber: 30 }}
             aiInstruction={signal?.aiInstruction ?? null}
           />
         </ErrorBoundary>
