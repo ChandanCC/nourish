@@ -164,6 +164,8 @@ export default function App() {
   return (
     <>
       <HomeScreen
+        user={user}
+        onLogout={logout}
         input={input}
         setInput={setInput}
         analysing={analysing}
@@ -174,8 +176,6 @@ export default function App() {
       >
         <ErrorBoundary>
           <SignalZone
-            user={user}
-            onLogout={logout}
             state={signal?.state ?? 'READING'}
             subtitle={signal?.subtitle ?? null}
             delta={signal?.delta ?? null}

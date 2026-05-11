@@ -1,5 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
-import type { AuthUser } from '../lib/auth';
+import { useState, useEffect } from 'react';
 import type { HomeWaveformDay } from '../types';
 import SignalHero from './SignalHero';
 
@@ -16,8 +15,6 @@ function toWaveformBarDays(days: HomeWaveformDay[]) {
 }
 
 interface SignalZoneProps {
-  user: AuthUser | null;
-  onLogout: () => void;
   state: string;
   subtitle: string | null;
   delta: string | null;
@@ -28,74 +25,24 @@ interface SignalZoneProps {
 }
 
 export default function SignalZone({
-  user, onLogout,
   state, subtitle, delta,
   waveformDays, selectedDayIndex, onDaySelect,
 }: SignalZoneProps) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const [visible, setVisible] = useState(false);
-  const sentinelRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsCollapsed(!entry.isIntersecting),
-      { threshold: 0, rootMargin: '-44px 0px 0px 0px' }
-    );
-
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, []);
-
   useEffect(() => { setVisible(true); }, []);
 
   const barDays = toWaveformBarDays(waveformDays);
 
   return (
     <div style={{ opacity: visible ? 1 : 0, transition: 'opacity 400ms linear' }}>
-      {/* Collapsed strip (sticky) */}
-      {isCollapsed && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: 20,
-            display: 'flex',
-            justifyContent: 'center',
-          }}
-        >
-          <div style={{ width: '100%', maxWidth: '32rem' }}>
-            <SignalHero
-              state={state}
-              subtitle={subtitle}
-              delta={delta}
-              isCollapsed={true}
-              user={user}
-              onLogout={onLogout}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Full hero with live waveform */}
       <SignalHero
         state={state}
         subtitle={subtitle}
         delta={delta}
-        isCollapsed={false}
-        user={user}
-        onLogout={onLogout}
         waveformDays={barDays}
         selectedDay={selectedDayIndex}
         onDaySelect={onDaySelect}
       />
-
-      {/* Sentinel: when this leaves the viewport, collapse triggers */}
-      <div ref={sentinelRef} style={{ height: 0 }} />
     </div>
   );
 }
