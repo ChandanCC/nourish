@@ -95,6 +95,17 @@ export interface HomeScreenPayload {
       fat: number;
       fiber: number;
     };
+    micros: {
+      iron: number;
+      calcium: number;
+      vitaminD: number;
+      vitaminB12: number;
+      magnesium: number;
+      zinc: number;
+      potassium: number;
+      sodium: number;
+      isEstimated: boolean;
+    };
   };
   signal: {
     state: string;

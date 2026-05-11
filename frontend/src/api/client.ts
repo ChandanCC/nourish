@@ -66,6 +66,14 @@ export interface LogEntryPayload {
   confidence: string;
   sourceType: string;
   sourceId: string | null;
+  ironMg: number;
+  calciumMg: number;
+  vitaminDMcg: number;
+  vitaminB12Mcg: number;
+  magnesiumMg: number;
+  zincMg: number;
+  potassiumMg: number;
+  sodiumMg: number;
   idempotencyKey: string;
 }
 

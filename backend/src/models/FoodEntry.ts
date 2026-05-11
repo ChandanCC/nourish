@@ -34,7 +34,16 @@ export interface IFoodEntry extends Document {
 
   confidence: NutritionConfidence;
   sourceType: SourceType;
-  sourceId: string | null;  // audit only — which memory/DB record matched; not a live join
+  sourceId: string | null;
+
+  ironMg: number;
+  calciumMg: number;
+  vitaminDMcg: number;
+  vitaminB12Mcg: number;
+  magnesiumMg: number;
+  zincMg: number;
+  potassiumMg: number;
+  sodiumMg: number;
 
   isDeleted: boolean;
   deletedAt: Date | null;
@@ -64,6 +73,15 @@ const FoodEntrySchema = new Schema<IFoodEntry>(
     confidence:     { type: String, enum: ['recalled','estimated','low_confidence','matched','verified','user_corrected'], required: true },
     sourceType:     { type: String, enum: ['personal_memory','ai_estimate','authoritative_db','user_input'], required: true },
     sourceId:       { type: String, default: null },
+
+    ironMg:         { type: Number, default: 0 },
+    calciumMg:      { type: Number, default: 0 },
+    vitaminDMcg:    { type: Number, default: 0 },
+    vitaminB12Mcg:  { type: Number, default: 0 },
+    magnesiumMg:    { type: Number, default: 0 },
+    zincMg:         { type: Number, default: 0 },
+    potassiumMg:    { type: Number, default: 0 },
+    sodiumMg:       { type: Number, default: 0 },
 
     isDeleted:      { type: Boolean, default: false },
     deletedAt:      { type: Date, default: null },

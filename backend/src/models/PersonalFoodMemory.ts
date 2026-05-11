@@ -12,7 +12,15 @@ export interface IPersonalFoodMemory extends Document {
   fiberG: number;
   parseNote: string | null;
   confidence: NutritionConfidence;
-  sourceModel: string;      // canonical "provider:model" that generated this estimate
+  sourceModel: string;
+  ironMg: number;
+  calciumMg: number;
+  vitaminDMcg: number;
+  vitaminB12Mcg: number;
+  magnesiumMg: number;
+  zincMg: number;
+  potassiumMg: number;
+  sodiumMg: number;
   hitCount: number;
   lastUsedAt: Date;
   createdAt: Date;
@@ -32,6 +40,14 @@ const PersonalFoodMemorySchema = new Schema<IPersonalFoodMemory>(
     parseNote:      { type: String, default: null },
     confidence:     { type: String, required: true },
     sourceModel:    { type: String, required: true },
+    ironMg:         { type: Number, default: 0 },
+    calciumMg:      { type: Number, default: 0 },
+    vitaminDMcg:    { type: Number, default: 0 },
+    vitaminB12Mcg:  { type: Number, default: 0 },
+    magnesiumMg:    { type: Number, default: 0 },
+    zincMg:         { type: Number, default: 0 },
+    potassiumMg:    { type: Number, default: 0 },
+    sodiumMg:       { type: Number, default: 0 },
     hitCount:       { type: Number, default: 1 },
     lastUsedAt:     { type: Date, default: Date.now },
   },

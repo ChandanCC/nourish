@@ -15,6 +15,15 @@ export interface IDayAggregate extends Document {
   proteinTargetG: number;
   proteinAdherencePct: number;
 
+  totalIronMg: number;
+  totalCalciumMg: number;
+  totalVitaminDMcg: number;
+  totalVitaminB12Mcg: number;
+  totalMagnesiumMg: number;
+  totalZincMg: number;
+  totalPotassiumMg: number;
+  totalSodiumMg: number;
+
   trainingLogged: boolean;
   trainingSessionIds: Types.ObjectId[];
   totalVolumeKg: number | null;
@@ -40,6 +49,15 @@ const DayAggregateSchema = new Schema<IDayAggregate>(
 
     proteinTargetG:        { type: Number, default: 0 },
     proteinAdherencePct:   { type: Number, default: 0 },
+
+    totalIronMg:        { type: Number, default: 0 },
+    totalCalciumMg:     { type: Number, default: 0 },
+    totalVitaminDMcg:   { type: Number, default: 0 },
+    totalVitaminB12Mcg: { type: Number, default: 0 },
+    totalMagnesiumMg:   { type: Number, default: 0 },
+    totalZincMg:        { type: Number, default: 0 },
+    totalPotassiumMg:   { type: Number, default: 0 },
+    totalSodiumMg:      { type: Number, default: 0 },
 
     trainingLogged:        { type: Boolean, default: false },
     trainingSessionIds:    { type: [Schema.Types.ObjectId], default: [] },

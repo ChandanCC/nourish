@@ -8,27 +8,34 @@ const router = Router();
 
 const MEAL_PARSING_PROMPT = `You are a precise nutrition parser. The user will describe what they ate.
 
+IMPORTANT: Always return a SINGLE JSON object representing the total meal, even if multiple foods are listed.
+If multiple foods are described (as a list, with bullet points, or separated by commas/newlines), sum all nutritional values into one combined entry and write a concise name like "Lunch — chapati, sabzi, buttermilk".
+
 Extract:
-- A clean, readable name for the entry (short, no measurement units in the name)
-- Calories (kcal, integer)
-- Protein (g, integer)
-- Carbohydrates (g, integer)
-- Fat (g, integer)
-- Fiber (g, integer)
+- A clean, readable name for the combined entry (short summary, no raw measurements in the name)
+- Total calories (kcal, integer) — sum of all items
+- Total protein (g, integer) — sum of all items
+- Total carbohydrates (g, integer) — sum of all items
+- Total fat (g, integer) — sum of all items
+- Total fiber (g, integer) — sum of all items
 - Your confidence in this estimate
 
-Return ONLY a JSON object. No explanation. No markdown. No prose.
+Return ONLY a JSON object. No explanation. No markdown. No prose. No arrays.
 
 Use standard reference values for foods. If a portion size is not specified, use a standard serving.
 If you cannot identify a food item, use your best estimate and flag it.
 For Indian food, use IFCT reference values.
 
 confidence rules:
-- "high": well-known food with standard portion, reliable estimate
-- "medium": reasonable estimate but portion or preparation unclear
-- "low": unfamiliar food, highly ambiguous description, or significant uncertainty
+- "high": well-known foods with clear portions, reliable estimate
+- "medium": reasonable estimate but some portions or preparations are unclear
+- "low": multiple unfamiliar foods or highly ambiguous descriptions
 
-Format:
+Also estimate these micronutrients (combined total across all items):
+- iron_mg, calcium_mg, vitamin_d_mcg, vitamin_b12_mcg, magnesium_mg, zinc_mg, potassium_mg, sodium_mg
+Use standard food composition values. Use 0 if genuinely unknown.
+
+Format (single object, always):
 {
   "name": "string",
   "calories": number,
@@ -37,10 +44,45 @@ Format:
   "fat": number,
   "fiber": number,
   "note": "string | null",
-  "confidence": "high" | "medium" | "low"
+  "confidence": "high" | "medium" | "low",
+  "iron_mg": number,
+  "calcium_mg": number,
+  "vitamin_d_mcg": number,
+  "vitamin_b12_mcg": number,
+  "magnesium_mg": number,
+  "zinc_mg": number,
+  "potassium_mg": number,
+  "sodium_mg": number
 }
 
-The "note" field: include only if there is something important about the parse — e.g., "Portion size assumed as 1 medium chicken breast (150g). Adjust if different." Null otherwise.`;
+The "note" field: include only if there is something important — e.g., assumptions made about portions. Null otherwise.`;
+
+function extractSingleEntry(raw: unknown): Record<string, unknown> | null {
+  if (!raw || typeof raw !== 'object') return null;
+
+  // Already a single object with name field
+  if (!Array.isArray(raw) && 'name' in (raw as Record<string, unknown>)) {
+    return raw as Record<string, unknown>;
+  }
+
+  // Array returned — sum all items into one
+  if (Array.isArray(raw) && raw.length > 0) {
+    const items = raw as Record<string, unknown>[];
+    const names = items.map(i => String(i['name'] ?? '')).filter(Boolean).join(', ');
+    return {
+      name:       names || 'Combined meal',
+      calories:   items.reduce((s, i) => s + (Number(i['calories']) || 0), 0),
+      protein:    items.reduce((s, i) => s + (Number(i['protein'])  || 0), 0),
+      carbs:      items.reduce((s, i) => s + (Number(i['carbs'])    || 0), 0),
+      fat:        items.reduce((s, i) => s + (Number(i['fat'])      || 0), 0),
+      fiber:      items.reduce((s, i) => s + (Number(i['fiber'])    || 0), 0),
+      note:       null,
+      confidence: 'medium',
+    };
+  }
+
+  return null;
+}
 
 router.post('/', async (req: Request, res: Response) => {
   const { text } = req.body;
@@ -86,7 +128,7 @@ router.post('/', async (req: Request, res: Response) => {
     const rawText = await provider.complete({
       systemPrompt: MEAL_PARSING_PROMPT,
       userMessage: text,
-      maxTokens: 512,
+      maxTokens: 1024,
       signal: controller.signal,
     });
 
@@ -97,16 +139,24 @@ router.post('/', async (req: Request, res: Response) => {
       return;
     }
 
-    let parsed: Record<string, unknown>;
+    let rawParsed: unknown;
     try {
-      parsed = JSON.parse(rawText);
+      rawParsed = JSON.parse(rawText);
     } catch {
+      res.status(422).json({ error: "Couldn't parse that. Try again." });
+      return;
+    }
+
+    const parsed = extractSingleEntry(rawParsed);
+    if (!parsed) {
       res.status(422).json({ error: "Couldn't parse that. Try again." });
       return;
     }
 
     const aiConfidence = String(parsed['confidence'] ?? 'medium');
     const confidence: NutritionConfidence = aiConfidence === 'low' ? 'low_confidence' : 'estimated';
+
+    const micro = (key: string) => Math.max(0, parseFloat((Number(parsed[key]) || 0).toFixed(2)));
 
     const result = {
       name:     String(parsed['name'] ?? 'Unknown food'),
@@ -116,16 +166,25 @@ router.post('/', async (req: Request, res: Response) => {
       fat:      Math.max(0, Math.round(Number(parsed['fat'])      || 0)),
       fiber:    Math.max(0, Math.round(Number(parsed['fiber'])    || 0)),
       note:     parsed['note'] ? String(parsed['note']) : null,
+      ironMg:        micro('iron_mg'),
+      calciumMg:     micro('calcium_mg'),
+      vitaminDMcg:   micro('vitamin_d_mcg'),
+      vitaminB12Mcg: micro('vitamin_b12_mcg'),
+      magnesiumMg:   micro('magnesium_mg'),
+      zincMg:        micro('zinc_mg'),
+      potassiumMg:   micro('potassium_mg'),
+      sodiumMg:      micro('sodium_mg'),
     };
 
-    // Store in personal memory for future deterministic recall
     storeFoodMemory(
       userId,
       normalizedText,
-      { ...result, proteinG: result.protein, carbsG: result.carbs, fatG: result.fat, fiberG: result.fiber, parseNote: result.note },
+      { ...result, proteinG: result.protein, carbsG: result.carbs, fatG: result.fat, fiberG: result.fiber, parseNote: result.note,
+        ironMg: result.ironMg, calciumMg: result.calciumMg, vitaminDMcg: result.vitaminDMcg, vitaminB12Mcg: result.vitaminB12Mcg,
+        magnesiumMg: result.magnesiumMg, zincMg: result.zincMg, potassiumMg: result.potassiumMg, sodiumMg: result.sodiumMg },
       provider.canonicalId,
       confidence,
-    ).catch(() => { /* non-critical — don't fail the response */ });
+    ).catch(() => { /* non-critical */ });
 
     res.json({
       result,

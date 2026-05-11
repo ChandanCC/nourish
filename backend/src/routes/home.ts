@@ -33,6 +33,18 @@ export interface MacroTargets {
   fiber: number;
 }
 
+export interface DayMicros {
+  iron: number;
+  calcium: number;
+  vitaminD: number;
+  vitaminB12: number;
+  magnesium: number;
+  zinc: number;
+  potassium: number;
+  sodium: number;
+  isEstimated: boolean;
+}
+
 export interface HomeScreenPayload {
   today: {
     date: string;
@@ -43,6 +55,7 @@ export interface HomeScreenPayload {
     fiber: number;
     entryCount: number;
     targets: MacroTargets;
+    micros: DayMicros;
   };
   signal: {
     state: string;
@@ -139,6 +152,17 @@ router.get('/', async (req: Request, res: Response) => {
         fiber:    todayAgg?.totalFiberG    ?? 0,
         entryCount: todayAgg?.entryCount   ?? 0,
         targets: computeMacroTargets(userDoc?.goal ?? null, userDoc?.proteinTargetG ?? 160),
+        micros: {
+          iron:       todayAgg?.totalIronMg        ?? 0,
+          calcium:    todayAgg?.totalCalciumMg     ?? 0,
+          vitaminD:   todayAgg?.totalVitaminDMcg   ?? 0,
+          vitaminB12: todayAgg?.totalVitaminB12Mcg ?? 0,
+          magnesium:  todayAgg?.totalMagnesiumMg   ?? 0,
+          zinc:       todayAgg?.totalZincMg        ?? 0,
+          potassium:  todayAgg?.totalPotassiumMg   ?? 0,
+          sodium:     todayAgg?.totalSodiumMg      ?? 0,
+          isEstimated: todayEntries.some(e => e.confidence !== 'recalled' && e.confidence !== 'user_corrected'),
+        },
       },
       signal: {
         state: currentSignal?.state ?? 'READING',

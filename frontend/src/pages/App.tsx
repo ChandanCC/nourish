@@ -96,6 +96,14 @@ export default function App() {
         confidence: parsed.confidence,
         sourceType: parsed.sourceType,
         sourceId: parsed.sourceId,
+        ironMg:        parsed.ironMg,
+        calciumMg:     parsed.calciumMg,
+        vitaminDMcg:   parsed.vitaminDMcg,
+        vitaminB12Mcg: parsed.vitaminB12Mcg,
+        magnesiumMg:   parsed.magnesiumMg,
+        zincMg:        parsed.zincMg,
+        potassiumMg:   parsed.potassiumMg,
+        sodiumMg:      parsed.sodiumMg,
         idempotencyKey: uuidv4(),
       });
       setInput('');
@@ -176,6 +184,7 @@ export default function App() {
             fat={todayData?.fat ?? 0}
             fiber={todayData?.fiber ?? 0}
             targets={todayData?.targets ?? { calories: 2000, protein: 160, carbs: 200, fat: 65, fiber: 30 }}
+            micros={todayData?.micros ?? { iron: 0, calcium: 0, vitaminD: 0, vitaminB12: 0, magnesium: 0, zinc: 0, potassium: 0, sodium: 0, isEstimated: false }}
             aiInstruction={signal?.aiInstruction ?? null}
           />
         </ErrorBoundary>

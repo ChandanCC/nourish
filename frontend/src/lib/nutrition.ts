@@ -144,6 +144,14 @@ export interface AnalyseResult {
   confidence: NutritionConfidence;
   sourceType: SourceType;
   sourceId: string | null;
+  ironMg: number;
+  calciumMg: number;
+  vitaminDMcg: number;
+  vitaminB12Mcg: number;
+  magnesiumMg: number;
+  zincMg: number;
+  potassiumMg: number;
+  sodiumMg: number;
 }
 
 export async function analyseFood(text: string): Promise<AnalyseResult> {
@@ -162,9 +170,19 @@ export async function analyseFood(text: string): Promise<AnalyseResult> {
   const confidence: NutritionConfidence = (data.confidence as NutritionConfidence) ?? 'estimated';
   const sourceType: SourceType          = (data.sourceType as SourceType) ?? 'ai_estimate';
   const sourceId: string | null         = data.sourceId ?? null;
+  const micros = {
+    ironMg:        Number(data.result?.ironMg        ?? 0),
+    calciumMg:     Number(data.result?.calciumMg     ?? 0),
+    vitaminDMcg:   Number(data.result?.vitaminDMcg   ?? 0),
+    vitaminB12Mcg: Number(data.result?.vitaminB12Mcg ?? 0),
+    magnesiumMg:   Number(data.result?.magnesiumMg   ?? 0),
+    zincMg:        Number(data.result?.zincMg        ?? 0),
+    potassiumMg:   Number(data.result?.potassiumMg   ?? 0),
+    sodiumMg:      Number(data.result?.sodiumMg      ?? 0),
+  };
   if (data.result && typeof data.result === 'object' && !Array.isArray(data.result)) {
-    return { ...data.result, parsedByModel: data.parsedByModel ?? '', confidence, sourceType, sourceId } as AnalyseResult;
+    return { ...data.result, parsedByModel: data.parsedByModel ?? '', confidence, sourceType, sourceId, ...micros } as AnalyseResult;
   }
   const legacy = extractJSON(typeof data.result === 'string' ? data.result : JSON.stringify(data.result));
-  return { ...legacy, parsedByModel: data.parsedByModel ?? '', confidence, sourceType, sourceId };
+  return { ...legacy, parsedByModel: data.parsedByModel ?? '', confidence, sourceType, sourceId, ...micros };
 }

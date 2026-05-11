@@ -17,6 +17,7 @@ const analyseLimiter = rateLimit({
   max: 10,
   keyGenerator: (req) => req.user?.userId ?? req.ip ?? 'unknown',
   handler: (_req, res) => res.status(429).json({ error: 'rate_limit', retryAfter: 60 }),
+  validate: { xForwardedForHeader: false },
 });
 
 const app = express();
@@ -33,7 +34,7 @@ app.use(helmet({
 app.use(cors({
   origin: process.env.CORS_ORIGIN || '*',
   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Idempotency-Key'],
 }));
 app.use(requestLogger);
 app.use(morgan('combined'));
