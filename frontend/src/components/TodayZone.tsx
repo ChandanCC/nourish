@@ -25,6 +25,7 @@ interface DayMicros {
 }
 
 interface TodayZoneProps {
+  date: string;
   calories: number;
   protein: number;
   carbs: number;
@@ -65,12 +66,14 @@ function getTopMicros(micros: DayMicros): Array<{ label: string; pct: number }> 
   return [...deficient.slice(0, 2), ...good.slice(0, 1)].slice(0, 3);
 }
 
-export default function TodayZone({ calories, protein, carbs, fat, fiber, targets, micros, aiInstruction }: TodayZoneProps) {
+export default function TodayZone({ date, calories, protein, carbs, fat, fiber, targets, micros, aiInstruction }: TodayZoneProps) {
   const [macroExpanded, setMacroExpanded] = useState(false);
   const [microsExpanded, setMicrosExpanded] = useState(false);
   const animatedCal = useCountUp(calories);
 
-  const day = new Date().toLocaleDateString('en-IN', { weekday: 'long' });
+  const today = new Date().toISOString().split('T')[0];
+  const isToday = date === today;
+  const day = new Date(date + 'T12:00:00').toLocaleDateString('en-IN', { weekday: 'long' });
   const topMicros = getTopMicros(micros);
   const hasMicros = topMicros.length > 0;
 
@@ -80,7 +83,7 @@ export default function TodayZone({ calories, protein, carbs, fat, fiber, target
       <div className="today-daily-position px-5 py-4">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
           <div style={{ fontSize: 9, fontFamily: 'var(--font-mono)', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-2)' }}>
-            TODAY · {day}
+            {isToday ? 'TODAY' : date} · {day}
           </div>
           <button
             onClick={() => setMacroExpanded(v => !v)}

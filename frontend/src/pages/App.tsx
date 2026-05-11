@@ -203,6 +203,7 @@ export default function App() {
 
         <ErrorBoundary>
           <TodayZone
+            date={todayData?.date ?? today}
             calories={todayData?.calories ?? 0}
             protein={todayData?.protein ?? 0}
             carbs={todayData?.carbs ?? 0}
