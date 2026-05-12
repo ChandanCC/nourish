@@ -1,12 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { useHomeScreen, useHomeForDate, useLogEntry, useDeleteEntry, useEditEntry } from '../hooks/useHomeScreen';
+import { useHomeScreen, useHomeForDate, useLogEntry, useDeleteEntry, useEditEntry, useLogTraining, useDeleteTraining } from '../hooks/useHomeScreen';
 import { getTodayKey, analyseFood } from '../lib/nutrition';
 import type { EditEntryPayload } from '../api/client';
 import HomeScreen from '../components/HomeScreen';
 import SignalZone from '../components/SignalZone';
-import TodayZone from '../components/TodayZone';
-import LogZone from '../components/LogZone';
+import NutritionCard from '../components/NutritionCard';
+import TrainingCard from '../components/TrainingCard';
+import NutritionDetailScreen from '../components/NutritionDetailScreen';
+import TrainingDetailScreen from '../components/TrainingDetailScreen';
+import TrainingLogScreen from '../components/TrainingLogScreen';
 import SignalExplanation from '../components/SignalExplanation';
 import ErrorBoundary from '../components/ErrorBoundary';
 import LoginPage from './LoginPage';
@@ -34,7 +37,12 @@ export default function App() {
   const [error, setError]         = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [editingId, setEditingId]   = useState<string | null>(null);
+  const [deletingTrainingId, setDeletingTrainingId] = useState<string | null>(null);
   const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
+
+  const [showNutritionDetail, setShowNutritionDetail] = useState(false);
+  const [showTrainingDetail, setShowTrainingDetail]   = useState(false);
+  const [showTrainingLog, setShowTrainingLog]         = useState(false);
 
   // Onboarding state
   const [onboardingStep, setOnboardingStep] = useState<OnboardingStep>('welcome');
@@ -47,16 +55,17 @@ export default function App() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const { data: homeData } = useHomeScreen();
-  const logEntryMutation    = useLogEntry();
-  const deleteEntryMutation = useDeleteEntry();
-  const editEntryMutation   = useEditEntry();
+  const logEntryMutation      = useLogEntry();
+  const deleteEntryMutation   = useDeleteEntry();
+  const editEntryMutation     = useEditEntry();
+  const logTrainingMutation   = useLogTraining();
+  const deleteTrainingMutation = useDeleteTraining();
 
   const today = getTodayKey();
 
   const waveformDays = homeData?.waveform ?? [];
-  const effectiveIndex = selectedDayIndex ?? 6; // today is always at index 6 in the 7-day waveform
+  const effectiveIndex = selectedDayIndex ?? 6;
 
-  // Compute the date corresponding to the selected waveform bar
   const isViewingToday = effectiveIndex === 6;
   const selectedDate = (() => {
     if (isViewingToday) return null;
@@ -67,17 +76,14 @@ export default function App() {
 
   const { data: pastDayData } = useHomeForDate(selectedDate);
 
-  // Active data: past day when a bar is selected, today's home data otherwise
   const activeData = isViewingToday ? homeData : (pastDayData ?? homeData);
 
-  // Show first-time SIGNAL explanation once per device after onboarding
   useEffect(() => {
     if (!homeData?.onboardingComplete) return;
     if (localStorage.getItem(SIGNAL_EXPLAINED_KEY) === 'true') return;
     setShowExplanation(true);
   }, [homeData?.onboardingComplete]);
 
-  // Trigger first SIGNAL computation once after onboarding
   useEffect(() => {
     if (!homeData?.onboardingComplete) return;
     if (signalTriggerFired.current) return;
@@ -147,9 +153,15 @@ export default function App() {
     finally { setEditingId(null); }
   }
 
+  async function handleDeleteTraining(sessionId: string) {
+    setDeletingTrainingId(sessionId);
+    try { await deleteTrainingMutation.mutateAsync(sessionId); }
+    catch (e: unknown) { setError(e instanceof Error ? e.message : 'Delete failed'); }
+    finally { setDeletingTrainingId(null); }
+  }
+
   if (!isAuthenticated) return <LoginPage onLogin={login} />;
 
-  // Onboarding gate: homeData loaded and not complete
   if (homeData && !homeData.onboardingComplete) {
     if (onboardingStep === 'welcome') {
       return <WelcomeScreen onContinue={() => setOnboardingStep('goal')} />;
@@ -174,6 +186,7 @@ export default function App() {
   const signal = homeData?.signal;
   const todayData = activeData?.today;
   const entries = activeData?.entries ?? [];
+  const training = activeData?.training ?? null;
 
   return (
     <>
@@ -187,6 +200,7 @@ export default function App() {
         error={error}
         onClearError={() => setError(null)}
         textareaRef={textareaRef}
+        onOpenTraining={() => setShowTrainingLog(true)}
       >
         <ErrorBoundary>
           <SignalZone
@@ -201,34 +215,77 @@ export default function App() {
           />
         </ErrorBoundary>
 
-        <ErrorBoundary>
-          <TodayZone
-            date={todayData?.date ?? today}
-            calories={todayData?.calories ?? 0}
-            protein={todayData?.protein ?? 0}
-            carbs={todayData?.carbs ?? 0}
-            fat={todayData?.fat ?? 0}
-            fiber={todayData?.fiber ?? 0}
-            targets={todayData?.targets ?? { calories: 2000, protein: 160, carbs: 200, fat: 65, fiber: 30 }}
-            micros={todayData?.micros ?? { iron: 0, calcium: 0, vitaminD: 0, vitaminB12: 0, magnesium: 0, zinc: 0, potassium: 0, sodium: 0, isEstimated: false }}
-            aiInstruction={signal?.aiInstruction ?? null}
-          />
-        </ErrorBoundary>
+        <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 8, paddingBottom: 16 }}>
+          <ErrorBoundary>
+            <NutritionCard
+              date={todayData?.date ?? today}
+              calories={todayData?.calories ?? 0}
+              protein={todayData?.protein ?? 0}
+              carbs={todayData?.carbs ?? 0}
+              fat={todayData?.fat ?? 0}
+              fiber={todayData?.fiber ?? 0}
+              targets={todayData?.targets ?? { calories: 2000, protein: 160, carbs: 200, fat: 65, fiber: 30 }}
+              onOpen={() => setShowNutritionDetail(true)}
+            />
+          </ErrorBoundary>
 
-        <ErrorBoundary>
-          <LogZone
-            entries={entries}
-            isLoading={false}
-            activeDay={activeData?.today?.date ?? today}
-            deletingId={deletingId}
-            editingId={editingId}
-            onDelete={handleDelete}
-            onEdit={handleEdit}
-          />
-        </ErrorBoundary>
+          <ErrorBoundary>
+            <TrainingCard
+              training={training}
+              onOpen={() => setShowTrainingDetail(true)}
+            />
+          </ErrorBoundary>
+        </div>
       </HomeScreen>
 
       {showExplanation && <SignalExplanation onDismiss={handleDismissExplanation} />}
+
+      {showNutritionDetail && (
+        <NutritionDetailScreen
+          date={todayData?.date ?? today}
+          calories={todayData?.calories ?? 0}
+          protein={todayData?.protein ?? 0}
+          carbs={todayData?.carbs ?? 0}
+          fat={todayData?.fat ?? 0}
+          fiber={todayData?.fiber ?? 0}
+          targets={todayData?.targets ?? { calories: 2000, protein: 160, carbs: 200, fat: 65, fiber: 30 }}
+          micros={todayData?.micros ?? { iron: 0, calcium: 0, vitaminD: 0, vitaminB12: 0, magnesium: 0, zinc: 0, potassium: 0, sodium: 0, isEstimated: false }}
+          aiInstruction={signal?.aiInstruction ?? null}
+          entries={entries}
+          deletingId={deletingId}
+          editingId={editingId}
+          onDelete={handleDelete}
+          onEdit={handleEdit}
+          input={input}
+          setInput={setInput}
+          analysing={analysing}
+          onLog={handleLog}
+          error={error}
+          onClearError={() => setError(null)}
+          textareaRef={textareaRef}
+          onClose={() => setShowNutritionDetail(false)}
+        />
+      )}
+
+      {showTrainingDetail && (
+        <TrainingDetailScreen
+          sessions={training?.sessions ?? []}
+          totalCaloriesBurnt={training?.totalCaloriesBurnt ?? 0}
+          totalVolumeKg={training?.totalVolumeKg ?? 0}
+          deletingId={deletingTrainingId}
+          onDelete={handleDeleteTraining}
+          onOpenLog={() => setShowTrainingLog(true)}
+          onClose={() => setShowTrainingDetail(false)}
+        />
+      )}
+
+      {showTrainingLog && (
+        <TrainingLogScreen
+          userWeightKg={homeData?.userWeightKg ?? 70}
+          onClose={() => setShowTrainingLog(false)}
+          onSubmit={payload => logTrainingMutation.mutateAsync(payload)}
+        />
+      )}
     </>
   );
 }

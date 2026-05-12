@@ -9,6 +9,7 @@ import analyseRouter from './routes/analyse';
 import homeRouter from './routes/home';
 import signalRouter from './routes/signal';
 import userRouter from './routes/user';
+import trainingRouter from './routes/training';
 import { requireAuth } from './middleware/auth';
 import { requestLogger } from './middleware/requestLogger';
 
@@ -48,6 +49,7 @@ app.use('/api/home', requireAuth, homeRouter);
 app.use('/api/signal', requireAuth, signalRouter);
 app.use('/api/analyse', requireAuth, analyseLimiter, analyseRouter);
 app.use('/api/user', requireAuth, userRouter);
+app.use('/api/training', requireAuth, trainingRouter);
 
 // ── 404 ──────────────────────────────────────────────────────────────────────
 app.use((_req, res) => res.status(404).json({ error: 'Not found' }));

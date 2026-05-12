@@ -125,8 +125,40 @@ export interface HomeScreenPayload {
   };
   waveform: HomeWaveformDay[];
   entries: FoodEntry[];
+  training: TrainingPayload;
+  userWeightKg: number;
   userId: string;
   onboardingComplete: boolean;
 }
 
 export type UserGoal = 'muscle_gain' | 'fat_loss' | 'maintenance' | 'performance';
+
+export type ActivityType = 'gym' | 'run' | 'cycle' | 'swim' | 'sport' | 'other';
+
+export interface TrainingExerciseSet {
+  reps: number;
+  weightKg: number;
+}
+
+export interface TrainingExercise {
+  name: string;
+  sets: TrainingExerciseSet[];
+}
+
+export interface TrainingSession {
+  _id: string;
+  activityType: ActivityType;
+  durationMin: number;
+  caloriesBurnt: number;
+  bodyParts: string[];
+  exercises: TrainingExercise[];
+  distanceKm?: number;
+  description?: string;
+}
+
+export interface TrainingPayload {
+  logged: boolean;
+  totalCaloriesBurnt: number;
+  totalVolumeKg: number;
+  sessions: TrainingSession[];
+}

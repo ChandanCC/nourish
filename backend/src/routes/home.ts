@@ -4,6 +4,7 @@ import { DayAggregate } from '../models/DayAggregate';
 import { FoodEntry } from '../models/FoodEntry';
 import { SignalState } from '../models/SignalState';
 import { User } from '../models/User';
+import { TrainingSession } from '../models/TrainingSession';
 
 export interface WaveformDay {
   date: string;
@@ -53,6 +54,24 @@ export interface DayMicros {
   isEstimated: boolean;
 }
 
+export interface TrainingSessionSummary {
+  _id: string;
+  activityType: string;
+  durationMin: number;
+  caloriesBurnt: number;
+  bodyParts: string[];
+  exercises: Array<{ name: string; sets: Array<{ reps: number; weightKg: number }> }>;
+  distanceKm?: number;
+  description?: string;
+}
+
+export interface TrainingPayload {
+  logged: boolean;
+  totalCaloriesBurnt: number;
+  totalVolumeKg: number;
+  sessions: TrainingSessionSummary[];
+}
+
 export interface HomeScreenPayload {
   today: {
     date: string;
@@ -75,6 +94,8 @@ export interface HomeScreenPayload {
   };
   waveform: WaveformDay[];
   entries: FoodEntrySummary[];
+  training: TrainingPayload;
+  userWeightKg: number;
   userId: string;
   onboardingComplete: boolean;
 }
@@ -152,6 +173,13 @@ router.get('/', async (req: Request, res: Response) => {
       .sort({ loggedAt: -1 })
       .lean();
 
+    // Training sessions for the viewed date
+    const trainingSessions = await TrainingSession.find({
+      userId,
+      date: viewDate,
+      isDeleted: false,
+    }).lean();
+
     // Fetch current SignalState
     const currentSignal = await SignalState.findOne({ userId, isCurrentState: true }).lean();
 
@@ -215,6 +243,22 @@ router.get('/', async (req: Request, res: Response) => {
         potassiumMg:   e.potassiumMg   ?? 0,
         sodiumMg:      e.sodiumMg      ?? 0,
       })),
+      training: {
+        logged: trainingSessions.length > 0,
+        totalCaloriesBurnt: trainingSessions.reduce((s, t) => s + t.caloriesBurnt, 0),
+        totalVolumeKg: trainingSessions.reduce((s, t) => s + (t.totalVolumeKg ?? 0), 0),
+        sessions: trainingSessions.map(t => ({
+          _id: t._id.toString(),
+          activityType: t.activityType,
+          durationMin: t.durationMin,
+          caloriesBurnt: t.caloriesBurnt,
+          bodyParts: t.bodyParts,
+          exercises: t.exercises,
+          distanceKm: t.distanceKm,
+          description: t.description,
+        })),
+      },
+      userWeightKg: (userDoc?.weightKg ?? 0) >= 20 ? (userDoc!.weightKg) : 70,
       userId: req.user!.userId,
       onboardingComplete: userDoc?.onboardingComplete ?? false,
     };

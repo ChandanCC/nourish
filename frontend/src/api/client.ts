@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { getToken } from '../lib/auth';
-import type { NutritionDay, HomeScreenPayload, FoodEntry, UserGoal } from '../types';
+import type { NutritionDay, HomeScreenPayload, FoodEntry, UserGoal, ActivityType, TrainingExercise, TrainingSession } from '../types';
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
 
@@ -121,4 +121,24 @@ export async function editLogEntry(entryId: string, payload: EditEntryPayload): 
 
 export async function saveOnboarding(goal: UserGoal, weightKg: number): Promise<void> {
   await client.patch('/user/onboarding', { goal, weight_kg: weightKg });
+}
+
+export interface LogTrainingPayload {
+  activityType: ActivityType;
+  durationMin: number;
+  userWeightKg: number;
+  bodyParts?: string[];
+  exercises?: TrainingExercise[];
+  distanceKm?: number;
+  description?: string;
+  date?: string;
+}
+
+export async function logTrainingSession(payload: LogTrainingPayload): Promise<TrainingSession> {
+  const { data } = await client.post<{ data: TrainingSession }>('/training', payload);
+  return data.data;
+}
+
+export async function deleteTrainingSession(id: string): Promise<void> {
+  await client.delete(`/training/${id}`);
 }

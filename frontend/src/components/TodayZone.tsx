@@ -93,7 +93,7 @@ export default function TodayZone({ date, calories, protein, carbs, fat, fiber, 
             <span style={{ fontSize: 16, fontFamily: 'var(--font-mono)', fontWeight: 500, fontVariantNumeric: 'tabular-nums', color: 'var(--ink-0)' }}>
               {animatedCal}
             </span>
-            <span style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: 'var(--ink-3)' }}>kcal</span>
+            <span style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: 'var(--ink-2)' }}>kcal</span>
           </button>
         </div>
 
@@ -109,18 +109,13 @@ export default function TodayZone({ date, calories, protein, carbs, fat, fiber, 
         )}
 
         {aiInstruction && (
-          <div style={{ marginTop: 10, fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--ink-3)', lineHeight: 1.5 }}>
+          <div style={{ marginTop: 10, fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--ink-2)', lineHeight: 1.5 }}>
             → {aiInstruction}
           </div>
         )}
       </div>
 
-      {/* 2B — Training placeholder */}
-      <div className="today-training px-5 py-4">
-        <div className="text-[9px] tracking-widest opacity-40">TRAINING · Not logged</div>
-      </div>
-
-      {/* 2C — Micros: absent when nothing logged */}
+      {/* 2B — Micros: absent when nothing logged */}
       {hasMicros && (
         <div className="today-micros px-5 py-4">
           <button

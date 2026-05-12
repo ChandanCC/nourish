@@ -27,6 +27,7 @@ export interface IDayAggregate extends Document {
   trainingLogged: boolean;
   trainingSessionIds: Types.ObjectId[];
   totalVolumeKg: number | null;
+  totalCaloriesBurntTraining: number;
 
   isComplete: boolean;
 
@@ -59,9 +60,10 @@ const DayAggregateSchema = new Schema<IDayAggregate>(
     totalPotassiumMg:   { type: Number, default: 0 },
     totalSodiumMg:      { type: Number, default: 0 },
 
-    trainingLogged:        { type: Boolean, default: false },
-    trainingSessionIds:    { type: [Schema.Types.ObjectId], default: [] },
-    totalVolumeKg:         { type: Number, default: null },
+    trainingLogged:             { type: Boolean, default: false },
+    trainingSessionIds:         { type: [Schema.Types.ObjectId], default: [] },
+    totalVolumeKg:              { type: Number, default: null },
+    totalCaloriesBurntTraining: { type: Number, default: 0 },
 
     isComplete:            { type: Boolean, default: false },
 

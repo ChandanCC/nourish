@@ -43,7 +43,7 @@ const INFO_PANEL_STYLE: React.CSSProperties = {
 const INFO_LABEL_STYLE: React.CSSProperties = {
   fontSize: 9,
   letterSpacing: '0.1em',
-  color: 'var(--ink-3)',
+  color: 'var(--ink-2)',
   marginBottom: 6,
   textTransform: 'uppercase',
 };
@@ -110,12 +110,12 @@ export default function SignalHero({
             style={{
               fontSize: 11,
               fontFamily: 'var(--font-mono)',
-              color: 'var(--ink-3)',
+              color: 'var(--ink-2)',
               userSelect: 'none',
             }}
           >
             Delta forms after 3 days of logging
-            <span style={{ color: 'var(--ink-4)', marginLeft: 4 }}>· what is delta?</span>
+            <span style={{ color: 'var(--ink-3)', marginLeft: 4 }}>· what is delta?</span>
           </div>
         )}
 

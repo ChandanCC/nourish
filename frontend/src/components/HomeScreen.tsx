@@ -12,6 +12,7 @@ interface HomeScreenProps {
   error: string | null;
   onClearError: () => void;
   textareaRef: RefObject<HTMLTextAreaElement | null>;
+  onOpenTraining: () => void;
   children: ReactNode;
 }
 
@@ -25,6 +26,7 @@ export default function HomeScreen({
   error,
   onClearError,
   textareaRef,
+  onOpenTraining,
   children,
 }: HomeScreenProps) {
   const [isFocused, setIsFocused] = useState(false);
@@ -180,6 +182,20 @@ export default function HomeScreen({
           )}
 
           <div className="px-5 pb-6 pt-3">
+            {/* Mode toggle */}
+            <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+              <span className="tab-btn active" style={{ fontSize: 9, letterSpacing: '0.1em', padding: '4px 12px' }}>
+                FOOD
+              </span>
+              <button
+                className="tab-btn"
+                onClick={onOpenTraining}
+                style={{ fontSize: 9, letterSpacing: '0.1em', padding: '4px 12px' }}
+              >
+                TRAIN
+              </button>
+            </div>
+
             <textarea
               ref={textareaRef}
               value={input}

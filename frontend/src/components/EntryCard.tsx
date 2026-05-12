@@ -29,9 +29,9 @@ const ENTRY_MICROS: {
 
 // Micro source quality — characterises the food, not the user's day
 function microSourceColor(pct: number): string {
-  if (pct >= 0.20) return 'var(--status-up)';   // significant source
-  if (pct >= 0.10) return 'var(--status-mid)';  // moderate source
-  return 'var(--ink-3)';                          // minor contribution
+  if (pct >= 0.20) return 'var(--status-up)';
+  if (pct >= 0.10) return 'var(--status-mid)';
+  return 'var(--ink-2)';
 }
 
 export default function EntryCard({ entry, index, onDelete, onEdit, deleting, editing }: Props) {
@@ -246,31 +246,31 @@ export default function EntryCard({ entry, index, onDelete, onEdit, deleting, ed
                     <div style={{ display: 'flex', gap: 2, height: 5, borderRadius: 3, overflow: 'hidden', background: 'var(--bar-track)', marginBottom: 8 }}>
                       {pCal > 0 && <div style={{ flex: pCal, background: 'var(--ink-0)' }} />}
                       {cCal > 0 && <div style={{ flex: cCal, background: 'var(--ink-2)' }} />}
-                      {fCal > 0 && <div style={{ flex: fCal, background: 'var(--ink-3)' }} />}
+                      {fCal > 0 && <div style={{ flex: fCal, background: 'var(--ink-2)', opacity: 0.5 }} />}
                     </div>
 
                     {/* Legend */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: entry.fiberG > 0 || entry.parseNote ? 6 : 0 }}>
                       {[
                         { label: 'P', value: entry.proteinG, pct: pPct, color: 'var(--ink-0)' },
-                        { label: 'C', value: entry.carbsG,   pct: cPct, color: 'var(--ink-2)' },
-                        { label: 'F', value: entry.fatG,     pct: fPct, color: 'var(--ink-3)' },
+                        { label: 'C', value: entry.carbsG,   pct: cPct, color: 'var(--ink-1)' },
+                        { label: 'F', value: entry.fatG,     pct: fPct, color: 'var(--ink-2)' },
                       ].map(({ label, value, pct, color }) => (
                         <div key={label} style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                          <span style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: 'var(--ink-3)', letterSpacing: '0.06em' }}>{label}</span>
+                          <span style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: 'var(--ink-2)', letterSpacing: '0.06em' }}>{label}</span>
                           <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums', color }}>{value}g</span>
-                          <span style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: 'var(--ink-3)' }}>{pct}%</span>
+                          <span style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: 'var(--ink-2)' }}>{pct}%</span>
                         </div>
                       ))}
                     </div>
 
                     {entry.fiberG > 0 && (
-                      <div className="text-micro" style={{ color: 'var(--ink-3)' }}>
+                      <div className="text-micro" style={{ color: 'var(--ink-2)' }}>
                         Fiber {entry.fiberG}g
                       </div>
                     )}
                     {entry.parseNote && (
-                      <div className="text-micro" style={{ color: 'var(--ink-3)', marginTop: 2 }}>
+                      <div className="text-micro" style={{ color: 'var(--ink-2)', marginTop: 2 }}>
                         {entry.parseNote}
                       </div>
                     )}
@@ -296,7 +296,7 @@ export default function EntryCard({ entry, index, onDelete, onEdit, deleting, ed
                         <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums', color, width: 32, textAlign: 'right' }}>
                           {Math.round((value / rdi) * 100)}%
                         </div>
-                        <div style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: 'var(--ink-3)', width: 44 }}>
+                        <div style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: 'var(--ink-2)', width: 44 }}>
                           {value}{unit}
                         </div>
                       </div>

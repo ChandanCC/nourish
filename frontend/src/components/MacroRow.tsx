@@ -12,7 +12,7 @@ function barColor(pct: number, isOver: boolean): string {
   if (isOver) return 'var(--status-down)';
   if (pct >= 0.8) return 'var(--status-up)';
   if (pct >= 0.4) return 'var(--status-mid)';
-  return 'var(--ink-3)';
+  return 'var(--ink-2)';
 }
 
 export default function MacroRow({ label, current, target, unit }: MacroRowProps) {
@@ -85,10 +85,10 @@ export default function MacroRow({ label, current, target, unit }: MacroRowProps
               fontSize: 8,
               fontFamily: 'var(--font-mono)',
               fontWeight: 400,
-              color: 'var(--ink-3)',
+              color: 'var(--ink-2)',
             }}
           >
-            {' '}of {target}{unit}
+            {' '}/ {target}{unit}
           </span>
         )}
       </div>

@@ -27,7 +27,7 @@ const STATUS_COLOR: Record<string, string> = {
   green:  'var(--status-up)',
   yellow: 'var(--status-mid)',
   red:    'var(--status-down)',
-  dim:    'var(--ink-3)',
+  dim:    'var(--ink-2)',
 };
 
 interface Props {
@@ -55,7 +55,7 @@ export default function MicroGrid({ micros }: Props) {
             <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums', color, width: 36, textAlign: 'right' }}>
               {pctDisplay}
             </div>
-            <div style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: 'var(--ink-3)', width: 48 }}>
+            <div style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: 'var(--ink-2)', width: 48 }}>
               {value > 0 ? `${value}${unit}` : ''}
             </div>
           </div>
