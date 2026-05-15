@@ -10,6 +10,13 @@ const PROTEIN_MULT: Record<UserGoal, number> = {
   maintenance: 1.6,
 };
 
+const KCAL_PER_KG: Record<UserGoal, number> = {
+  muscle_gain: 38,
+  fat_loss:    28,
+  performance: 40,
+  maintenance: 33,
+};
+
 const GOAL_LABEL: Record<UserGoal, string> = {
   muscle_gain: 'BUILD',
   fat_loss:    'CUT',
@@ -35,8 +42,9 @@ export default function SettingsScreen({ user, currentGoal, currentWeightKg, onC
   const [weight, setWeight] = useState<number>(currentWeightKg);
   const [saving, setSaving] = useState(false);
 
-  const isDirty = goal !== currentGoal || weight !== currentWeightKg;
+  const isDirty         = goal !== currentGoal || weight !== currentWeightKg;
   const computedProtein = Math.round(PROTEIN_MULT[goal] * weight);
+  const computedCalories = Math.round(KCAL_PER_KG[goal] * weight);
 
   function handleWeightBlur(e: React.FocusEvent<HTMLInputElement>) {
     const v = parseFloat(e.target.value);
@@ -69,12 +77,6 @@ export default function SettingsScreen({ user, currentGoal, currentWeightKg, onC
     fontSize: 9,
     letterSpacing: '0.12em',
     color: 'var(--ink-3)',
-  };
-
-  const rowValue: React.CSSProperties = {
-    ...mono,
-    fontSize: 13,
-    color: 'var(--ink-0)',
   };
 
   return (
@@ -142,36 +144,47 @@ export default function SettingsScreen({ user, currentGoal, currentWeightKg, onC
           </div>
         </div>
 
-        {/* Body weight */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <span style={rowLabel}>BODY WEIGHT</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <input
-              type="number"
-              value={weight}
-              onChange={e => setWeight(parseFloat(e.target.value) || 0)}
-              onBlur={handleWeightBlur}
-              min={30}
-              max={300}
-              style={{
-                ...mono,
-                fontSize: 13,
-                color: 'var(--ink-0)',
-                background: 'transparent',
-                border: 'none',
-                outline: 'none',
-                textAlign: 'right',
-                width: 52,
-              }}
-            />
-            <span style={{ ...mono, fontSize: 10, color: 'var(--ink-3)', letterSpacing: '0.08em' }}>KG</span>
+        {/* Lean body weight */}
+        <div style={{ marginBottom: 8 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={rowLabel}>LEAN BODY WEIGHT</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <input
+                type="number"
+                value={weight}
+                onChange={e => setWeight(parseFloat(e.target.value) || 0)}
+                onBlur={handleWeightBlur}
+                min={30}
+                max={300}
+                style={{
+                  ...mono,
+                  fontSize: 13,
+                  color: 'var(--ink-0)',
+                  background: 'transparent',
+                  border: 'none',
+                  outline: 'none',
+                  textAlign: 'right',
+                  width: 52,
+                }}
+              />
+              <span style={{ ...mono, fontSize: 10, color: 'var(--ink-3)', letterSpacing: '0.08em' }}>KG</span>
+            </div>
           </div>
+          <p style={{ ...mono, fontSize: 9, color: 'var(--ink-3)', lineHeight: 1.6, marginTop: 8 }}>
+            Lean body weight = total weight × (1 − body fat %). Protein and calorie targets are based on lean mass, not total weight. Unsure of your body fat? Use ~85% of total weight for athletic build, ~80% for average, ~72% for higher body fat.
+          </p>
         </div>
 
-        {/* Protein target (computed) */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
-          <span style={rowLabel}>PROTEIN TARGET</span>
-          <span style={{ ...mono, fontSize: 11, color: 'var(--ink-3)', letterSpacing: '0.06em' }}>~{computedProtein} G / DAY</span>
+        {/* Computed targets (read-only) */}
+        <div style={{ borderTop: '1px solid var(--ink-4)', marginTop: 20, marginBottom: 28, paddingTop: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={rowLabel}>PROTEIN TARGET</span>
+            <span style={{ ...mono, fontSize: 11, color: 'var(--ink-2)', letterSpacing: '0.06em' }}>~{computedProtein} G / DAY</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={rowLabel}>CALORIE TARGET</span>
+            <span style={{ ...mono, fontSize: 11, color: 'var(--ink-2)', letterSpacing: '0.06em' }}>~{computedCalories} KCAL / DAY</span>
+          </div>
         </div>
 
         {/* Save button — only when dirty */}
