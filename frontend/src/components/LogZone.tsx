@@ -11,6 +11,7 @@ interface LogZoneProps {
   editingId: string | null;
   onDelete: (id: string) => void;
   onEdit: (id: string, payload: EditEntryPayload) => void;
+  onIntel?: (entryId: string, mealName: string) => void;
 }
 
 function formatDayLabel(dateStr: string): string {
@@ -18,7 +19,7 @@ function formatDayLabel(dateStr: string): string {
   return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }).toUpperCase();
 }
 
-export default function LogZone({ entries, isLoading, activeDay, deletingId, editingId, onDelete, onEdit }: LogZoneProps) {
+export default function LogZone({ entries, isLoading, activeDay, deletingId, editingId, onDelete, onEdit, onIntel }: LogZoneProps) {
   const isToday = activeDay === getTodayKey();
 
   return (
@@ -63,6 +64,7 @@ export default function LogZone({ entries, isLoading, activeDay, deletingId, edi
             index={i}
             onDelete={onDelete}
             onEdit={onEdit}
+            onIntel={onIntel}
             deleting={deletingId === entry._id}
             editing={editingId === entry._id}
           />

@@ -31,6 +31,7 @@ const logEntrySchema = z.object({
   potassiumMg:    z.number().min(0).default(0),
   sodiumMg:       z.number().min(0).default(0),
   idempotencyKey: z.string().uuid().nullable().default(null),
+  date:           z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
 });
 
 const router = Router();
@@ -89,10 +90,10 @@ router.post('/', validate(logEntrySchema), async (req: Request, res: Response) =
       }
     }
 
-    const today = new Date().toISOString().split('T')[0];
+    const mealDate = req.body.date ?? new Date().toISOString().split('T')[0];
     const entry = await FoodEntry.create({
       userId,
-      mealDate: today,
+      mealDate,
       loggedAt: new Date(),
       rawInput,
       parsedAt: new Date(),
@@ -121,7 +122,7 @@ router.post('/', validate(logEntrySchema), async (req: Request, res: Response) =
       idempotencyKey,
     });
 
-    await computeDayAggregate(userId, today);
+    await computeDayAggregate(userId, mealDate);
 
     res.status(201).json({ data: entry });
   } catch (err) {

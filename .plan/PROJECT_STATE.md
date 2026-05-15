@@ -2,15 +2,15 @@
 
 **This file answers: "where exactly are we right now?"**
 
-Last updated: 2026-05-11
-Current version: v1.2 (full home screen + SIGNAL + onboarding + micros pipeline live)
-Next milestone: v1.3 — training log, weekly report card, polish pass
+Last updated: 2026-05-15
+Current version: v1.3 (training log + INTEL system complete — pending deployment)
+Next milestone: v1.4 — CI/CD pipeline, deployment of v1.3, then next product feature
 
 ---
 
 ## NEXT ACTION
 
-**Stabilisation + QA before next feature.** Core loop, SIGNAL, onboarding, macros, and micros are all live. Run a full manual test of the golden path before adding new features. Resolve U-001 (training section scope) to unblock the Training sub-section in TODAY zone.
+**Deploy v1.3 + set up CI/CD.** Training log and INTEL system are both complete and TypeScript-clean. Local verification done. Next: deploy updated backend (Lambda), deploy updated frontend (S3/CloudFront), and establish a CI/CD pipeline so future deploys are not manual.
 
 Before beginning new feature work: read `governance/IMPLEMENTATION_REVIEW_CHECKLIST.md` and `governance/SCOPE_DISCIPLINE.md`.
 
@@ -43,10 +43,20 @@ rawInput display in EntryCard expanded panel        ✅ DONE
 Rate limiting on /api/analyse                       ✅ DONE
 Zod input validation on all routes                  ✅ DONE
 
-Training log (text or structured)                   ⏳ PENDING ← blocked U-001
-Weekly report card                                  ⏳ PENDING
+Training log (structured: gym sets/reps, cardio)    ✅ DONE ← U-001 resolved
+Training detail screen (sessions, edit, delete)     ✅ DONE
+Waveform readout (hover/long-press bar details)     ✅ DONE
+Past-date viewing + logging (nutrition + training)  ✅ DONE
+INTEL system (AI insights — 5 levels)               ✅ DONE ← replaces "weekly report card"
+  ├─ Meal Intel (per entry: assessment + suggestion)
+  ├─ Session Intel (per training: nutrition context)
+  ├─ Day Intel (rating: STRONG/SOLID/SHORT/WEAK)
+  ├─ Week Intel (7-day pattern + projection)
+  └─ Month Intel (monthly trend + projection)
 First-time SIGNAL explanation block                 ✅ DONE (one-time, localStorage dismiss)
 Notification permission prompt (day 14)             ⏳ PENDING
+Body weight logging + trend                         ⏳ PENDING
+CI/CD pipeline (GitHub Actions → Lambda + S3)       ⏳ PENDING
 Test coverage                                       ⏳ DEFERRED
 ```
 
@@ -80,6 +90,10 @@ Test coverage                                       ⏳ DEFERRED
 
 **Onboarding:** `WelcomeScreen → GoalSelectionScreen → ProteinTargetScreen`. Goal + protein target saved via `PATCH /api/user/onboarding`. `homeData.onboardingComplete` gates the flow. First-time SIGNAL explanation shown once post-onboarding, dismissed to localStorage.
 
+**Training log:** Full structured workout logging. Activities: gym (body parts → exercises → sets/reps/weight), run/cycle/swim/sport/other (duration + distance). `POST /api/training` → `TrainingSession` document → `DayAggregate.trainingSessionIds`. Calories burnt via MET formula. Edit (PATCH) and delete (soft) supported. `TrainingDetailScreen` shows day totals (kcal + volume) and per-session cards with EDIT/DELETE. Past-date training correctly saved to selected date. Edit flow always starts at `pick_activity` step with initial data pre-populated.
+
+**INTEL system:** On-demand AI insights at 5 levels, cached by MD5 checksum of input metrics. `GeneratedIntel` model (`userId + level + refId` unique index). Generation service: `generateIntel.ts` with frank nutritionist persona, anti-hallucination rules, full training data (exercises/body parts/volume) in every prompt, time-aware instructions (day_phase/day_complete), 350-char instruction cap. Routes: `GET /api/intel/{meal,session,daily,weekly,monthly}`. Frontend: 5 full-screen overlay components, `INTEL →` entry points on EntryCard, SessionCard, NutritionDetailScreen header, home screen (DAY INTEL), and SignalHero (WEEK/MONTH INTEL). Meal Intel includes a better-alternative suggestion. Daily Intel instruction is time-appropriate (suggests dinner actions at 6pm, not "tomorrow").
+
 ---
 
 ## Technical Debt
@@ -101,7 +115,7 @@ Test coverage                                       ⏳ DEFERRED
 
 | ID | Question | Blocking |
 |---|---|---|
-| U-001 | Training section in TODAY zone: text-log only, or full workout sheet? | Training feature |
+| U-001 | ~~Training section in TODAY zone: text-log only, or full workout sheet?~~ | ✅ RESOLVED — full structured workout sheet built |
 | U-002 | Baseline before 7 days: show DELTA as "—" or use Mifflin-St Jeor estimate? | SIGNAL quality |
 | U-005 | Progressive overload detection: v1.3 or deferred? | U-001 dependent |
 

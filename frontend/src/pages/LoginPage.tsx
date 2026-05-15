@@ -69,7 +69,7 @@ export default function LoginPage({ onLogin }: Props) {
               shape="rectangular"
               text="signin_with"
               onSuccess={res => { if (res.credential) handleCredential(res.credential); }}
-              onError={() => setError('Google sign-in failed')}
+              onError={(err) => { console.error('GoogleLogin error:', err); setError('Google sign-in failed'); }}
             />
           )}
         </div>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { ActivityType, TrainingExercise } from '../types';
+import type { ActivityType, TrainingExercise, TrainingSession } from '../types';
 import type { LogTrainingPayload } from '../api/client';
 
 const MET: Record<ActivityType, number> = {
@@ -53,6 +53,8 @@ type FlowStep =
 
 interface Props {
   userWeightKg: number;
+  initialSession?: TrainingSession;
+  editingId?: string;
   onClose: () => void;
   onSubmit: (payload: LogTrainingPayload) => Promise<void>;
 }
@@ -63,7 +65,9 @@ function computeCalories(activityType: ActivityType, durationMin: number, weight
   return Math.round(MET[activityType] * weightKg * (durationMin / 60));
 }
 
-export default function TrainingLogScreen({ userWeightKg, onClose, onSubmit }: Props) {
+
+export default function TrainingLogScreen({ userWeightKg, initialSession, editingId, onClose, onSubmit }: Props) {
+  const isEditing = !!editingId;
   const [step, setStep] = useState<FlowStep>({ kind: 'pick_activity' });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -141,11 +145,15 @@ export default function TrainingLogScreen({ userWeightKg, onClose, onSubmit }: P
       {/* Content */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '32px 20px 40px' }}>
         {step.kind === 'pick_activity' && (
-          <PickActivityStep onSelect={handlePickActivity} />
+          <PickActivityStep
+            initialActivity={isEditing ? initialSession?.activityType : undefined}
+            onSelect={handlePickActivity}
+          />
         )}
 
         {step.kind === 'gym_body_parts' && (
           <GymBodyPartsStep
+            initialBodyParts={isEditing && initialSession?.activityType === 'gym' ? (initialSession.bodyParts ?? []) : []}
             onNext={parts => setStep({ kind: 'gym_exercises', bodyParts: parts })}
           />
         )}
@@ -153,6 +161,7 @@ export default function TrainingLogScreen({ userWeightKg, onClose, onSubmit }: P
         {step.kind === 'gym_exercises' && (
           <GymExercisesStep
             bodyParts={step.bodyParts}
+            initialExercises={isEditing && initialSession?.activityType === 'gym' ? (initialSession.exercises.map(e => e.name)) : []}
             onNext={exercises => setStep({ kind: 'gym_sets', bodyParts: step.bodyParts, selectedExercises: exercises })}
           />
         )}
@@ -160,6 +169,7 @@ export default function TrainingLogScreen({ userWeightKg, onClose, onSubmit }: P
         {step.kind === 'gym_sets' && (
           <GymSetsStep
             selectedExercises={step.selectedExercises}
+            initialExercises={isEditing && initialSession?.activityType === 'gym' ? (initialSession.exercises ?? []) : []}
             onNext={exercises => setStep({
               kind: 'duration',
               activityType: 'gym',
@@ -172,6 +182,7 @@ export default function TrainingLogScreen({ userWeightKg, onClose, onSubmit }: P
         {step.kind === 'cardio_inputs' && (
           <CardioInputsStep
             activityType={step.activityType}
+            initialDistanceKm={isEditing && initialSession?.activityType === step.activityType ? initialSession.distanceKm : undefined}
             onNext={(distanceKm) => setStep({ kind: 'duration', activityType: step.activityType, distanceKm })}
           />
         )}
@@ -179,6 +190,7 @@ export default function TrainingLogScreen({ userWeightKg, onClose, onSubmit }: P
         {step.kind === 'other_inputs' && (
           <OtherInputsStep
             activityType={step.activityType}
+            initialDescription={isEditing && initialSession?.activityType === step.activityType ? initialSession.description : undefined}
             onNext={(description) => setStep({ kind: 'duration', activityType: step.activityType, description })}
           />
         )}
@@ -187,6 +199,7 @@ export default function TrainingLogScreen({ userWeightKg, onClose, onSubmit }: P
           <DurationStep
             activityType={step.activityType}
             userWeightKg={userWeightKg}
+            initialDurationMin={isEditing && initialSession?.activityType === step.activityType ? initialSession.durationMin : undefined}
             onNext={durationMin => {
               const caloriesPreview = computeCalories(step.activityType, durationMin, userWeightKg);
               const payload: LogTrainingPayload & { caloriesPreview: number } = {
@@ -209,6 +222,7 @@ export default function TrainingLogScreen({ userWeightKg, onClose, onSubmit }: P
             payload={step.payload}
             submitting={submitting}
             error={error}
+            isEditing={isEditing}
             onSubmit={() => {
               const { caloriesPreview: _, ...logPayload } = step.payload;
               handleSubmitReview(logPayload);
@@ -222,7 +236,7 @@ export default function TrainingLogScreen({ userWeightKg, onClose, onSubmit }: P
 
 // ─── Step components ─────────────────────────────────────────────────────────
 
-function PickActivityStep({ onSelect }: { onSelect: (a: ActivityType) => void }) {
+function PickActivityStep({ initialActivity, onSelect }: { initialActivity?: ActivityType; onSelect: (a: ActivityType) => void }) {
   const activities: ActivityType[] = ['gym', 'run', 'cycle', 'swim', 'sport', 'other'];
   return (
     <div>
@@ -230,38 +244,41 @@ function PickActivityStep({ onSelect }: { onSelect: (a: ActivityType) => void })
         WHAT DID YOU DO?
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-        {activities.map(a => (
-          <button
-            key={a}
-            onClick={() => onSelect(a)}
-            style={{
-              background: 'none',
-              border: '1px solid var(--ink-4)',
-              borderRadius: 4,
-              padding: '20px 16px',
-              cursor: 'pointer',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 8,
-              transition: 'border-color 0.15s',
-            }}
-            onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--ink-2)')}
-            onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--ink-4)')}
-          >
-            <span style={{ fontSize: 28 }}>{ACTIVITY_ICONS[a]}</span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', color: 'var(--ink-1)', textTransform: 'uppercase' }}>
-              {ACTIVITY_LABELS[a]}
-            </span>
-          </button>
-        ))}
+        {activities.map(a => {
+          const isSelected = a === initialActivity;
+          return (
+            <button
+              key={a}
+              onClick={() => onSelect(a)}
+              style={{
+                background: isSelected ? 'rgba(232,199,122,0.06)' : 'none',
+                border: `1px solid ${isSelected ? 'var(--gold-1)' : 'var(--ink-4)'}`,
+                borderRadius: 4,
+                padding: '20px 16px',
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 8,
+                transition: 'border-color 0.15s',
+              }}
+              onMouseEnter={e => { if (!isSelected) e.currentTarget.style.borderColor = 'var(--ink-2)'; }}
+              onMouseLeave={e => { if (!isSelected) e.currentTarget.style.borderColor = 'var(--ink-4)'; }}
+            >
+              <span style={{ fontSize: 28 }}>{ACTIVITY_ICONS[a]}</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', color: 'var(--ink-1)', textTransform: 'uppercase' }}>
+                {ACTIVITY_LABELS[a]}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
 }
 
-function GymBodyPartsStep({ onNext }: { onNext: (parts: string[]) => void }) {
-  const [selected, setSelected] = useState<string[]>([]);
+function GymBodyPartsStep({ initialBodyParts = [], onNext }: { initialBodyParts?: string[]; onNext: (parts: string[]) => void }) {
+  const [selected, setSelected] = useState<string[]>(initialBodyParts);
 
   function toggle(part: string) {
     setSelected(prev => prev.includes(part) ? prev.filter(p => p !== part) : [...prev, part]);
@@ -304,8 +321,8 @@ function GymBodyPartsStep({ onNext }: { onNext: (parts: string[]) => void }) {
   );
 }
 
-function GymExercisesStep({ bodyParts, onNext }: { bodyParts: string[]; onNext: (exercises: string[]) => void }) {
-  const [selected, setSelected] = useState<string[]>([]);
+function GymExercisesStep({ bodyParts, initialExercises = [], onNext }: { bodyParts: string[]; initialExercises?: string[]; onNext: (exercises: string[]) => void }) {
+  const [selected, setSelected] = useState<string[]>(initialExercises);
   const [customInputs, setCustomInputs] = useState<Record<string, string>>({});
 
   function toggleExercise(name: string) {
@@ -380,10 +397,17 @@ function GymExercisesStep({ bodyParts, onNext }: { bodyParts: string[]; onNext: 
 
 interface SetEntry { reps: string; weightKg: string }
 
-function GymSetsStep({ selectedExercises, onNext }: { selectedExercises: string[]; onNext: (exercises: TrainingExercise[]) => void }) {
-  const [sets, setSets] = useState<Record<string, SetEntry[]>>(
-    Object.fromEntries(selectedExercises.map(ex => [ex, [{ reps: '', weightKg: '' }]])),
-  );
+function GymSetsStep({ selectedExercises, initialExercises = [], onNext }: { selectedExercises: string[]; initialExercises?: TrainingExercise[]; onNext: (exercises: TrainingExercise[]) => void }) {
+  const [sets, setSets] = useState<Record<string, SetEntry[]>>(() => {
+    const init: Record<string, SetEntry[]> = {};
+    for (const ex of selectedExercises) {
+      const existing = initialExercises.find(e => e.name === ex);
+      init[ex] = existing && existing.sets.length > 0
+        ? existing.sets.map(s => ({ reps: String(s.reps), weightKg: String(s.weightKg) }))
+        : [{ reps: '', weightKg: '' }];
+    }
+    return init;
+  });
 
   function updateSet(ex: string, idx: number, field: keyof SetEntry, value: string) {
     setSets(prev => {
@@ -491,8 +515,8 @@ function GymSetsStep({ selectedExercises, onNext }: { selectedExercises: string[
   );
 }
 
-function CardioInputsStep({ activityType, onNext }: { activityType: 'run' | 'cycle' | 'swim'; onNext: (distanceKm?: number) => void }) {
-  const [distance, setDistance] = useState('');
+function CardioInputsStep({ activityType, initialDistanceKm, onNext }: { activityType: 'run' | 'cycle' | 'swim'; initialDistanceKm?: number; onNext: (distanceKm?: number) => void }) {
+  const [distance, setDistance] = useState(initialDistanceKm != null ? String(initialDistanceKm) : '');
   const label = activityType === 'run' ? 'DISTANCE (KM)' : activityType === 'cycle' ? 'DISTANCE (KM)' : 'DISTANCE (KM, OPTIONAL)';
 
   return (
@@ -524,8 +548,8 @@ function CardioInputsStep({ activityType, onNext }: { activityType: 'run' | 'cyc
   );
 }
 
-function OtherInputsStep({ activityType, onNext }: { activityType: 'sport' | 'other'; onNext: (description?: string) => void }) {
-  const [desc, setDesc] = useState('');
+function OtherInputsStep({ activityType, initialDescription, onNext }: { activityType: 'sport' | 'other'; initialDescription?: string; onNext: (description?: string) => void }) {
+  const [desc, setDesc] = useState(initialDescription ?? '');
   const label = activityType === 'sport' ? 'WHAT SPORT?' : 'DESCRIBE ACTIVITY (OPTIONAL)';
 
   return (
@@ -552,8 +576,8 @@ function OtherInputsStep({ activityType, onNext }: { activityType: 'sport' | 'ot
   );
 }
 
-function DurationStep({ activityType, userWeightKg, onNext }: { activityType: ActivityType; userWeightKg: number; onNext: (min: number) => void }) {
-  const [duration, setDuration] = useState('');
+function DurationStep({ activityType, userWeightKg, initialDurationMin, onNext }: { activityType: ActivityType; userWeightKg: number; initialDurationMin?: number; onNext: (min: number) => void }) {
+  const [duration, setDuration] = useState(initialDurationMin != null ? String(initialDurationMin) : '');
   const preview = duration ? computeCalories(activityType, parseInt(duration, 10), userWeightKg) : null;
 
   return (
@@ -586,11 +610,12 @@ function DurationStep({ activityType, userWeightKg, onNext }: { activityType: Ac
 }
 
 function ReviewStep({
-  payload, submitting, error, onSubmit,
+  payload, submitting, error, isEditing, onSubmit,
 }: {
   payload: LogTrainingPayload & { caloriesPreview: number };
   submitting: boolean;
   error: string | null;
+  isEditing: boolean;
   onSubmit: () => void;
 }) {
   const totalVolume = payload.exercises?.reduce((s, ex) =>
@@ -630,7 +655,7 @@ function ReviewStep({
       )}
 
       <PrimaryButton onClick={onSubmit} disabled={submitting}>
-        {submitting ? 'LOGGING...' : 'LOG SESSION'}
+        {submitting ? (isEditing ? 'SAVING...' : 'LOGGING...') : (isEditing ? 'SAVE CHANGES' : 'LOG SESSION')}
       </PrimaryButton>
     </div>
   );

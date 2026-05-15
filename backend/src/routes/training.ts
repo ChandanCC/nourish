@@ -101,6 +101,56 @@ router.post('/', async (req: Request, res: Response) => {
   return res.status(201).json({ data: session });
 });
 
+router.patch('/:id', async (req: Request, res: Response) => {
+  const parsed = LogTrainingSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: 'Invalid payload', details: parsed.error.flatten() });
+  }
+
+  const userId = new Types.ObjectId(req.user!.userId);
+  const id = String(req.params['id']);
+
+  if (!Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ error: 'Invalid id' });
+  }
+
+  const { activityType, durationMin, userWeightKg, bodyParts, exercises, distanceKm, description } = parsed.data;
+
+  const caloriesBurnt = Math.round(MET[activityType] * userWeightKg * (durationMin / 60));
+
+  let totalVolumeKg = 0;
+  if (activityType === 'gym' && exercises && exercises.length > 0) {
+    totalVolumeKg = exercises.reduce((sum, ex) => {
+      return sum + ex.sets.reduce((s, set) => s + set.reps * set.weightKg, 0);
+    }, 0);
+  }
+
+  const session = await TrainingSession.findOneAndUpdate(
+    { _id: new Types.ObjectId(id), userId, isDeleted: false },
+    {
+      $set: {
+        activityType,
+        durationMin,
+        caloriesBurnt,
+        bodyParts: bodyParts ?? [],
+        exercises: exercises ?? [],
+        totalVolumeKg,
+        distanceKm: distanceKm ?? undefined,
+        description: description ?? undefined,
+      },
+    },
+    { new: true },
+  );
+
+  if (!session) {
+    return res.status(404).json({ error: 'Session not found' });
+  }
+
+  await recalcDayAggregate(userId, session.date);
+
+  return res.json({ data: session });
+});
+
 router.delete('/:id', async (req: Request, res: Response) => {
   const userId = new Types.ObjectId(req.user!.userId);
   const id = String(req.params['id']);

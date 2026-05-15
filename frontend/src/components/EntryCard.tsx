@@ -8,6 +8,7 @@ interface Props {
   index: number;
   onDelete: (id: string) => void;
   onEdit: (id: string, payload: EditEntryPayload) => void;
+  onIntel?: (entryId: string, mealName: string) => void;
   deleting?: boolean;
   editing?: boolean;
 }
@@ -34,7 +35,7 @@ function microSourceColor(pct: number): string {
   return 'var(--ink-2)';
 }
 
-export default function EntryCard({ entry, index, onDelete, onEdit, deleting, editing }: Props) {
+export default function EntryCard({ entry, index, onDelete, onEdit, onIntel, deleting, editing }: Props) {
   const [expanded,   setExpanded]   = useState(false);
   const [activeTab,  setActiveTab]  = useState<'macros' | 'micros'>('macros');
   const [editMode,   setEditMode]   = useState(false);
@@ -314,6 +315,17 @@ export default function EntryCard({ entry, index, onDelete, onEdit, deleting, ed
                 {new Date(entry.loggedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
               </span>
               <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+                {onIntel && (
+                  <button
+                    onClick={e => { e.stopPropagation(); onIntel(entry._id, entry.name); }}
+                    className="text-label"
+                    style={{ color: 'var(--ink-3)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, transition: 'color 150ms linear' }}
+                    onMouseEnter={e => ((e.currentTarget as HTMLButtonElement).style.color = 'var(--gold-1)')}
+                    onMouseLeave={e => ((e.currentTarget as HTMLButtonElement).style.color = 'var(--ink-3)')}
+                  >
+                    INTEL →
+                  </button>
+                )}
                 <button
                   onClick={openEdit}
                   className="text-label"

@@ -13,14 +13,18 @@ interface TrainingDetailScreenProps {
   sessions: TrainingSession[];
   totalCaloriesBurnt: number;
   totalVolumeKg: number;
+  date: string;
   deletingId: string | null;
   onDelete: (id: string) => void;
+  onEditSession: (session: TrainingSession) => void;
+  onSessionIntel?: (sessionId: string, activityType: string, date: string) => void;
   onOpenLog: () => void;
   onClose: () => void;
 }
 
 export default function TrainingDetailScreen({
-  sessions, totalCaloriesBurnt, totalVolumeKg, deletingId, onDelete, onOpenLog, onClose,
+  sessions, totalCaloriesBurnt, totalVolumeKg, date, deletingId,
+  onDelete, onEditSession, onSessionIntel, onOpenLog, onClose,
 }: TrainingDetailScreenProps) {
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'var(--bg-0)', display: 'flex', flexDirection: 'column', maxWidth: '32rem', margin: '0 auto' }}>
@@ -46,7 +50,7 @@ export default function TrainingDetailScreen({
       {/* Scrollable content */}
       <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overscrollBehavior: 'contain', padding: '20px 20px 40px' }}>
         {sessions.length === 0 ? (
-          <div style={{ textAlign: 'center', paddingTop: 60, fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.1em', color: 'var(--ink-4)', textTransform: 'uppercase' }}>
+          <div style={{ textAlign: 'center', paddingTop: 60, fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.1em', color: 'var(--ink-3)', textTransform: 'uppercase' }}>
             No sessions logged
           </div>
         ) : (
@@ -56,14 +60,14 @@ export default function TrainingDetailScreen({
               <div>
                 <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: '0.08em', color: 'var(--ink-3)', textTransform: 'uppercase', marginBottom: 2 }}>Burnt</div>
                 <div style={{ fontFamily: 'var(--font-mono)', fontSize: 16, color: 'var(--ink-1)', fontVariantNumeric: 'tabular-nums' }}>
-                  {totalCaloriesBurnt} <span style={{ fontSize: 9, color: 'var(--ink-3)' }}>kcal</span>
+                  {totalCaloriesBurnt} <span style={{ fontSize: 9, color: 'var(--ink-2)' }}>kcal</span>
                 </div>
               </div>
               {totalVolumeKg > 0 && (
                 <div>
                   <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: '0.08em', color: 'var(--ink-3)', textTransform: 'uppercase', marginBottom: 2 }}>Volume</div>
                   <div style={{ fontFamily: 'var(--font-mono)', fontSize: 16, color: 'var(--ink-1)', fontVariantNumeric: 'tabular-nums' }}>
-                    {Math.round(totalVolumeKg).toLocaleString()} <span style={{ fontSize: 9, color: 'var(--ink-3)' }}>kg</span>
+                    {Math.round(totalVolumeKg).toLocaleString()} <span style={{ fontSize: 9, color: 'var(--ink-2)' }}>kg</span>
                   </div>
                 </div>
               )}
@@ -77,6 +81,8 @@ export default function TrainingDetailScreen({
                   session={s}
                   deleting={deletingId === s._id}
                   onDelete={() => onDelete(s._id)}
+                  onEdit={() => onEditSession(s)}
+                  onIntel={onSessionIntel ? () => onSessionIntel(s._id, s.activityType, date) : undefined}
                 />
               ))}
             </div>
@@ -87,14 +93,32 @@ export default function TrainingDetailScreen({
   );
 }
 
-function SessionCard({ session, deleting, onDelete }: { session: TrainingSession; deleting: boolean; onDelete: () => void }) {
+function SessionCard({
+  session, deleting, onDelete, onEdit, onIntel,
+}: {
+  session: TrainingSession;
+  deleting: boolean;
+  onDelete: () => void;
+  onEdit: () => void;
+  onIntel?: () => void;
+}) {
+  const [hovered, setHovered] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const totalVolume = session.exercises.reduce((s, ex) =>
     s + ex.sets.reduce((ss, set) => ss + set.reps * set.weightKg, 0), 0);
 
   return (
-    <div style={{ border: '1px solid var(--ink-4)', borderRadius: 4, padding: '14px 16px' }}>
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        border: `1px solid ${hovered ? 'var(--ink-3)' : 'var(--ink-4)'}`,
+        borderRadius: 4,
+        padding: '14px 16px',
+        transition: 'border-color 0.15s',
+      }}
+    >
       {/* Top row */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -103,14 +127,14 @@ function SessionCard({ session, deleting, onDelete }: { session: TrainingSession
             {ACTIVITY_LABELS[session.activityType] ?? session.activityType}
           </span>
         </div>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--ink-2)', fontVariantNumeric: 'tabular-nums' }}>
-          {session.caloriesBurnt} <span style={{ color: 'var(--ink-4)', fontSize: 8 }}>kcal</span>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--ink-1)', fontVariantNumeric: 'tabular-nums' }}>
+          {session.caloriesBurnt} <span style={{ fontSize: 8, color: 'var(--ink-2)' }}>kcal</span>
         </span>
       </div>
 
       {/* Meta */}
-      <div style={{ display: 'flex', gap: 16, marginBottom: session.exercises.length > 0 || session.distanceKm != null ? 10 : 0 }}>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--ink-3)' }}>
+      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: session.exercises.length > 0 || session.distanceKm != null ? 10 : 6 }}>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--ink-2)' }}>
           {session.durationMin} min
         </span>
         {session.bodyParts.length > 0 && (
@@ -119,12 +143,12 @@ function SessionCard({ session, deleting, onDelete }: { session: TrainingSession
           </span>
         )}
         {session.distanceKm != null && (
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--ink-3)' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--ink-2)' }}>
             {session.distanceKm} km
           </span>
         )}
         {totalVolume > 0 && (
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--ink-4)' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--ink-2)' }}>
             {Math.round(totalVolume).toLocaleString()} kg vol
           </span>
         )}
@@ -147,11 +171,11 @@ function SessionCard({ session, deleting, onDelete }: { session: TrainingSession
         </div>
       )}
 
-      {/* Delete */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      {/* Footer: Edit + Delete */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 16, borderTop: '1px solid var(--ink-4)', marginTop: 10, paddingTop: 8 }}>
         {confirmDelete ? (
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--ink-3)' }}>Delete session?</span>
+          <>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--ink-2)' }}>Delete session?</span>
             <button
               onClick={() => onDelete()}
               disabled={deleting}
@@ -161,20 +185,40 @@ function SessionCard({ session, deleting, onDelete }: { session: TrainingSession
             </button>
             <button
               onClick={() => setConfirmDelete(false)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--ink-4)', letterSpacing: '0.06em', padding: 0 }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--ink-2)', letterSpacing: '0.06em', padding: 0 }}
             >
               NO
             </button>
-          </div>
+          </>
         ) : (
-          <button
-            onClick={() => setConfirmDelete(true)}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--ink-4)', letterSpacing: '0.06em', padding: 0, opacity: 0.6 }}
-            onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
-            onMouseLeave={e => (e.currentTarget.style.opacity = '0.6')}
-          >
-            DELETE
-          </button>
+          <>
+            {onIntel && (
+              <button
+                onClick={onIntel}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--ink-2)', letterSpacing: '0.06em', padding: 0, transition: 'color 150ms linear' }}
+                onMouseEnter={e => (e.currentTarget.style.color = 'var(--gold-1)')}
+                onMouseLeave={e => (e.currentTarget.style.color = 'var(--ink-2)')}
+              >
+                INTEL →
+              </button>
+            )}
+            <button
+              onClick={onEdit}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--ink-2)', letterSpacing: '0.06em', padding: 0, transition: 'color 150ms linear' }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--gold-1)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--ink-2)')}
+            >
+              EDIT
+            </button>
+            <button
+              onClick={() => setConfirmDelete(true)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--ink-2)', letterSpacing: '0.06em', padding: 0, transition: 'color 150ms linear' }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--status-down)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--ink-2)')}
+            >
+              DELETE
+            </button>
+          </>
         )}
       </div>
     </div>

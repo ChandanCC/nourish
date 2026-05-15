@@ -162,3 +162,89 @@ export interface TrainingPayload {
   totalVolumeKg: number;
   sessions: TrainingSession[];
 }
+
+// ── INTEL types ───────────────────────────────────────────────────────────────
+
+export type DayRating = 'STRONG' | 'SOLID' | 'SHORT' | 'WEAK';
+
+export interface MealIntel {
+  _id: string;
+  level: 'meal';
+  refId: string;
+  narrative: string;
+  instruction: string | null;
+  projection: null;
+  dayRating: null;
+  aiModel: string;
+  generatedAt: string;
+}
+
+export interface SessionIntel {
+  _id: string;
+  level: 'session';
+  refId: string;
+  narrative: string;
+  instruction: string | null;
+  projection: null;
+  dayRating: null;
+  aiModel: string;
+  generatedAt: string;
+}
+
+export interface DayIntel {
+  _id: string;
+  level: 'daily';
+  refId: string;
+  narrative: string;
+  metrics: { whatWentWell: string; whatToImprove: string; [key: string]: unknown };
+  instruction: string | null;
+  projection: null;
+  dayRating: DayRating;
+  aiModel: string;
+  generatedAt: string;
+}
+
+export interface WeekIntel {
+  _id: string;
+  level: 'weekly';
+  refId: string;
+  metrics: {
+    signal_state: string;
+    state_days_count: number;
+    avg_delta_pct: number | null;
+    avg_calories_7d: number | null;
+    protein_adherence_pct: number;
+    days_logged: number;
+    training_sessions_count: number;
+    [key: string]: unknown;
+  };
+  narrative: string;
+  instruction: string | null;
+  projection: string | null;
+  dayRating: null;
+  aiModel: string;
+  generatedAt: string;
+}
+
+export interface MonthIntel {
+  _id: string;
+  level: 'monthly';
+  refId: string;
+  metrics: {
+    avg_calories: number;
+    baseline_kcal: number | null;
+    avg_delta_pct: number | null;
+    protein_adherence_pct: number;
+    days_logged: number;
+    total_days_in_month: number;
+    training_sessions_count: number;
+    dominant_state: string;
+    [key: string]: unknown;
+  };
+  narrative: string;
+  instruction: string | null;
+  projection: string | null;
+  dayRating: null;
+  aiModel: string;
+  generatedAt: string;
+}

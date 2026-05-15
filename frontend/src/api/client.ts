@@ -80,6 +80,7 @@ export interface LogEntryPayload {
   potassiumMg: number;
   sodiumMg: number;
   idempotencyKey: string;
+  date?: string;
 }
 
 export async function logEntry(payload: LogEntryPayload): Promise<FoodEntry> {
@@ -141,4 +142,9 @@ export async function logTrainingSession(payload: LogTrainingPayload): Promise<T
 
 export async function deleteTrainingSession(id: string): Promise<void> {
   await client.delete(`/training/${id}`);
+}
+
+export async function editTrainingSession(id: string, payload: LogTrainingPayload): Promise<TrainingSession> {
+  const { data } = await client.patch<{ data: TrainingSession }>(`/training/${id}`, payload);
+  return data.data;
 }

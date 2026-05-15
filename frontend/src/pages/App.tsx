@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { useHomeScreen, useHomeForDate, useLogEntry, useDeleteEntry, useEditEntry, useLogTraining, useDeleteTraining } from '../hooks/useHomeScreen';
+import { useHomeScreen, useHomeForDate, useLogEntry, useDeleteEntry, useEditEntry, useLogTraining, useDeleteTraining, useEditTraining } from '../hooks/useHomeScreen';
 import { getTodayKey, analyseFood } from '../lib/nutrition';
 import type { EditEntryPayload } from '../api/client';
+import type { TrainingSession } from '../types';
 import HomeScreen from '../components/HomeScreen';
 import SignalZone from '../components/SignalZone';
 import NutritionCard from '../components/NutritionCard';
@@ -11,6 +12,11 @@ import NutritionDetailScreen from '../components/NutritionDetailScreen';
 import TrainingDetailScreen from '../components/TrainingDetailScreen';
 import TrainingLogScreen from '../components/TrainingLogScreen';
 import SignalExplanation from '../components/SignalExplanation';
+import MealIntelScreen from '../components/MealIntelScreen';
+import SessionIntelScreen from '../components/SessionIntelScreen';
+import DayIntelScreen from '../components/DayIntelScreen';
+import WeekIntelScreen from '../components/WeekIntelScreen';
+import MonthIntelScreen from '../components/MonthIntelScreen';
 import ErrorBoundary from '../components/ErrorBoundary';
 import LoginPage from './LoginPage';
 import WelcomeScreen from './onboarding/WelcomeScreen';
@@ -43,6 +49,13 @@ export default function App() {
   const [showNutritionDetail, setShowNutritionDetail] = useState(false);
   const [showTrainingDetail, setShowTrainingDetail]   = useState(false);
   const [showTrainingLog, setShowTrainingLog]         = useState(false);
+  const [editingSession, setEditingSession]           = useState<TrainingSession | null>(null);
+
+  const [mealIntel, setMealIntel]       = useState<{ entryId: string; mealName: string } | null>(null);
+  const [sessionIntel, setSessionIntel] = useState<{ sessionId: string; activityType: string; date: string } | null>(null);
+  const [showDayIntel, setShowDayIntel]     = useState(false);
+  const [showWeekIntel, setShowWeekIntel]   = useState(false);
+  const [showMonthIntel, setShowMonthIntel] = useState(false);
 
   // Onboarding state
   const [onboardingStep, setOnboardingStep] = useState<OnboardingStep>('welcome');
@@ -54,14 +67,23 @@ export default function App() {
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const { data: homeData } = useHomeScreen();
+  const { data: homeData } = useHomeScreen(isAuthenticated);
   const logEntryMutation      = useLogEntry();
   const deleteEntryMutation   = useDeleteEntry();
   const editEntryMutation     = useEditEntry();
-  const logTrainingMutation   = useLogTraining();
+  const logTrainingMutation    = useLogTraining();
   const deleteTrainingMutation = useDeleteTraining();
+  const editTrainingMutation   = useEditTraining();
 
   const today = getTodayKey();
+
+  const weekOf = (() => {
+    const d = new Date();
+    const day = d.getDay();
+    d.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
+    return d.toISOString().split('T')[0];
+  })();
+  const currentMonth = today.slice(0, 7);
 
   const waveformDays = homeData?.waveform ?? [];
   const effectiveIndex = selectedDayIndex ?? 6;
@@ -128,9 +150,10 @@ export default function App() {
         potassiumMg:   parsed.potassiumMg,
         sodiumMg:      parsed.sodiumMg,
         idempotencyKey: uuidv4(),
+        date: selectedDate ?? undefined,
       });
       setInput('');
-      setSelectedDayIndex(null);
+      if (isViewingToday) setSelectedDayIndex(null);
       textareaRef.current?.focus();
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Something went wrong');
@@ -212,6 +235,8 @@ export default function App() {
             selectedDayIndex={effectiveIndex}
             baseline={todayData?.targets?.calories ?? 1850}
             onDaySelect={setSelectedDayIndex}
+            onWeekIntel={() => setShowWeekIntel(true)}
+            onMonthIntel={() => setShowMonthIntel(true)}
           />
         </ErrorBoundary>
 
@@ -235,6 +260,15 @@ export default function App() {
               onOpen={() => setShowTrainingDetail(true)}
             />
           </ErrorBoundary>
+
+          <button
+            onClick={() => setShowDayIntel(true)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0', fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', color: 'var(--ink-3)', textTransform: 'uppercase', alignSelf: 'flex-start', transition: 'color 150ms linear' }}
+            onMouseEnter={e => (e.currentTarget.style.color = 'var(--gold-1)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'var(--ink-3)')}
+          >
+            — DAY INTEL
+          </button>
         </div>
       </HomeScreen>
 
@@ -264,6 +298,8 @@ export default function App() {
           onClearError={() => setError(null)}
           textareaRef={textareaRef}
           onClose={() => setShowNutritionDetail(false)}
+          onDayIntel={() => setShowDayIntel(true)}
+          onMealIntel={(entryId, mealName) => setMealIntel({ entryId, mealName })}
         />
       )}
 
@@ -272,9 +308,12 @@ export default function App() {
           sessions={training?.sessions ?? []}
           totalCaloriesBurnt={training?.totalCaloriesBurnt ?? 0}
           totalVolumeKg={training?.totalVolumeKg ?? 0}
+          date={todayData?.date ?? today}
           deletingId={deletingTrainingId}
           onDelete={handleDeleteTraining}
-          onOpenLog={() => setShowTrainingLog(true)}
+          onEditSession={session => { setEditingSession(session); setShowTrainingLog(true); }}
+          onSessionIntel={(sessionId, activityType, date) => setSessionIntel({ sessionId, activityType, date })}
+          onOpenLog={() => { setEditingSession(null); setShowTrainingLog(true); }}
           onClose={() => setShowTrainingDetail(false)}
         />
       )}
@@ -282,8 +321,51 @@ export default function App() {
       {showTrainingLog && (
         <TrainingLogScreen
           userWeightKg={homeData?.userWeightKg ?? 70}
-          onClose={() => setShowTrainingLog(false)}
-          onSubmit={payload => logTrainingMutation.mutateAsync(payload)}
+          initialSession={editingSession ?? undefined}
+          editingId={editingSession?._id}
+          onClose={() => { setShowTrainingLog(false); setEditingSession(null); }}
+          onSubmit={editingSession
+            ? payload => editTrainingMutation.mutateAsync({ id: editingSession._id, payload })
+            : payload => logTrainingMutation.mutateAsync({ ...payload, date: selectedDate ?? undefined })
+          }
+        />
+      )}
+
+      {mealIntel && (
+        <MealIntelScreen
+          entryId={mealIntel.entryId}
+          mealName={mealIntel.mealName}
+          onClose={() => setMealIntel(null)}
+        />
+      )}
+
+      {sessionIntel && (
+        <SessionIntelScreen
+          sessionId={sessionIntel.sessionId}
+          activityType={sessionIntel.activityType}
+          date={sessionIntel.date}
+          onClose={() => setSessionIntel(null)}
+        />
+      )}
+
+      {showDayIntel && (
+        <DayIntelScreen
+          date={todayData?.date ?? today}
+          onClose={() => setShowDayIntel(false)}
+        />
+      )}
+
+      {showWeekIntel && (
+        <WeekIntelScreen
+          weekOf={weekOf}
+          onClose={() => setShowWeekIntel(false)}
+        />
+      )}
+
+      {showMonthIntel && (
+        <MonthIntelScreen
+          month={currentMonth}
+          onClose={() => setShowMonthIntel(false)}
         />
       )}
     </>

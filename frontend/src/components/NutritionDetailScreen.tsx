@@ -49,13 +49,15 @@ interface NutritionDetailScreenProps {
   onClearError: () => void;
   textareaRef: RefObject<HTMLTextAreaElement | null>;
   onClose: () => void;
+  onDayIntel?: () => void;
+  onMealIntel?: (entryId: string, mealName: string) => void;
 }
 
 export default function NutritionDetailScreen({
   date, calories, protein, carbs, fat, fiber, targets, micros, aiInstruction,
   entries, deletingId, editingId, onDelete, onEdit,
   input, setInput, analysing, onLog, error, onClearError, textareaRef,
-  onClose,
+  onClose, onDayIntel, onMealIntel,
 }: NutritionDetailScreenProps) {
   const [isFocused, setIsFocused] = useState(false);
 
@@ -72,7 +74,18 @@ export default function NutritionDetailScreen({
         <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.12em', color: 'var(--ink-2)', textTransform: 'uppercase' }}>
           NUTRITION
         </span>
-        <div style={{ width: 60 }} />
+        {onDayIntel ? (
+          <button
+            onClick={onDayIntel}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '12px 0', minHeight: 44, fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', color: 'var(--ink-3)', textTransform: 'uppercase', transition: 'color 150ms linear' }}
+            onMouseEnter={e => (e.currentTarget.style.color = 'var(--gold-1)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'var(--ink-3)')}
+          >
+            INTEL →
+          </button>
+        ) : (
+          <div style={{ width: 60 }} />
+        )}
       </div>
 
       {/* Scrim */}
@@ -113,6 +126,7 @@ export default function NutritionDetailScreen({
             editingId={editingId}
             onDelete={onDelete}
             onEdit={onEdit}
+            onIntel={onMealIntel}
           />
         </ErrorBoundary>
       </div>

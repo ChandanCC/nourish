@@ -41,11 +41,14 @@ interface SignalZoneProps {
   selectedDayIndex: number;
   baseline: number;
   onDaySelect: (index: number) => void;
+  onWeekIntel?: () => void;
+  onMonthIntel?: () => void;
 }
 
 export default function SignalZone({
   state, subtitle, delta,
   waveformDays, selectedDayIndex, baseline, onDaySelect,
+  onWeekIntel, onMonthIntel,
 }: SignalZoneProps) {
   const [visible, setVisible] = useState(false);
   useEffect(() => { setVisible(true); }, []);
@@ -62,6 +65,8 @@ export default function SignalZone({
         selectedDay={selectedDayIndex}
         baseline={baseline}
         onDaySelect={onDaySelect}
+        onWeekIntel={onWeekIntel}
+        onMonthIntel={onMonthIntel}
       />
     </div>
   );

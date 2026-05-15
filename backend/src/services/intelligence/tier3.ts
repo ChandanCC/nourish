@@ -20,7 +20,7 @@ export interface Tier3Output {
   modelId: string;
 }
 
-const PROHIBITED_PATTERNS = [
+export const PROHIBITED_PATTERNS = [
   /great job/i, /nice work/i, /keep it up/i, /you're crushing/i,
   /well done/i, /awesome/i, /fantastic/i, /listen to your body/i,
   /your body needs/i, /try to/i, /consider /i, /you might want/i,

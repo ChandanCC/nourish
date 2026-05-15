@@ -15,6 +15,8 @@ interface SignalHeroProps {
   selectedDay?: number;
   baseline?: number;
   onDaySelect?: (index: number) => void;
+  onWeekIntel?: () => void;
+  onMonthIntel?: () => void;
 }
 
 const STATE_DESCRIPTIONS: Record<string, string> = {
@@ -56,6 +58,8 @@ export default function SignalHero({
   selectedDay = 6,
   baseline = 1850,
   onDaySelect,
+  onWeekIntel,
+  onMonthIntel,
 }: SignalHeroProps) {
   const [showStateInfo, setShowStateInfo] = useState(false);
   const [showDeltaInfo, setShowDeltaInfo] = useState(false);
@@ -95,6 +99,32 @@ export default function SignalHero({
           onDaySelect={onDaySelect}
         />
       </div>
+
+      {/* Intel links — week and month */}
+      {(onWeekIntel || onMonthIntel) && (
+        <div style={{ padding: '12px 24px 0', display: 'flex', gap: 20 }}>
+          {onWeekIntel && (
+            <button
+              onClick={onWeekIntel}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', color: 'var(--ink-3)', textTransform: 'uppercase', transition: 'color 150ms linear' }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--gold-1)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--ink-3)')}
+            >
+              WEEK INTEL →
+            </button>
+          )}
+          {onMonthIntel && (
+            <button
+              onClick={onMonthIntel}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', color: 'var(--ink-3)', textTransform: 'uppercase', transition: 'color 150ms linear' }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--gold-1)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--ink-3)')}
+            >
+              MONTH INTEL →
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Delta or placeholder — clickable, explains what delta is */}
       <div
