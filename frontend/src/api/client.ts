@@ -148,3 +148,7 @@ export async function editTrainingSession(id: string, payload: LogTrainingPayloa
   const { data } = await client.patch<{ data: TrainingSession }>(`/training/${id}`, payload);
   return data.data;
 }
+
+export async function updateUserSettings(goal: UserGoal, weightKg: number): Promise<void> {
+  await client.patch('/user/onboarding', { goal, weight_kg: weightKg });
+}

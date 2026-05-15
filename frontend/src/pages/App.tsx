@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../hooks/useAuth';
 import { useHomeScreen, useHomeForDate, useLogEntry, useDeleteEntry, useEditEntry, useLogTraining, useDeleteTraining, useEditTraining } from '../hooks/useHomeScreen';
 import { getTodayKey, analyseFood } from '../lib/nutrition';
@@ -17,6 +18,7 @@ import SessionIntelScreen from '../components/SessionIntelScreen';
 import DayIntelScreen from '../components/DayIntelScreen';
 import WeekIntelScreen from '../components/WeekIntelScreen';
 import MonthIntelScreen from '../components/MonthIntelScreen';
+import SettingsScreen from '../components/SettingsScreen';
 import ErrorBoundary from '../components/ErrorBoundary';
 import LoginPage from './LoginPage';
 import WelcomeScreen from './onboarding/WelcomeScreen';
@@ -37,6 +39,7 @@ function uuidv4(): string {
 
 export default function App() {
   const { user, login, logout, isAuthenticated } = useAuth();
+  const queryClient = useQueryClient();
 
   const [input, setInput]         = useState('');
   const [analysing, setAnalysing] = useState(false);
@@ -56,6 +59,7 @@ export default function App() {
   const [showDayIntel, setShowDayIntel]     = useState(false);
   const [showWeekIntel, setShowWeekIntel]   = useState(false);
   const [showMonthIntel, setShowMonthIntel] = useState(false);
+  const [showSettings, setShowSettings]     = useState(false);
 
   // Onboarding state
   const [onboardingStep, setOnboardingStep] = useState<OnboardingStep>('welcome');
@@ -216,6 +220,7 @@ export default function App() {
       <HomeScreen
         user={user}
         onLogout={logout}
+        onSettings={() => setShowSettings(true)}
         input={input}
         setInput={setInput}
         analysing={analysing}
@@ -366,6 +371,20 @@ export default function App() {
         <MonthIntelScreen
           month={currentMonth}
           onClose={() => setShowMonthIntel(false)}
+        />
+      )}
+
+      {showSettings && (
+        <SettingsScreen
+          user={user}
+          currentGoal={homeData?.goal ?? null}
+          currentWeightKg={homeData?.userWeightKg ?? 70}
+          onClose={() => setShowSettings(false)}
+          onLogout={logout}
+          onSaved={() => {
+            queryClient.invalidateQueries({ queryKey: ['home'] });
+            setShowSettings(false);
+          }}
         />
       )}
     </>

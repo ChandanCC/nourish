@@ -126,7 +126,9 @@ export interface HomeScreenPayload {
   waveform: HomeWaveformDay[];
   entries: FoodEntry[];
   training: TrainingPayload;
-  userWeightKg: number;
+  userWeightKg:   number;
+  goal:           UserGoal | null;
+  proteinTargetG: number;
   userId: string;
   onboardingComplete: boolean;
 }

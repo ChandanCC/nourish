@@ -95,7 +95,9 @@ export interface HomeScreenPayload {
   waveform: WaveformDay[];
   entries: FoodEntrySummary[];
   training: TrainingPayload;
-  userWeightKg: number;
+  userWeightKg:   number;
+  goal:           string | null;
+  proteinTargetG: number;
   userId: string;
   onboardingComplete: boolean;
 }
@@ -258,7 +260,9 @@ router.get('/', async (req: Request, res: Response) => {
           description: t.description,
         })),
       },
-      userWeightKg: (userDoc?.weightKg ?? 0) >= 20 ? (userDoc!.weightKg) : 70,
+      userWeightKg:   (userDoc?.weightKg ?? 0) >= 20 ? (userDoc!.weightKg) : 70,
+      goal:           (userDoc?.goal ?? null) as string | null,
+      proteinTargetG: userDoc?.proteinTargetG ?? 160,
       userId: req.user!.userId,
       onboardingComplete: userDoc?.onboardingComplete ?? false,
     };

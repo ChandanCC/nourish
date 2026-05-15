@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import type { ReactNode, RefObject } from 'react';
 import type { AuthUser } from '../lib/auth';
 
 interface HomeScreenProps {
   user: AuthUser | null;
   onLogout: () => void;
+  onSettings: () => void;
   input: string;
   setInput: (v: string) => void;
   analysing: boolean;
@@ -16,9 +17,24 @@ interface HomeScreenProps {
   children: ReactNode;
 }
 
+const dropdownItemStyle: React.CSSProperties = {
+  display: 'block',
+  width: '100%',
+  padding: '10px 16px',
+  fontFamily: 'var(--font-mono)',
+  fontSize: 10,
+  letterSpacing: '0.1em',
+  textAlign: 'left',
+  background: 'none',
+  border: 'none',
+  cursor: 'pointer',
+  color: 'var(--ink-1)',
+};
+
 export default function HomeScreen({
   user,
   onLogout,
+  onSettings,
   input,
   setInput,
   analysing,
@@ -29,7 +45,8 @@ export default function HomeScreen({
   onOpenTraining,
   children,
 }: HomeScreenProps) {
-  const [isFocused, setIsFocused] = useState(false);
+  const [isFocused, setIsFocused]     = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
 
   return (
     <div
@@ -95,37 +112,70 @@ export default function HomeScreen({
           >
             NOURIQ
           </span>
-          <button
-            onClick={onLogout}
-            title={`Sign out (${user?.email ?? ''})`}
-            style={{ lineHeight: 1 }}
-          >
-            {user?.picture ? (
-              <img
-                src={user.picture}
-                alt={user?.name ?? ''}
-                style={{ width: 28, height: 28, borderRadius: '50%', opacity: 0.7, display: 'block' }}
-              />
-            ) : (
-              <div
-                style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: '50%',
-                  background: 'var(--ink-4)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 9,
-                  fontFamily: 'var(--font-mono)',
-                  fontWeight: 700,
-                  color: 'var(--ink-2)',
-                }}
-              >
-                {user?.name?.[0]?.toUpperCase() ?? '?'}
-              </div>
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setShowDropdown(d => !d)}
+              style={{ lineHeight: 1 }}
+            >
+              {user?.picture ? (
+                <img
+                  src={user.picture}
+                  alt={user?.name ?? ''}
+                  style={{ width: 28, height: 28, borderRadius: '50%', opacity: 0.7, display: 'block' }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: '50%',
+                    background: 'var(--ink-4)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 9,
+                    fontFamily: 'var(--font-mono)',
+                    fontWeight: 700,
+                    color: 'var(--ink-2)',
+                  }}
+                >
+                  {user?.name?.[0]?.toUpperCase() ?? '?'}
+                </div>
+              )}
+            </button>
+
+            {showDropdown && (
+              <>
+                <div
+                  onClick={() => setShowDropdown(false)}
+                  style={{ position: 'fixed', inset: 0, zIndex: 29 }}
+                />
+                <div style={{
+                  position: 'absolute',
+                  top: 36,
+                  right: 0,
+                  zIndex: 30,
+                  background: 'var(--bg-2)',
+                  border: '1px solid var(--ink-4)',
+                  minWidth: 128,
+                  animation: 'dropdown-in 150ms cubic-bezier(0.16,1,0.3,1) both',
+                }}>
+                  <button
+                    onClick={() => { setShowDropdown(false); onSettings(); }}
+                    style={dropdownItemStyle}
+                  >
+                    SETTINGS
+                  </button>
+                  <button
+                    onClick={() => { setShowDropdown(false); onLogout(); }}
+                    style={{ ...dropdownItemStyle, color: 'var(--ink-2)', borderTop: '1px solid var(--ink-4)' }}
+                  >
+                    LOGOUT
+                  </button>
+                </div>
+              </>
             )}
-          </button>
+          </div>
         </div>
 
         {/* Scrollable content */}
