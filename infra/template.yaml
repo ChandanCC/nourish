@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Nourish API — Lambda + API Gateway
+Description: Nouriq API — Lambda + API Gateway
 
 Globals:
   Function:
@@ -24,13 +24,13 @@ Parameters:
 Resources:
 
   # ── Lambda function ─────────────────────────────────────────────────────────
-  NourishApiFunction:
+  NouriqApiFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: nourish-api
+      FunctionName: nouriq-api
       Handler: dist/lambda.lambdaHandler
       CodeUri: ../backend/
-      Description: Nourish nutrition logger API
+      Description: Nouriq nutrition logger API
       Environment:
         Variables:
           MONGODB_URI: !Ref MongoDBUri
@@ -39,13 +39,13 @@ Resources:
         ApiProxy:
           Type: Api
           Properties:
-            RestApiId: !Ref NourishApi
+            RestApiId: !Ref NouriqApi
             Path: /{proxy+}
             Method: ANY
         ApiRoot:
           Type: Api
           Properties:
-            RestApiId: !Ref NourishApi
+            RestApiId: !Ref NouriqApi
             Path: /
             Method: ANY
     Metadata:
@@ -58,10 +58,10 @@ Resources:
           - src/lambda.ts
 
   # ── API Gateway ─────────────────────────────────────────────────────────────
-  NourishApi:
+  NouriqApi:
     Type: AWS::Serverless::Api
     Properties:
-      Name: nourish-api
+      Name: nouriq-api
       StageName: prod
       Cors:
         AllowMethods: "'GET,POST,DELETE,OPTIONS'"
@@ -71,7 +71,7 @@ Resources:
 Outputs:
   ApiUrl:
     Description: API Gateway endpoint
-    Value: !Sub 'https://${NourishApi}.execute-api.${AWS::Region}.amazonaws.com/prod'
+    Value: !Sub 'https://${NouriqApi}.execute-api.${AWS::Region}.amazonaws.com/prod'
   FunctionArn:
     Description: Lambda function ARN
-    Value: !GetAtt NourishApiFunction.Arn
+    Value: !GetAtt NouriqApiFunction.Arn

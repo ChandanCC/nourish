@@ -1,9 +1,9 @@
-# Nourish — Nutrition Logger
+# Nouriq — Nutrition Logger
 
 Full-stack nutrition tracker with AI-powered food analysis.
 
 ```
-nourish/
+nouriq/
 ├── frontend/          React + Vite + React Query + Tailwind
 ├── backend/           Express + MongoDB Atlas → AWS Lambda
 └── infra/             SAM (Lambda/API GW) + CDK (S3/CloudFront)
@@ -16,7 +16,7 @@ nourish/
 ### 1. MongoDB Atlas (free M0)
 1. Go to https://cloud.mongodb.com → create free M0 cluster
 2. Create DB user → whitelist IP (0.0.0.0/0 for dev)
-3. Get connection string: `mongodb+srv://<user>:<pass>@cluster0.xxxxx.mongodb.net/nourish`
+3. Get connection string: `mongodb+srv://<user>:<pass>@cluster0.xxxxx.mongodb.net/nouriq`
 
 ### 2. Backend
 ```bash
@@ -63,7 +63,7 @@ cd ../infra
 sam build
 sam deploy --guided
 # When prompted:
-#   Stack name: nourish-api
+#   Stack name: nouriq-api
 #   Region: ap-south-1
 #   MongoDBUri: <your atlas URI>
 #   CorsOrigin: * (change to CloudFront URL after frontend deploy)

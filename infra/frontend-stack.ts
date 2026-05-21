@@ -15,13 +15,13 @@ import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import { Construct } from 'constructs';
 
-export class NourishFrontendStack extends cdk.Stack {
+export class NouriqFrontendStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
     // ── S3 bucket (private, served only via CloudFront) ──────────────────────
-    const bucket = new s3.Bucket(this, 'NourishFrontendBucket', {
-      bucketName:    `nourish-frontend-${this.account}-${this.region}`,
+    const bucket = new s3.Bucket(this, 'NouriqFrontendBucket', {
+      bucketName:    `nouriq-frontend-${this.account}-${this.region}`,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
@@ -31,7 +31,7 @@ export class NourishFrontendStack extends cdk.Stack {
     // ── CloudFront OAC ───────────────────────────────────────────────────────
     const oac = new cloudfront.CfnOriginAccessControl(this, 'OAC', {
       originAccessControlConfig: {
-        name:                          'NourishOAC',
+        name:                          'NouriqOAC',
         originAccessControlOriginType: 's3',
         signingBehavior:               'always',
         signingProtocol:               'sigv4',
@@ -39,7 +39,7 @@ export class NourishFrontendStack extends cdk.Stack {
     });
 
     // ── CloudFront distribution ──────────────────────────────────────────────
-    const distribution = new cloudfront.Distribution(this, 'NourishDistribution', {
+    const distribution = new cloudfront.Distribution(this, 'NouriqDistribution', {
       defaultBehavior: {
         origin: new origins.S3Origin(bucket),
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
@@ -71,7 +71,7 @@ export class NourishFrontendStack extends cdk.Stack {
     }));
 
     // ── Deploy built frontend to S3 ──────────────────────────────────────────
-    new s3deploy.BucketDeployment(this, 'NourishDeploy', {
+    new s3deploy.BucketDeployment(this, 'NouriqDeploy', {
       sources: [s3deploy.Source.asset('../frontend/dist')],
       destinationBucket: bucket,
       distribution,
@@ -87,7 +87,7 @@ export class NourishFrontendStack extends cdk.Stack {
 }
 
 const app = new cdk.App();
-new NourishFrontendStack(app, 'NourishFrontendStack', {
+new NouriqFrontendStack(app, 'NouriqFrontendStack', {
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
     region:  process.env.CDK_DEFAULT_REGION || 'ap-south-1', // Mumbai — closest to Bangalore

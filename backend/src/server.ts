@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 4000;
 async function start() {
   await connectDB();
   app.listen(PORT, () => {
-    console.log(`Nourish API running on http://localhost:${PORT}`);
+    console.log(`Nouriq API running on http://localhost:${PORT}`);
   });
 }
 
