@@ -10,5 +10,5 @@ parallel = true
 [default.deploy.parameters]
 capabilities = "CAPABILITY_IAM"
 confirm_changeset = false
-region = "us-east-1"
+region = "ap-south-1"
 resolve_s3 = true
