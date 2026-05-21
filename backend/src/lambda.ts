@@ -1,21 +1,21 @@
-import 'dotenv/config';
 import serverless from 'serverless-http';
 import { connectDB } from './lib/db';
 import app from './app';
 
-// Keep DB connection alive across Lambda warm invocations
-let isConnected = false;
+type LambdaContext = { callbackWaitsForEmptyEventLoop: boolean };
 
-const handler = serverless(app);
+let serverlessHandler: ReturnType<typeof serverless>;
 
-export const lambdaHandler = async (event: any, context: any) => {
-  // Prevent Lambda from waiting for event loop to drain
-  context.callbackWaitsForEmptyEventLoop = false;
-
-  if (!isConnected) {
+async function getHandler() {
+  if (!serverlessHandler) {
     await connectDB();
-    isConnected = true;
+    serverlessHandler = serverless(app);
   }
+  return serverlessHandler;
+}
 
-  return handler(event, context);
+export const handler = async (event: Record<string, unknown>, context: LambdaContext) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+  const h = await getHandler();
+  return h(event, context);
 };
