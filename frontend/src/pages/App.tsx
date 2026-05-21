@@ -330,8 +330,8 @@ export default function App() {
           editingId={editingSession?._id}
           onClose={() => { setShowTrainingLog(false); setEditingSession(null); }}
           onSubmit={editingSession
-            ? payload => editTrainingMutation.mutateAsync({ id: editingSession._id, payload })
-            : payload => logTrainingMutation.mutateAsync({ ...payload, date: selectedDate ?? undefined })
+            ? payload => editTrainingMutation.mutateAsync({ id: editingSession._id, payload }).then(() => {})
+            : payload => logTrainingMutation.mutateAsync({ ...payload, date: selectedDate ?? undefined }).then(() => {})
           }
         />
       )}

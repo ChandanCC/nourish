@@ -35,7 +35,7 @@ function microSourceColor(pct: number): string {
   return 'var(--ink-2)';
 }
 
-export default function EntryCard({ entry, index, onDelete, onEdit, onIntel, deleting, editing }: Props) {
+export default function EntryCard({ entry, index, onDelete, onEdit, onIntel, deleting }: Props) {
   const [expanded,   setExpanded]   = useState(false);
   const [activeTab,  setActiveTab]  = useState<'macros' | 'micros'>('macros');
   const [editMode,   setEditMode]   = useState(false);

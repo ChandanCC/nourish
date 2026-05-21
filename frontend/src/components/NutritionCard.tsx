@@ -29,8 +29,6 @@ export default function NutritionCard({ date, calories, protein, carbs, fat, fib
   const day = new Date(date + 'T12:00:00').toLocaleDateString('en-IN', { weekday: 'long' });
 
   const proteinPct = targets.protein > 0 ? Math.min(1, protein / targets.protein) : 0;
-  const carbsPct   = targets.carbs  > 0 ? Math.min(1, carbs  / targets.carbs)  : 0;
-  const fatPct     = targets.fat    > 0 ? Math.min(1, fat    / targets.fat)    : 0;
 
   return (
     <button
