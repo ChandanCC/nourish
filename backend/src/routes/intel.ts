@@ -43,11 +43,17 @@ function weekBounds(weekOf: string): { start: string; end: string } {
   };
 }
 
-function goalCalTarget(goal: string | null | undefined): number {
-  if (goal === 'fat_loss') return 1800;
-  if (goal === 'muscle_gain') return 2500;
-  if (goal === 'performance') return 2300;
-  return 2100;
+const KCAL_PER_KG_INTEL: Record<string, number> = {
+  muscle_gain: 38, fat_loss: 28, performance: 40, maintenance: 33,
+};
+
+const MICRO_RDA = {
+  iron: 18, calcium: 1000, vitaminD: 20, vitaminB12: 2.4,
+  magnesium: 400, zinc: 11, potassium: 3500, sodium: 2300,
+};
+
+function userCalTarget(goal: string | null | undefined, weightKg: number | null | undefined): number {
+  return Math.round((KCAL_PER_KG_INTEL[goal ?? 'maintenance'] ?? 33) * (weightKg ?? 70));
 }
 
 function trainingTypeFreq(sessions: { activityType: string }[]): Record<string, number> {
@@ -80,7 +86,7 @@ router.get('/meal/:entryId', async (req: Request, res: Response) => {
     TrainingSession.find({ userId, date: entry.mealDate, isDeleted: false }).lean(),
   ]);
 
-  const calTarget = goalCalTarget(user?.goal);
+  const calTarget = userCalTarget(user?.goal, user?.weightKg);
   const trainingKcal = trainingSessions.reduce((s, t) => s + t.caloriesBurnt, 0);
 
   const inputMetrics = {
@@ -95,6 +101,16 @@ router.get('/meal/:entryId', async (req: Request, res: Response) => {
     day_protein_so_far: dayAgg?.totalProteinG ?? entry.proteinG,
     day_protein_target: user?.proteinTargetG ?? 160,
     training_today_kcal_burnt: trainingKcal,
+    micros: {
+      iron_mg: entry.ironMg ?? 0,
+      calcium_mg: entry.calciumMg ?? 0,
+      vitaminD_mcg: entry.vitaminDMcg ?? 0,
+      vitaminB12_mcg: entry.vitaminB12Mcg ?? 0,
+      magnesium_mg: entry.magnesiumMg ?? 0,
+      zinc_mg: entry.zincMg ?? 0,
+      potassium_mg: entry.potassiumMg ?? 0,
+      sodium_mg: entry.sodiumMg ?? 0,
+    },
   };
 
   const checksum = computeChecksum(inputMetrics);
@@ -146,7 +162,7 @@ router.get('/session/:sessionId', async (req: Request, res: Response) => {
     User.findById(userId).lean(),
   ]);
 
-  const calTarget = goalCalTarget(user?.goal);
+  const calTarget = userCalTarget(user?.goal, user?.weightKg);
 
   const inputMetrics = {
     activity_type: session.activityType,
@@ -239,8 +255,19 @@ router.get('/daily', async (req: Request, res: Response) => {
     TrainingSession.find({ userId, date, isDeleted: false }).lean(),
   ]);
 
-  const calTarget = goalCalTarget(user?.goal);
+  const calTarget = userCalTarget(user?.goal, user?.weightKg);
   const timeCtx = getDayTimeContext(date, user?.timezone ?? 'UTC');
+
+  const micros = dayAgg ? {
+    iron_pct:      Math.round((dayAgg.totalIronMg      / MICRO_RDA.iron)      * 100),
+    calcium_pct:   Math.round((dayAgg.totalCalciumMg   / MICRO_RDA.calcium)   * 100),
+    vitaminD_pct:  Math.round((dayAgg.totalVitaminDMcg / MICRO_RDA.vitaminD)  * 100),
+    vitaminB12_pct:Math.round((dayAgg.totalVitaminB12Mcg / MICRO_RDA.vitaminB12) * 100),
+    magnesium_pct: Math.round((dayAgg.totalMagnesiumMg / MICRO_RDA.magnesium) * 100),
+    zinc_pct:      Math.round((dayAgg.totalZincMg      / MICRO_RDA.zinc)      * 100),
+    potassium_pct: Math.round((dayAgg.totalPotassiumMg / MICRO_RDA.potassium) * 100),
+    sodium_pct:    Math.round((dayAgg.totalSodiumMg    / MICRO_RDA.sodium)    * 100),
+  } : undefined;
 
   const inputMetrics = {
     date,
@@ -253,6 +280,7 @@ router.get('/daily', async (req: Request, res: Response) => {
     carbs_g: dayAgg?.totalCarbsG ?? 0,
     fat_g: dayAgg?.totalFatG ?? 0,
     fiber_g: dayAgg?.totalFiberG ?? 0,
+    micros,
     training_sessions: trainingSessions.map(t => ({
       type: t.activityType,
       duration_min: t.durationMin,
@@ -463,6 +491,72 @@ router.get('/monthly', async (req: Request, res: Response) => {
   );
 
   return res.json({ data: doc, cached: false });
+});
+
+import { z } from 'zod';
+
+const chatSchema = z.object({
+  level:       z.enum(['meal', 'session', 'daily', 'weekly', 'monthly']),
+  contextData: z.record(z.string(), z.unknown()),
+  message:     z.string().min(1).max(500),
+  history:     z.array(z.object({
+    role: z.enum(['user', 'assistant']),
+    text: z.string(),
+  })).max(20).default([]),
+});
+
+// POST /api/intel/chat
+router.post('/chat', async (req: Request, res: Response) => {
+  const parsed = chatSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: 'Invalid payload', details: parsed.error.flatten() });
+  }
+
+  const { level, contextData, message, history } = parsed.data;
+  const userId = new Types.ObjectId(req.user!.userId);
+  const user = await User.findById(userId).lean();
+  const calTarget = userCalTarget(user?.goal, user?.weightKg);
+
+  const systemPrompt = `You are an expert sports nutritionist and strength coach with 15 years of clinical experience. You give frank, data-driven answers — complete honesty, no softening.
+
+USER PROFILE:
+- Goal: ${user?.goal ?? 'maintenance'}
+- Weight: ${user?.weightKg ?? 70}kg
+- Calorie target: ${calTarget} kcal/day
+- Protein target: ${user?.proteinTargetG ?? 160}g/day
+
+INTEL CONTEXT (${level} level data that was already analysed):
+${JSON.stringify(contextData)}
+
+RULES:
+- Use exact numbers from the context data — never vague
+- No praise language: no "great", "well done", "impressive"
+- No hedging: no "try to", "consider", "you might want to"
+- No "your body", "listen to your body", "everyone is different"
+- No exclamation marks
+- Keep replies under 400 characters — targeted answers, not essays
+- Only reference foods/data that appear in the context`;
+
+  const provider = await getProvider();
+  if (!provider) return res.status(503).json({ error: 'AI provider unavailable' });
+
+  const historyBlock = history.length > 0
+    ? history.map(h => `${h.role === 'user' ? 'User' : 'Assistant'}: ${h.text}`).join('\n') + '\n\n'
+    : '';
+  const userMessage = `${historyBlock}User: ${message}\n\nAnswer directly and concisely (under 400 characters):`;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+
+  try {
+    const reply = await provider.complete({ systemPrompt, userMessage, maxTokens: 200, signal: controller.signal });
+    clearTimeout(timeout);
+    if (!reply) return res.status(503).json({ error: 'No reply from AI' });
+    return res.json({ reply: reply.trim().slice(0, 600) });
+  } catch {
+    clearTimeout(timeout);
+    return res.status(503).json({ error: 'AI request failed' });
+  }
 });
 
 export default router;

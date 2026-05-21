@@ -48,7 +48,7 @@ type FlowStep =
   | { kind: 'gym_sets'; bodyParts: string[]; selectedExercises: string[] }
   | { kind: 'cardio_inputs'; activityType: 'run' | 'cycle' | 'swim' }
   | { kind: 'other_inputs'; activityType: 'sport' | 'other' }
-  | { kind: 'duration'; activityType: ActivityType; exercises?: TrainingExercise[]; bodyParts?: string[]; distanceKm?: number; description?: string }
+  | { kind: 'duration'; activityType: ActivityType; exercises?: TrainingExercise[]; bodyParts?: string[]; distanceKm?: number; steps?: number; description?: string }
   | { kind: 'review'; payload: LogTrainingPayload & { caloriesPreview: number } };
 
 interface Props {
@@ -61,7 +61,10 @@ interface Props {
 
 const mono: React.CSSProperties = { fontFamily: 'var(--font-mono)' };
 
-function computeCalories(activityType: ActivityType, durationMin: number, weightKg: number): number {
+function computeCalories(activityType: ActivityType, durationMin: number, weightKg: number, steps?: number): number {
+  if (steps && steps > 0 && (activityType === 'run' || activityType === 'other')) {
+    return Math.round(steps * weightKg * 0.00057);
+  }
   return Math.round(MET[activityType] * weightKg * (durationMin / 60));
 }
 
@@ -183,7 +186,8 @@ export default function TrainingLogScreen({ userWeightKg, initialSession, editin
           <CardioInputsStep
             activityType={step.activityType}
             initialDistanceKm={isEditing && initialSession?.activityType === step.activityType ? initialSession.distanceKm : undefined}
-            onNext={(distanceKm) => setStep({ kind: 'duration', activityType: step.activityType, distanceKm })}
+            initialSteps={isEditing && initialSession?.activityType === step.activityType ? initialSession.steps : undefined}
+            onNext={(distanceKm, steps) => setStep({ kind: 'duration', activityType: step.activityType, distanceKm, steps })}
           />
         )}
 
@@ -191,7 +195,8 @@ export default function TrainingLogScreen({ userWeightKg, initialSession, editin
           <OtherInputsStep
             activityType={step.activityType}
             initialDescription={isEditing && initialSession?.activityType === step.activityType ? initialSession.description : undefined}
-            onNext={(description) => setStep({ kind: 'duration', activityType: step.activityType, description })}
+            initialSteps={isEditing && initialSession?.activityType === step.activityType ? initialSession.steps : undefined}
+            onNext={(description, steps) => setStep({ kind: 'duration', activityType: step.activityType, description, steps })}
           />
         )}
 
@@ -199,9 +204,10 @@ export default function TrainingLogScreen({ userWeightKg, initialSession, editin
           <DurationStep
             activityType={step.activityType}
             userWeightKg={userWeightKg}
+            steps={step.steps}
             initialDurationMin={isEditing && initialSession?.activityType === step.activityType ? initialSession.durationMin : undefined}
             onNext={durationMin => {
-              const caloriesPreview = computeCalories(step.activityType, durationMin, userWeightKg);
+              const caloriesPreview = computeCalories(step.activityType, durationMin, userWeightKg, step.steps);
               const payload: LogTrainingPayload & { caloriesPreview: number } = {
                 activityType: step.activityType,
                 durationMin,
@@ -209,6 +215,7 @@ export default function TrainingLogScreen({ userWeightKg, initialSession, editin
                 bodyParts: step.bodyParts,
                 exercises: step.exercises,
                 distanceKm: step.distanceKm,
+                steps:      step.steps,
                 description: step.description,
                 caloriesPreview,
               };
@@ -515,14 +522,20 @@ function GymSetsStep({ selectedExercises, initialExercises = [], onNext }: { sel
   );
 }
 
-function CardioInputsStep({ activityType, initialDistanceKm, onNext }: { activityType: 'run' | 'cycle' | 'swim'; initialDistanceKm?: number; onNext: (distanceKm?: number) => void }) {
+function CardioInputsStep({ activityType, initialDistanceKm, initialSteps, onNext }: {
+  activityType: 'run' | 'cycle' | 'swim';
+  initialDistanceKm?: number;
+  initialSteps?: number;
+  onNext: (distanceKm?: number, steps?: number) => void;
+}) {
   const [distance, setDistance] = useState(initialDistanceKm != null ? String(initialDistanceKm) : '');
-  const label = activityType === 'run' ? 'DISTANCE (KM)' : activityType === 'cycle' ? 'DISTANCE (KM)' : 'DISTANCE (KM, OPTIONAL)';
+  const [steps,    setSteps]    = useState(initialSteps != null ? String(initialSteps) : '');
+  const distLabel = activityType === 'swim' ? 'DISTANCE (KM, OPTIONAL)' : 'DISTANCE (KM)';
 
   return (
     <div>
       <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.1em', color: 'var(--ink-2)', textTransform: 'uppercase', marginBottom: 24 }}>
-        {label}
+        {distLabel}
       </div>
       <input
         type="number"
@@ -533,12 +546,32 @@ function CardioInputsStep({ activityType, initialDistanceKm, onNext }: { activit
         autoFocus
         style={{ width: '100%', background: 'none', border: 'none', borderBottom: '1px solid var(--ink-3)', padding: '8px 0', fontFamily: 'var(--font-mono)', fontSize: 32, color: 'var(--ink-0)', outline: 'none', marginBottom: 32 }}
       />
-      <PrimaryButton onClick={() => onNext(distance ? parseFloat(distance) : undefined)}>
+
+      {activityType === 'run' && (
+        <>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.1em', color: 'var(--ink-2)', textTransform: 'uppercase', marginBottom: 16 }}>
+            STEPS (OPTIONAL)
+          </div>
+          <input
+            type="number"
+            inputMode="numeric"
+            placeholder="e.g. 8000"
+            value={steps}
+            onChange={e => setSteps(e.target.value)}
+            style={{ width: '100%', background: 'none', border: 'none', borderBottom: '1px solid var(--ink-4)', padding: '8px 0', fontFamily: 'var(--font-mono)', fontSize: 24, color: 'var(--ink-0)', outline: 'none', marginBottom: 8 }}
+          />
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--ink-3)', marginBottom: 32, letterSpacing: '0.06em' }}>
+            If provided, calories will be calculated from steps instead of duration
+          </div>
+        </>
+      )}
+
+      <PrimaryButton onClick={() => onNext(distance ? parseFloat(distance) : undefined, steps ? parseInt(steps, 10) : undefined)}>
         CONTINUE →
       </PrimaryButton>
       {activityType === 'swim' && (
         <button
-          onClick={() => onNext(undefined)}
+          onClick={() => onNext(undefined, undefined)}
           style={{ display: 'block', margin: '10px auto 0', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--ink-4)', letterSpacing: '0.06em' }}
         >
           SKIP
@@ -548,8 +581,14 @@ function CardioInputsStep({ activityType, initialDistanceKm, onNext }: { activit
   );
 }
 
-function OtherInputsStep({ activityType, initialDescription, onNext }: { activityType: 'sport' | 'other'; initialDescription?: string; onNext: (description?: string) => void }) {
-  const [desc, setDesc] = useState(initialDescription ?? '');
+function OtherInputsStep({ activityType, initialDescription, initialSteps, onNext }: {
+  activityType: 'sport' | 'other';
+  initialDescription?: string;
+  initialSteps?: number;
+  onNext: (description?: string, steps?: number) => void;
+}) {
+  const [desc,  setDesc]  = useState(initialDescription ?? '');
+  const [steps, setSteps] = useState(initialSteps != null ? String(initialSteps) : '');
   const label = activityType === 'sport' ? 'WHAT SPORT?' : 'DESCRIBE ACTIVITY (OPTIONAL)';
 
   return (
@@ -565,9 +604,29 @@ function OtherInputsStep({ activityType, initialDescription, onNext }: { activit
         autoFocus
         style={{ width: '100%', background: 'none', border: 'none', borderBottom: '1px solid var(--ink-3)', padding: '8px 0', fontFamily: 'var(--font-mono)', fontSize: 20, color: 'var(--ink-0)', outline: 'none', marginBottom: 32 }}
       />
-      <PrimaryButton onClick={() => onNext(desc.trim() || undefined)}>CONTINUE →</PrimaryButton>
+
+      {activityType === 'other' && (
+        <>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.1em', color: 'var(--ink-2)', textTransform: 'uppercase', marginBottom: 16 }}>
+            STEPS (OPTIONAL)
+          </div>
+          <input
+            type="number"
+            inputMode="numeric"
+            placeholder="e.g. 6000"
+            value={steps}
+            onChange={e => setSteps(e.target.value)}
+            style={{ width: '100%', background: 'none', border: 'none', borderBottom: '1px solid var(--ink-4)', padding: '8px 0', fontFamily: 'var(--font-mono)', fontSize: 24, color: 'var(--ink-0)', outline: 'none', marginBottom: 8 }}
+          />
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--ink-3)', marginBottom: 32, letterSpacing: '0.06em' }}>
+            If provided, calories will be calculated from steps instead of duration
+          </div>
+        </>
+      )}
+
+      <PrimaryButton onClick={() => onNext(desc.trim() || undefined, steps ? parseInt(steps, 10) : undefined)}>CONTINUE →</PrimaryButton>
       <button
-        onClick={() => onNext(undefined)}
+        onClick={() => onNext(undefined, undefined)}
         style={{ display: 'block', margin: '10px auto 0', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--ink-4)', letterSpacing: '0.06em' }}
       >
         SKIP
@@ -576,9 +635,11 @@ function OtherInputsStep({ activityType, initialDescription, onNext }: { activit
   );
 }
 
-function DurationStep({ activityType, userWeightKg, initialDurationMin, onNext }: { activityType: ActivityType; userWeightKg: number; initialDurationMin?: number; onNext: (min: number) => void }) {
+function DurationStep({ activityType, userWeightKg, steps, initialDurationMin, onNext }: { activityType: ActivityType; userWeightKg: number; steps?: number; initialDurationMin?: number; onNext: (min: number) => void }) {
   const [duration, setDuration] = useState(initialDurationMin != null ? String(initialDurationMin) : '');
-  const preview = duration ? computeCalories(activityType, parseInt(duration, 10), userWeightKg) : null;
+  const stepsCalories = steps && steps > 0 && (activityType === 'run' || activityType === 'other')
+    ? Math.round(steps * userWeightKg * 0.00057) : null;
+  const preview = stepsCalories ?? (duration ? computeCalories(activityType, parseInt(duration, 10), userWeightKg) : null);
 
   return (
     <div>
@@ -635,13 +696,19 @@ function ReviewStep({
           <ReviewRow label="MUSCLES" value={payload.bodyParts.join(', ').toUpperCase()} />
         )}
         {payload.exercises && payload.exercises.length > 0 && (
-          <ReviewRow label="EXERCISES" value={`${payload.exercises.length} exercises`} />
+          <ReviewRow
+            label="EXERCISES"
+            value={`${payload.exercises.length} EXERCISES · ${payload.exercises.reduce((s, ex) => s + ex.sets.length, 0)} SETS`}
+          />
         )}
         {totalVolume > 0 && (
           <ReviewRow label="VOLUME" value={`${Math.round(totalVolume).toLocaleString()} KG`} />
         )}
         {payload.distanceKm != null && (
           <ReviewRow label="DISTANCE" value={`${payload.distanceKm} KM`} />
+        )}
+        {payload.steps != null && (
+          <ReviewRow label="STEPS" value={payload.steps.toLocaleString()} />
         )}
         {payload.description && (
           <ReviewRow label="NOTE" value={payload.description} />

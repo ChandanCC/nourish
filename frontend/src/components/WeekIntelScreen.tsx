@@ -1,6 +1,7 @@
 import { useWeekIntel } from '../hooks/useIntel';
 import { INTEL_LABEL } from '../lib/constants';
 import { IntelLoading, IntelError, IntelSection, IntelInstruction, IntelProjection, IntelDivider } from './IntelPanel';
+import IntelChat from './IntelChat';
 
 const mono: React.CSSProperties = { fontFamily: 'var(--font-mono)' };
 
@@ -55,7 +56,7 @@ export default function WeekIntelScreen({ weekOf, onClose }: Props) {
         <span style={{ ...mono, fontSize: 9, color: 'var(--ink-3)' }}>WEEK {weekNum}</span>
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto', overscrollBehavior: 'contain', padding: '28px 20px 48px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', overscrollBehavior: 'contain', padding: '28px 20px 20px' }}>
         <div style={{ ...mono, fontSize: 9, letterSpacing: '0.08em', color: 'var(--ink-3)', marginBottom: 20 }}>
           {range}
         </div>
@@ -96,6 +97,7 @@ export default function WeekIntelScreen({ weekOf, onClose }: Props) {
           </>
         )}
       </div>
+      {data && <IntelChat level="weekly" contextData={data as unknown as Record<string, unknown>} />}
     </div>
   );
 }

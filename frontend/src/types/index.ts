@@ -155,6 +155,7 @@ export interface TrainingSession {
   bodyParts: string[];
   exercises: TrainingExercise[];
   distanceKm?: number;
+  steps?: number;
   description?: string;
 }
 

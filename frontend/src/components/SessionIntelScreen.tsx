@@ -1,6 +1,7 @@
 import { useSessionIntel } from '../hooks/useIntel';
 import { INTEL_LABEL } from '../lib/constants';
 import { IntelLoading, IntelError, IntelSection, IntelInstruction, IntelDivider } from './IntelPanel';
+import IntelChat from './IntelChat';
 
 const ACTIVITY_LABELS: Record<string, string> = {
   gym: 'GYM', run: 'RUN', cycle: 'CYCLE', swim: 'SWIM', sport: 'SPORT', other: 'OTHER',
@@ -38,7 +39,7 @@ export default function SessionIntelScreen({ sessionId, activityType, date, onCl
         </span>
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto', overscrollBehavior: 'contain', padding: '28px 20px 48px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', overscrollBehavior: 'contain', padding: '28px 20px 20px' }}>
         {isLoading && <IntelLoading />}
         {isError && <IntelError />}
         {data && (
@@ -55,6 +56,7 @@ export default function SessionIntelScreen({ sessionId, activityType, date, onCl
           </>
         )}
       </div>
+      {data && <IntelChat level="session" contextData={data as unknown as Record<string, unknown>} />}
     </div>
   );
 }

@@ -23,6 +23,7 @@ export interface ITrainingSession extends Document {
   exercises: Exercise[];
   totalVolumeKg: number;
   distanceKm?: number;
+  steps?: number;
   description?: string;
   isDeleted: boolean;
 }
@@ -48,6 +49,7 @@ const TrainingSessionSchema = new Schema<ITrainingSession>(
     exercises:     { type: [ExerciseSchema], default: [] },
     totalVolumeKg: { type: Number, default: 0 },
     distanceKm:    { type: Number },
+    steps:         { type: Number, min: 0 },
     description:   { type: String },
     isDeleted:     { type: Boolean, default: false },
   },

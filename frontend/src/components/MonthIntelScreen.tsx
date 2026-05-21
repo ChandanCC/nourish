@@ -1,6 +1,7 @@
 import { useMonthIntel } from '../hooks/useIntel';
 import { INTEL_LABEL } from '../lib/constants';
 import { IntelLoading, IntelError, IntelSection, IntelInstruction, IntelProjection, IntelDivider } from './IntelPanel';
+import IntelChat from './IntelChat';
 
 const mono: React.CSSProperties = { fontFamily: 'var(--font-mono)' };
 
@@ -43,7 +44,7 @@ export default function MonthIntelScreen({ month, onClose }: Props) {
         <span style={{ ...mono, fontSize: 9, color: 'var(--ink-3)' }}>{monthLabel(month)}</span>
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto', overscrollBehavior: 'contain', padding: '28px 20px 48px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', overscrollBehavior: 'contain', padding: '28px 20px 20px' }}>
         {isLoading && <IntelLoading />}
         {isError && <IntelError />}
         {data && (
@@ -85,6 +86,7 @@ export default function MonthIntelScreen({ month, onClose }: Props) {
           </>
         )}
       </div>
+      {data && <IntelChat level="monthly" contextData={data as unknown as Record<string, unknown>} />}
     </div>
   );
 }

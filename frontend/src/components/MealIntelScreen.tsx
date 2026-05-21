@@ -1,6 +1,7 @@
 import { useMealIntel } from '../hooks/useIntel';
 import { INTEL_LABEL } from '../lib/constants';
 import { IntelLoading, IntelError, IntelSection, IntelDivider, IntelInstruction } from './IntelPanel';
+import IntelChat from './IntelChat';
 
 const mono: React.CSSProperties = { fontFamily: 'var(--font-mono)' };
 
@@ -34,7 +35,7 @@ export default function MealIntelScreen({ entryId, mealName, onClose }: Props) {
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, overflowY: 'auto', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' as React.CSSProperties['WebkitOverflowScrolling'], padding: '28px 20px 48px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' as React.CSSProperties['WebkitOverflowScrolling'], padding: '28px 20px 20px' }}>
         {isLoading && <IntelLoading />}
         {isError && <IntelError />}
         {data && (
@@ -51,6 +52,7 @@ export default function MealIntelScreen({ entryId, mealName, onClose }: Props) {
           </>
         )}
       </div>
+      {data && <IntelChat level="meal" contextData={data as unknown as Record<string, unknown>} />}
     </div>
   );
 }

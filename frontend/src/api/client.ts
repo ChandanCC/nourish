@@ -131,6 +131,7 @@ export interface LogTrainingPayload {
   bodyParts?: string[];
   exercises?: TrainingExercise[];
   distanceKm?: number;
+  steps?: number;
   description?: string;
   date?: string;
 }

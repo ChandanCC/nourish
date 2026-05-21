@@ -35,3 +35,15 @@ export async function fetchMonthIntel(month: string): Promise<MonthIntel> {
   const { data } = await client.get<{ data: MonthIntel }>(`/intel/monthly`, { params: { month } });
   return data.data;
 }
+
+export interface ChatMessage { role: 'user' | 'assistant'; text: string; }
+
+export async function sendIntelChat(payload: {
+  level: 'meal' | 'session' | 'daily' | 'weekly' | 'monthly';
+  contextData: Record<string, unknown>;
+  message: string;
+  history: ChatMessage[];
+}): Promise<{ reply: string }> {
+  const { data } = await client.post<{ reply: string }>('/intel/chat', payload);
+  return data;
+}

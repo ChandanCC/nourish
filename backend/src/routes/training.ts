@@ -13,6 +13,26 @@ const MET: Record<string, number> = {
   other: 3.5,
 };
 
+function computeCaloriesBurnt(
+  activityType: string,
+  durationMin: number,
+  weightKg: number,
+  steps?: number,
+  totalVolumeKg?: number,
+): number {
+  if (steps && steps > 0 && (activityType === 'run' || activityType === 'other')) {
+    return Math.round(steps * weightKg * 0.00057);
+  }
+  if (activityType === 'gym' && totalVolumeKg && totalVolumeKg > 0) {
+    const met = totalVolumeKg > 10000 ? 5.5
+              : totalVolumeKg > 5000  ? 5.0
+              : totalVolumeKg > 2000  ? 4.5
+              : 4.0;
+    return Math.round(met * weightKg * (durationMin / 60));
+  }
+  return Math.round((MET[activityType] ?? 3.5) * weightKg * (durationMin / 60));
+}
+
 const ExerciseSetSchema = z.object({
   reps:     z.number().int().min(1),
   weightKg: z.number().min(0),
@@ -30,6 +50,7 @@ const LogTrainingSchema = z.object({
   bodyParts:    z.array(z.string()).optional().default([]),
   exercises:    z.array(ExerciseSchema).optional().default([]),
   distanceKm:   z.number().min(0).optional(),
+  steps:        z.number().int().min(0).optional(),
   description:  z.string().max(200).optional(),
   date:         z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
 });
@@ -63,11 +84,9 @@ router.post('/', async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Invalid payload', details: parsed.error.flatten() });
   }
 
-  const { activityType, durationMin, userWeightKg, bodyParts, exercises, distanceKm, description, date } = parsed.data;
+  const { activityType, durationMin, userWeightKg, bodyParts, exercises, distanceKm, steps, description, date } = parsed.data;
   const userId = new Types.ObjectId(req.user!.userId);
   const sessionDate = date ?? new Date().toISOString().split('T')[0];
-
-  const caloriesBurnt = Math.round(MET[activityType] * userWeightKg * (durationMin / 60));
 
   let totalVolumeKg = 0;
   if (activityType === 'gym' && exercises && exercises.length > 0) {
@@ -75,6 +94,8 @@ router.post('/', async (req: Request, res: Response) => {
       return sum + ex.sets.reduce((s, set) => s + set.reps * set.weightKg, 0);
     }, 0);
   }
+
+  const caloriesBurnt = computeCaloriesBurnt(activityType, durationMin, userWeightKg, steps, totalVolumeKg);
 
   const session = await TrainingSession.create({
     userId,
@@ -86,6 +107,7 @@ router.post('/', async (req: Request, res: Response) => {
     exercises: exercises ?? [],
     totalVolumeKg,
     distanceKm,
+    steps,
     description,
   });
 
@@ -114,9 +136,7 @@ router.patch('/:id', async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Invalid id' });
   }
 
-  const { activityType, durationMin, userWeightKg, bodyParts, exercises, distanceKm, description } = parsed.data;
-
-  const caloriesBurnt = Math.round(MET[activityType] * userWeightKg * (durationMin / 60));
+  const { activityType, durationMin, userWeightKg, bodyParts, exercises, distanceKm, steps, description } = parsed.data;
 
   let totalVolumeKg = 0;
   if (activityType === 'gym' && exercises && exercises.length > 0) {
@@ -124,6 +144,8 @@ router.patch('/:id', async (req: Request, res: Response) => {
       return sum + ex.sets.reduce((s, set) => s + set.reps * set.weightKg, 0);
     }, 0);
   }
+
+  const caloriesBurnt = computeCaloriesBurnt(activityType, durationMin, userWeightKg, steps, totalVolumeKg);
 
   const session = await TrainingSession.findOneAndUpdate(
     { _id: new Types.ObjectId(id), userId, isDeleted: false },
@@ -136,6 +158,7 @@ router.patch('/:id', async (req: Request, res: Response) => {
         exercises: exercises ?? [],
         totalVolumeKg,
         distanceKm: distanceKm ?? undefined,
+        steps:      steps ?? undefined,
         description: description ?? undefined,
       },
     },

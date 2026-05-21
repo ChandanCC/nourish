@@ -135,6 +135,7 @@ router.post('/', async (req: Request, res: Response) => {
     clearTimeout(timeout);
 
     if (rawText === null) {
+      console.error('[analyse] rawText is null', rawText, text);
       res.status(502).json({ error: "Couldn't parse that. Try again." });
       return;
     }
@@ -143,12 +144,14 @@ router.post('/', async (req: Request, res: Response) => {
     try {
       rawParsed = JSON.parse(rawText);
     } catch {
+      console.error('[analyse] JSON parse failed. Raw model output:', rawText);
       res.status(422).json({ error: "Couldn't parse that. Try again." });
       return;
     }
 
     const parsed = extractSingleEntry(rawParsed);
     if (!parsed) {
+      console.error('[analyse] extractSingleEntry returned null. rawParsed:', JSON.stringify(rawParsed));
       res.status(422).json({ error: "Couldn't parse that. Try again." });
       return;
     }

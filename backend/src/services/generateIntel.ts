@@ -85,6 +85,17 @@ async function callProvider(systemPrompt: string, userMessage: string, maxTokens
 
 // ── Meal ─────────────────────────────────────────────────────────────────────
 
+export interface MealMicros {
+  iron_mg: number;
+  calcium_mg: number;
+  vitaminD_mcg: number;
+  vitaminB12_mcg: number;
+  magnesium_mg: number;
+  zinc_mg: number;
+  potassium_mg: number;
+  sodium_mg: number;
+}
+
 export interface MealInput {
   meal_name: string;
   calories: number;
@@ -97,13 +108,14 @@ export interface MealInput {
   day_protein_so_far: number;
   day_protein_target: number;
   training_today_kcal_burnt: number;
+  micros?: MealMicros;
 }
 
 const MEAL_SYSTEM = `${SYSTEM_PROMPT_BASE}
 
 TASK: Review this meal as a sports nutritionist examining a client's food log.
 
-narrative: 1–2 tight sentences. State what this meal contributes to today's targets using exact numbers. Flag clearly if the protein-to-calorie ratio is poor, if it eats heavily into the calorie budget while delivering little protein, or if it helps close a gap. If training happened today, note whether this meal helps cover the recovery demand.
+narrative: 1–2 tight sentences. State what this meal contributes to today's targets using exact numbers. Flag clearly if the protein-to-calorie ratio is poor, if it eats heavily into the calorie budget while delivering little protein, or if it helps close a gap. If training happened today, note whether this meal helps cover the recovery demand. If micros are present, mention a notable micro contribution only if it's significant (e.g., >30% of a single RDA from one meal) or notably absent (e.g., zero iron on a fat loss goal).
 
 suggestion: Suggest one specific, minimal tweak to the actual meal to make it meaningfully better for the stated goal — a swap, an addition, or a portion change. Name the food, amount, and the macro/calorie impact. Examples:
   - "Add 150g Greek yogurt (15g protein, 90 kcal) on the side — closes half your remaining protein gap"
@@ -180,6 +192,17 @@ export interface DailyTrainingDetail {
   exercises: string[];
 }
 
+export interface DailyMicros {
+  iron_pct: number;
+  calcium_pct: number;
+  vitaminD_pct: number;
+  vitaminB12_pct: number;
+  magnesium_pct: number;
+  zinc_pct: number;
+  potassium_pct: number;
+  sodium_pct: number;
+}
+
 export interface DailyInput {
   date: string;
   goal: string;
@@ -191,6 +214,7 @@ export interface DailyInput {
   carbs_g: number;
   fat_g: number;
   fiber_g: number;
+  micros?: DailyMicros;
   training_sessions: DailyTrainingDetail[];
   day_complete: boolean;
   day_phase: 'morning' | 'afternoon' | 'evening' | 'night';
@@ -208,8 +232,10 @@ day_rating rules:
 - WEAK: multiple significant misses — protein <60%, calories severely off, or trained hard on insufficient nutrition
 
 what_went_well: 1 sentence identifying the strongest part of the day with exact numbers.
-what_to_improve: 1 sentence identifying the biggest gap with exact numbers. Be direct.
+what_to_improve: 1 sentence identifying the biggest gap with exact numbers. Be direct. If micros are provided and any are consistently below 40% of RDA (e.g., iron <40%, vitamin D <40%), flag the most deficient micro alongside any macro gaps.
 If training was logged, factor it into the assessment — a hard gym session demands more from the nutrition than a rest day.
+
+MICRONUTRIENTS: If a micros object is present, assess key deficiencies. Iron, calcium, vitamin D, and B12 below 50% RDA are worth noting. Sodium above 100% is a flag. Do not invent micro data — only reference values in the input.
 
 CRITICAL — timing of instruction:
 - If day_complete is false: the day is still in progress. The instruction MUST tell the user what to do BEFORE the day ends — "at dinner", "in your next meal", "before bed". NEVER say "tomorrow" for an incomplete day. Use the day_phase and hours_remaining_today to calibrate specificity. If it is evening with 4h remaining, suggest something achievable before bed.
