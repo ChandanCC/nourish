@@ -9,7 +9,9 @@
       "Bash(git commit -m 'P01-002: remove tab navigation — day/week view, macros/micros tabs, weekly summary *)",
       "Bash(git -C /Users/chandan_cc/Projects/nourish add frontend/src/components/HomeScreen.tsx)",
       "Bash(git -C /Users/chandan_cc/Projects/nourish commit -m ' *)",
-      "Bash(npm test *)"
+      "Bash(npm test *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
     ]
   }
 }
