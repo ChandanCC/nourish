@@ -1,11 +1,11 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Nourish Frontend - S3 + CloudFront
+Description: Nouriq Frontend - S3 + CloudFront
 
 Resources:
   FrontendBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub 'nourish-frontend-${AWS::AccountId}'
+      BucketName: !Sub 'nouriq-frontend-${AWS::AccountId}'
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -16,7 +16,7 @@ Resources:
     Type: AWS::CloudFront::OriginAccessControl
     Properties:
       OriginAccessControlConfig:
-        Name: nourish-frontend-oac
+        Name: nouriq-frontend-oac
         OriginAccessControlOriginType: s3
         SigningBehavior: always
         SigningProtocol: sigv4

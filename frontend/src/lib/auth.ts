@@ -1,5 +1,5 @@
-const TOKEN_KEY = 'nourish_token';
-const USER_KEY  = 'nourish_user';
+const TOKEN_KEY = 'nouriq_token';
+const USER_KEY  = 'nouriq_user';
 
 export interface AuthUser {
   email: string;

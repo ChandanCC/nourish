@@ -117,7 +117,7 @@ export default function App() {
     const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
     fetch(`${apiBase}/signal/recompute`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${localStorage.getItem('nourish_token')}` },
+      headers: { Authorization: `Bearer ${localStorage.getItem('nouriq_token')}` },
     }).catch(() => { /* non-critical */ });
   }, [homeData?.onboardingComplete]);
 

@@ -1,7 +1,7 @@
 version = 0.1
 
 [default.global.parameters]
-stack_name = "nourish-api"
+stack_name = "nouriq-api"
 
 [default.build.parameters]
 cached = true

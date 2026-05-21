@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Nourish API
+Description: Nouriq API
 
 Globals:
   Function:
@@ -31,7 +31,7 @@ Parameters:
     Default: '*'
 
 Resources:
-  NourishFunction:
+  NouriqFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: dist/lambda.handler
